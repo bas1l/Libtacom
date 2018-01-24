@@ -274,7 +274,7 @@ void getfrequencies(int *fbeg, int *fend)
         *fend = *fend+100;
     }
     
-    printw("Frequencies statement = %i", &f_state);
+    printw("Frequencies statement = %i", f_state);
     
     f_state++;
 }
@@ -380,7 +380,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, up, result);
             int csize = result[11].size();
             int osize = result[1].size();
-            printw("::size in 1/2ms = %i, other:%i\n", &csize, &osize);
+            printw("::size in 1/2ms = %i, other:%i\n", csize, osize);
             break;
         }
         
