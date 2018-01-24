@@ -179,7 +179,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
         {
             if (c == chan_used)
             {
-                result[c].insert(result[c].end(), go_up.begin(), go_up.begin()+go_up_length);
+                result[c].insert(result[c].end(), go_up.begin()+go_up_length, go_up.end());
             }
             else
             {
