@@ -241,6 +241,7 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
     }
 }
 
+static int f_state = 1;
 void getfrequencies(int *fbeg, int *fend)
 {
     
@@ -278,7 +279,6 @@ void getfrequencies(int *fbeg, int *fend)
     f_state++;
 }
 
-int f_state = 1;
 std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 {
     static int a = 0;
