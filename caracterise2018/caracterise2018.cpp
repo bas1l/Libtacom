@@ -34,7 +34,8 @@ using namespace std;
     
     
 
-uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset){
+uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
+{
 	uint16_t * s;
 	s = (uint16_t*) malloc(nsample * sizeof(uint16_t));
 	
@@ -78,8 +79,8 @@ void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
     
 }
 
-
-std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset){
+std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset)
+{
     int phase = 0;
     int nsample = 2000;
     std::vector<uint16_t> sinus;//nothing, just a break.
@@ -93,8 +94,6 @@ std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset){
     
     return sinus;
 }
-
-
 
 std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
 {
@@ -194,7 +193,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
     return go_up[3*go_up_length];
 }
     
-    
+
 void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<std::vector<uint16_t>>& result)
 {
     //std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
@@ -242,7 +241,44 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
     }
 }
 
+void getfrequencies(int *fbeg, int *fend)
+{
+    
+    int fmin = 10;
+    int fmax = 500;
+    
+    if (f_state == 1)
+    {
+        *fbeg = 10;
+        *fend = 100;
+    }
+    else if (f_state == 2)
+    {
+        *fbeg = *fend+1;
+        *fend = *fend+100;
+    }
+    else if (f_state == 3)
+    {
+        *fbeg = *fend+1;
+        *fend = *fend+100;
+    }
+    else if (f_state == 4)
+    {
+        *fbeg = *fend+1;
+        *fend = *fend+100;
+    }
+    else if (f_state == 5)
+    {
+        *fbeg = *fend+1;
+        *fend = *fend+100;
+    }
+    
+    printw("Frequencies statement = %i", &f_state);
+    
+    f_state++;
+}
 
+int f_state = 1;
 std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 {
     static int a = 0;
@@ -335,10 +371,11 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         }
         case 'f':
         {
-            int fbeg = 10;
-            int fend = 500;
+            int fbeg;
+            int fend;
             int amp1 = 50;
             int amp2 = 500;
+            getfrequencies(&fbeg, &fend);
             
             get_sinesweep(fbeg, fend, amp1, amp2, up, result);
             int csize = result[11].size();
@@ -478,7 +515,6 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         letters.pop();
      }
 }
-
 
 
 
