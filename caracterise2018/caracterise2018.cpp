@@ -263,7 +263,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     {
         case 'n' :
         {
-            for(int i=0; i<3; ++)
+            for(int i=0; i<3; i++)
             {
                 for(int c=0; c<AD5383::num_channels; c++)
                 {
