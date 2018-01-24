@@ -191,7 +191,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
 
     
     
-    return go_up[go_up_length];
+    return go_up[3*go_up_length];
 }
     
     
