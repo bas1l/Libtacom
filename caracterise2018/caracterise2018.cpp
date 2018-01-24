@@ -179,7 +179,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
         {
             if (c == chan_used)
             {
-                result[c].insert(result[c].end(), go_up.begin(), go_up.end());
+                result[c].insert(result[c].end(), go_up.begin(), go_up[go_up_length]);
             }
             else
             {
@@ -189,13 +189,13 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
 
     
     
-    return up;
+    return go_up[go_up_length];
 }
     
     
 void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<std::vector<uint16_t>>& result)
 {
-    std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
+    //std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
     std::vector<uint16_t> waitsinus(2000, 2048);//sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
     int chan_used = 11;
@@ -224,7 +224,7 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
         {
             for(int c=0; c<AD5383::num_channels; c++)
             {
-                if (chan == chan_used)
+                if (c == chan_used)
                 {
                     std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp2, up);
                     result[c].insert(result[c].end(), sinus.begin(), sinus.end());
