@@ -201,7 +201,7 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
     
     int chan_used = 11;
     
-    for(int f=fbeg; f<=fend; f++)
+    for(int f=fbeg; f<=fend; f+=5)
     {
         for(int c=0; c<AD5383::num_channels; c++)
         {
@@ -250,7 +250,7 @@ void getfrequencies(int *fbeg, int *fend)
     if (f_state == 1)
     {
         *fbeg = 10;
-        *fend = 100;
+        *fend = 99;
     }
     else if (f_state == 2)
     {
