@@ -373,7 +373,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         {
             int fbeg;
             int fend;
-            int amp1 = 50;
+            int amp1 = 500;
             int amp2 = 500;
             getfrequencies(&fbeg, &fend);
             
