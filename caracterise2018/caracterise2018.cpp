@@ -388,9 +388,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         
         case 'n' :
         {
-            result = alph.getneutral();
+            //result = alph.getneutral();
             for(int c=0; c<AD5383::num_channels; c++)
             {
+                result[c].push_back(2048);
                 result[c].push_back(2048);
             }
             break;
