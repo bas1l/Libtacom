@@ -179,10 +179,12 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
         {
             if (c == chan_used)
             {
-                result[c].insert(result[c].end(), go_up.begin()+go_up_length, go_up.end());
+                result[c].push_back(1000);
+                //result[c].insert(result[c].end(), go_up.begin()+go_up_length, go_up.end());
             }
             else
             {
+                result[c].push_back(2048);
                 result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
             }
         }
@@ -261,17 +263,6 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     
     switch (c)
     {
-        case 'n' :
-        {
-            for(int i=0; i<3; i++)
-            {
-                for(int c=0; c<AD5383::num_channels; c++)
-                {
-                    result[c].push_back(2048);
-                }
-            }
-            break;
-        }
         case 'k' :
         {
             int ff = freq[f];
@@ -350,6 +341,18 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             
             get_sinesweep(fbeg, fend, amp1, amp2, up, result);
+            break;
+        }
+        
+        case 'n' :
+        {
+            for(int i=0; i<3; i++)
+            {
+                for(int c=0; c<AD5383::num_channels; c++)
+                {
+                    result[c].push_back(2048);
+                }
+            }
             break;
         }
         
