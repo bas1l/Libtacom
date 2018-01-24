@@ -261,6 +261,17 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     
     switch (c)
     {
+        case 'n' :
+        {
+            for(int i=0; i<3; ++)
+            {
+                for(int c=0; c<AD5383::num_channels; c++)
+                {
+                    result[c].push_back(2048);
+                }
+            }
+            break;
+        }
         case 'k' :
         {
             int ff = freq[f];
