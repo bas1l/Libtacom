@@ -341,8 +341,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             
             get_sinesweep(fbeg, fend, amp1, amp2, up, result);
-            csize = result[11].size();
-            osize = result[1].size();
+            int csize = result[11].size();
+            int osize = result[1].size();
             printw("::size in 1/2ms = %i, other:%i\n", &csize, &osize);
             break;
         }
