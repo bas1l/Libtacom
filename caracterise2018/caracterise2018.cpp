@@ -171,7 +171,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
     
     std::vector<uint16_t> go_up = push_sine_wave_ret(freq, amp, offset);
     
-    int go_up_length = go_up.size()/4;
+    int go_up_length = (int)(go_up.size()/4);
     std::vector<uint16_t> waitsinus(go_up_length, 2048);
     
     int chan_used = 11;
@@ -179,7 +179,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
         {
             if (c == chan_used)
             {
-                result[c].insert(result[c].end(), go_up.begin(), go_up.at(go_up_length));
+                result[c].insert(result[c].end(), go_up.begin(), go_up.begin()+go_up_length);
             }
             else
             {
