@@ -87,10 +87,10 @@ std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset)
     
     uint16_t * s = create_sin(freq, ampl, phase, nsample-1, offset);
     
-    for(int i=0; i < nsample-1; i++){
+    for(int i=0; i < nsample; i++){
         sinus.push_back(s[i]);
     }
-    sinus.push_back(2048);
+    //sinus.push_back(2048);
     
     return sinus;
 }
@@ -239,6 +239,8 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
         }
 
     }
+    
+    
 }
 
 static int f_state = 1;
@@ -274,7 +276,7 @@ void getfrequencies(int *fbeg, int *fend)
         *fend = *fend+100;
     }
     
-    printw("Frequencies statement = %i", f_state);
+    printw("Frequencies statement = %i\n", f_state);
     
     f_state++;
 }
@@ -375,23 +377,18 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int fend;
             int amp1 = 500;
             int amp2 = 500;
-            getfrequencies(&fbeg, &fend);
             
+            getfrequencies(&fbeg, &fend);
             get_sinesweep(fbeg, fend, amp1, amp2, 1000, result);
+            
             int csize = result[11].size();
-            printw("up_value = %i, size(ms) = %i, other:%i\n", up, csize/2);
+            printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             break;
         }
         
         case 'n' :
         {
-            for(int i=0; i<3; i++)
-            {
-                for(int c=0; c<AD5383::num_channels; c++)
-                {
-                    result[c].push_back(2048);
-                }
-            }
+            result = alph.getneutral();
             break;
         }
         
