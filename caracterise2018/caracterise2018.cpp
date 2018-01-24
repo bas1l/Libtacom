@@ -377,7 +377,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             getfrequencies(&fbeg, &fend);
             
-            get_sinesweep(fbeg, fend, amp1, amp2, up, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, 1000, result);
             int csize = result[11].size();
             printw("up_value = %i, size(ms) = %i, other:%i\n", up, csize/2);
             break;
