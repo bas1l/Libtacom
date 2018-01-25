@@ -450,6 +450,61 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
             break;
         }
+        case 'r':
+        {
+            int fbeg;
+            int fend;
+            int upvalue = 2048-400;
+            int amp1 = 1000;
+            int amp2 = 500;
+            int number_of_rep = 2;
+            
+            triple_spike(alph, result); // to fit between the laser data and the theoric data
+            
+            // f_state = 1 (10-100Hz)
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            
+            number_of_rep = 1;
+            
+            // f_state = 2 (100-200)
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            // f_state = 3 (200-300)
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            int csize = result[11].size();
+            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
+            printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
+            break;
+        }
+        case 't':
+        {
+            int fbeg;
+            int fend;
+            int upvalue = 2048-400;
+            int amp1 = 1000;
+            int amp2 = 500;
+            int number_of_rep = 1;
+            
+            triple_spike(alph, result); // to fit between the laser data and the theoric data
+            
+            // f_state = 4 (300-400Hz)
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            // f_state = 5 (400-500)
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            int csize = result[11].size();
+            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
+            printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
+            break;
+        }
         
         case 'n' :
         {
