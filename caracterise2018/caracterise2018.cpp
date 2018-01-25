@@ -173,7 +173,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
     int go_up_length = (int)(go_up.size()/4);
     std::vector<uint16_t> waitsinus(go_up_length, 2048);
     
-    int chan_used = 11;
+    int chan_used = ACT_RINGFINGER2;
     for(int c=0; c<AD5383::num_channels; c++)
         {
             if (c == chan_used)
@@ -199,7 +199,7 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
     //std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
     std::vector<uint16_t> waitsinus(2000, 2048);//sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
-    int chan_used = 11;
+    int chan_used = ACT_RINGFINGER2;
     
     for(int f=fbeg; f<=fend; f+=5)
     {
