@@ -206,40 +206,22 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
 }
     
 
-void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<std::vector<uint16_t>>& result)
+void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int number_of_rep, std::vector<std::vector<uint16_t>>& result)
 {
     //std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
     std::vector<uint16_t> waitsinus(2000, 2048);//sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
     int chan_used = ACT_RINGFINGER2;
-    
+    int amp_used = amp1;
     for(int f=fbeg; f<=fend; f+=5)
     {
-        for(int c=0; c<AD5383::num_channels; c++)
-        {
-            if (c == chan_used)
-            {
-                std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp1, up);
-                result[c].insert(result[c].end(), sinus.begin(), sinus.end());
-                
-            }
-            else
-            {
-                result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
-            }
-        }
-    }
-    
-    // for amp2
-    if (0)
-    {
-        for(int f=fbeg; f<=fend; f++)
+        for (int nor=0; nor<number_of_rep; nor++)
         {
             for(int c=0; c<AD5383::num_channels; c++)
             {
                 if (c == chan_used)
                 {
-                    std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp2, up);
+                    std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
                     result[c].insert(result[c].end(), sinus.begin(), sinus.end());
 
                 }
@@ -249,7 +231,31 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, std::vector<s
                 }
             }
         }
+    }
+    
+    // for amp2
+    if (0)
+    {
+        int amp_used = amp2;
+        for(int f=fbeg; f<=fend; f+=5)
+        {
+            for (int nor=0; nor<number_of_rep; nor++)
+            {
+                for(int c=0; c<AD5383::num_channels; c++)
+                {
+                    if (c == chan_used)
+                    {
+                        std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
+                        result[c].insert(result[c].end(), sinus.begin(), sinus.end());
 
+                    }
+                    else
+                    {
+                        result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
+                    }
+                }
+            }
+        }
     }
     
     
@@ -389,13 +395,37 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int fend;
             int amp1 = 500;
             int amp2 = 500;
+            int upvalue = 1000;
+            int number_of_rep = 2;
             
-            getfrequencies(&fbeg, &fend);
             triple_spike(alph, result); // to fit between the laser data and the theoric data
-            get_sinesweep(fbeg, fend, amp1, amp2, 1000, result);
+            
+            // f_state = 1
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            
+            number_of_rep = 1;
+            
+            // f_state = 2
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            // f_state = 3
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            // f_state = 4
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            
+            // f_state = 5
+            getfrequencies(&fbeg, &fend);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
             
             int csize = result[11].size();
-            printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
+            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
+            printw("10hz to 500Hz\n");//, fbeg, fend, csize/2);
             break;
         }
         
