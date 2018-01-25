@@ -399,9 +399,9 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         {
             int fbeg;
             int fend;
-            int amp1 = 500;
+            int upvalue = 2048-400;
+            int amp1 = 1500;
             int amp2 = 500;
-            int upvalue = 1000;
             int number_of_rep = 2;
             
             triple_spike(alph, result); // to fit between the laser data and the theoric data
