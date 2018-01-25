@@ -321,7 +321,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     switch (c)
     {
         
-        case 'r':
+        case 'q':
         {
             f_state = 1;
             printw("f_state is back to 1\n");
