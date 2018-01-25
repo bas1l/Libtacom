@@ -435,7 +435,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             int number_of_rep = 1;
             
-            triple_spike(alph, result); // to fit between the laser data and the theoric data
+            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
             
             // f_state = 4 (300-400Hz)
             getfrequencies(&fbeg, &fend);
@@ -461,7 +461,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             int number_of_rep = 2;
             
-            triple_spike(alph, result); // to fit between the laser data and the theoric data
+            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
             
             // f_state = 1 (10-100Hz)
             getfrequencies(&fbeg, &fend);
@@ -493,7 +493,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             int number_of_rep = 1;
             
-            triple_spike(alph, result); // to fit between the laser data and the theoric data
+            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
             
             // f_state = 4 (300-400Hz)
             getfrequencies(&fbeg, &fend);
