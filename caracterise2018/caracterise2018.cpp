@@ -345,19 +345,19 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             {
                 if (f == freq_max-1)
                 {
-                    printw("::After(f=%i,a=%i)/Impossible\t", freq[f], ampl[a]);
+                    //printw("::After(f=%i,a=%i)/Impossible\t", freq[f], ampl[a]);
                 }
                 else
                 {
                     f += 1;
                     a = 0;
-                    printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
+                    //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
                 }
             }
             else
             {
                 a += 1;
-                printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
+                //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
             }
             
             
@@ -371,20 +371,20 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             {
                 if (f == 0)
                 {
-                    printw("::After(f=%i,a=%i)/Impossible\t", freq[f], ampl[a]);
+                    //printw("::After(f=%i,a=%i)/Impossible\t", freq[f], ampl[a]);
                 }
                 else
                 {
                     f -= 1;
                     a = ampl_max-1;
-                    printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
+                    //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
                 }
                 
             }
             else
             {
                 a -= 1;
-                printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
+                //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
             }
             
         break;
