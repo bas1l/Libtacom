@@ -108,7 +108,7 @@ std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
     return result;
 }
 
-void triple_spike(ALPHABET& alph, std::vector<std::vector<uint16_t>>& result, int chan_current)
+void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint16_t>>& result)
 {
     
     std::vector<std::vector<uint16_t>> spike = creatematrix(20, 0);
@@ -389,7 +389,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         
         case 'u':
         {
-            up = get_up(result);
+            up = get_up(result, chan_used);
             break;
         }
         case 'f':
