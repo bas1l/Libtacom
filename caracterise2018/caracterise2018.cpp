@@ -108,14 +108,13 @@ std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
     return result;
 }
 
-void triple_spike(ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
+void triple_spike(ALPHABET& alph, std::vector<std::vector<uint16_t>>& result, int chan_current)
 {
     
     std::vector<std::vector<uint16_t>> spike = creatematrix(20, 0);
     std::vector<std::vector<uint16_t>> waitspike = creatematrix(20, 2048);
     std::vector<std::vector<uint16_t>> wait = creatematrix(2000, 2048);
     
-    int chan_current = ACT_RINGFINGER2;
     for (int i=0; i<3; i++)
     {
         for(int c=0; c<AD5383::num_channels; c++)
@@ -140,7 +139,7 @@ void triple_spike(ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
     
 }
 
-void get_sinus(int f, int a, int u, int nos, ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
+void get_sinus(int f, int a, int u, int nos, int chan_current, ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
 {
     
     std::vector<std::vector<uint16_t>> wait = creatematrix(2000, 2048);
@@ -150,7 +149,6 @@ void get_sinus(int f, int a, int u, int nos, ALPHABET& alph, std::vector<std::ve
     std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
     std::vector<uint16_t> waitsinus(sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
-    int chan_current = ACT_RINGFINGER2;
     for(int chan=0; chan<AD5383::num_channels; chan++)
     {
         if (chan == chan_current)
@@ -175,7 +173,7 @@ void get_sinus(int f, int a, int u, int nos, ALPHABET& alph, std::vector<std::ve
 }
 
 static int amp_get_up = 500;
-int get_up(std::vector<std::vector<uint16_t>>& result)
+int get_up(std::vector<std::vector<uint16_t>>& result, int chan_used)
 {
     int offset = 2048;
     int freq = 1;
@@ -186,7 +184,6 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
     int go_up_length = (int)(go_up.size()/4);
     std::vector<uint16_t> waitsinus(go_up_length, 2048);
     
-    int chan_used = ACT_RINGFINGER2;
     for(int c=0; c<AD5383::num_channels; c++)
         {
             if (c == chan_used)
@@ -208,12 +205,11 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
 }
     
 
-void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int number_of_rep, std::vector<std::vector<uint16_t>>& result)
+void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int chan_used, int number_of_rep, std::vector<std::vector<uint16_t>>& result)
 {
     //std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
     std::vector<uint16_t> waitsinus(2000, 2048);//sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
-    int chan_used = ACT_RINGFINGER2;
     int amp_used = amp1;
     for(int f=fbeg; f<=fend; f+=5)
     {
@@ -319,6 +315,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     std::vector<std::vector<uint16_t> > result(AD5383::num_channels);
     static int up = 2048;
     
+    int chan_used = ACT_RINGFINGER2;
     switch (c)
     {
         case 'k' :
@@ -328,10 +325,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int uu = upto[u];
             int num_of_sinus = 2;
             
-            triple_spike(alph, result); // to fit between the laser data and the theoric data
-            get_sinus(ff, aa, uu, num_of_sinus, alph, result);
+            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
+            get_sinus(ff, aa, uu, num_of_sinus, chan_used, alph, result);
             
-            std::vector<uint16_t> towrite(result[11].begin(), result[11].end());
+            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
             write_file(towrite, ff, aa, uu);
             
             printw("::After : go. \n");
@@ -404,24 +401,27 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             int number_of_rep = 2;
             
-            triple_spike(alph, result); // to fit between the laser data and the theoric data
+            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
             
             // f_state = 1 (10-100Hz)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             
             number_of_rep = 1;
             
             // f_state = 2 (100-200)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             // f_state = 3 (200-300)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
-            int csize = result[11].size();
+            
+            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
+            write_file(towrite, 10, 300, 555555);
+            
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -439,13 +439,15 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
             // f_state = 4 (300-400Hz)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             // f_state = 5 (400-500)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
-            int csize = result[11].size();
+            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
+            write_file(towrite, 300, 500, 555555);
+            
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -476,7 +478,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             getfrequencies(&fbeg, &fend);
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
             
-            int csize = result[11].size();
+            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
+            write_file(towrite, 10, 300, 555555);
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -500,7 +503,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             getfrequencies(&fbeg, &fend);
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
             
-            int csize = result[11].size();
+            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
+            write_file(towrite, 300, 500, 555555);
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -521,7 +525,12 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
         break;
     }
-
+    
+    // CLEANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
+    for (int w=0; w<result.size(); ++w)
+    {
+        result[w].clear();
+    }
     
     return result;
 }
