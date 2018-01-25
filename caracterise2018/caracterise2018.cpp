@@ -49,11 +49,13 @@ uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
 	return s;
 }
 
+static int number_of_the_file = 1;
 void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
 {
     std::string path = "caracterise2018/results/";
     std::string name =  path +
-                        "up" + std::to_string(upto) + 
+                        "n" + std::to_string(number_of_the_file) +
+                        "_up" + std::to_string(upto) + 
                         "f" + std::to_string(freq) +
                         "amp" + std::to_string(ampl) +
                         "_theoric.csv";
@@ -76,7 +78,7 @@ void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
         //cerr << "write_file/Erreur a l'ouverture !" << endl;
     }
     
-    
+    number_of_the_file++;
 }
 
 std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset)
@@ -318,6 +320,13 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     int chan_used = ACT_RINGFINGER2;
     switch (c)
     {
+        
+        case 'r':
+        {
+            f_state = 1;
+            printw("f_state is back to 1\n");
+        }
+            
         case 'k' :
         {
             int ff = freq[f];
@@ -420,7 +429,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 10, 300, 555555);
+            write_file(towrite, 10, 300, amp1);
             
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
@@ -446,7 +455,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 300, 500, 555555);
+            write_file(towrite, 300, 500, amp1);
             
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
@@ -479,7 +488,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 10, 300, 555555);
+            write_file(towrite, 10, 300, amp1);
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -504,7 +513,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 300, 500, 555555);
+            write_file(towrite, 300, 500, amp1);
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -527,10 +536,11 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     }
     
     // CLEANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-    for (int w=0; w<result.size(); ++w)
-    {
-        result[w].clear();
-    }
+    //for (int w=0; w<result.size(); ++w)
+    //{
+    //    result[w].clear();
+    //}
+    
     
     return result;
 }
