@@ -111,7 +111,7 @@ std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
 void triple_spike(ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
 {
     
-    std::vector<std::vector<uint16_t>> spike = creatematrix(20, 1500);
+    std::vector<std::vector<uint16_t>> spike = creatematrix(20, 0);
     std::vector<std::vector<uint16_t>> waitspike = creatematrix(20, 2048);
     std::vector<std::vector<uint16_t>> wait = creatematrix(2000, 2048);
     
