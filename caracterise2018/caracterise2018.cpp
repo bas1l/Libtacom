@@ -112,14 +112,25 @@ void triple_spike(ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
 {
     
     std::vector<std::vector<uint16_t>> spike = creatematrix(20, 1500);
+    std::vector<std::vector<uint16_t>> waitspike = creatematrix(20, 2048);
     std::vector<std::vector<uint16_t>> wait = creatematrix(2000, 2048);
     
+    int chan_current = ACT_RINGFINGER2;
     for (int i=0; i<3; i++)
     {
         for(int c=0; c<AD5383::num_channels; c++)
         {
             result[c].insert(result[c].end(),  wait[c].begin(), wait[c].end());
-            result[c].insert(result[c].end(), spike[c].begin(), spike[c].end());
+            if (c == chan_current)
+            {
+                result[c].insert(result[c].end(), spike[c].begin(), spike[c].end());
+            }
+            else
+            {
+                result[c].insert(result[c].end(), waitspike[c].begin(), waitspike[c].end());
+            }
+            
+            
         }
     }
     for(int c=0; c<AD5383::num_channels; c++)
@@ -139,9 +150,10 @@ void get_sinus(int f, int a, int u, int nos, ALPHABET& alph, std::vector<std::ve
     std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
     std::vector<uint16_t> waitsinus(sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
+    int chan_current = ACT_RINGFINGER2;
     for(int chan=0; chan<AD5383::num_channels; chan++)
     {
-        if (chan == 11)
+        if (chan == chan_current)
         {
             sinus4all[chan].assign(sinus.begin(), sinus.end());
         }
@@ -379,6 +391,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             int amp2 = 500;
             
             getfrequencies(&fbeg, &fend);
+            triple_spike(alph, result); // to fit between the laser data and the theoric data
             get_sinesweep(fbeg, fend, amp1, amp2, 1000, result);
             
             int csize = result[11].size();
