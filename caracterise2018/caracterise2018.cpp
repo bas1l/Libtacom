@@ -465,18 +465,18 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
             // f_state = 1 (10-100Hz)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             
             number_of_rep = 1;
             
             // f_state = 2 (100-200)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             // f_state = 3 (200-300)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
             write_file(towrite, 10, 300, 555555);
@@ -497,11 +497,11 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
             // f_state = 4 (300-400Hz)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             // f_state = 5 (400-500)
             getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, number_of_rep, result);
+            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
             write_file(towrite, 300, 500, 555555);
