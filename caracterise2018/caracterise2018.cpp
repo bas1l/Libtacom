@@ -174,13 +174,14 @@ void get_sinus(int f, int a, int u, int nos, ALPHABET& alph, std::vector<std::ve
     
 }
 
+static int amp_get_up = 500;
 int get_up(std::vector<std::vector<uint16_t>>& result)
 {
     int offset = 2048;
     int freq = 1;
-    int amp = 2000;
+    //int amp = 2000;
     
-    std::vector<uint16_t> go_up = push_sine_wave_ret(freq, amp, offset);
+    std::vector<uint16_t> go_up = push_sine_wave_ret(freq, amp_get_up, offset);
     
     int go_up_length = (int)(go_up.size()/4);
     std::vector<uint16_t> waitsinus(go_up_length, 2048);
@@ -202,6 +203,7 @@ int get_up(std::vector<std::vector<uint16_t>>& result)
 
     
     
+    printw("amp_get_up = %i\n", amp_get_up);
     return go_up[3*go_up_length];
 }
     
@@ -310,7 +312,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 
     static int ampl[] = {50, 100, 150, 200, 250, 300, 400, 600, 800, 1000};
     static int ampl_max = sizeof(ampl)/sizeof(int);
-
+    
     static int upto[] = {2048};
     //static int upto_max = sizeof(upto)/sizeof(int);
     
@@ -337,6 +339,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         }
         case 'a' :     
         {
+            amp_get_up +=50;
+            printw("amp_get_up = %i\n", amp_get_up);
             if (a == ampl_max-1)
             {
                 if (f == freq_max-1)
@@ -361,6 +365,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         }
         case 'b' :
         {   
+            amp_get_up -=50;
+            printw("amp_get_up = %i\n", amp_get_up);
             if (a == 0)
             {
                 if (f == 0)
