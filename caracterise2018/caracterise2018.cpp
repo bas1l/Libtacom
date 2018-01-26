@@ -296,7 +296,7 @@ void getfrequencies(int *fbeg, int *fend)
     
     if (f_state == 1)
     {
-        *fbeg = 1;
+        *fbeg = 10;
         *fend = 99;
     }
     else if (f_state == 2)
