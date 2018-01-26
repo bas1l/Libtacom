@@ -87,7 +87,7 @@ std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset)
     int nsample = 2000;
     std::vector<uint16_t> sinus;//nothing, just a break.
     
-    uint16_t * s = create_sin(freq, ampl, phase, nsample-1, offset);
+    uint16_t * s = create_sin(freq, ampl, phase, nsample, offset);
     
     for(int i=0; i < nsample; i++){
         sinus.push_back(s[i]);
@@ -227,7 +227,6 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int chan_used
                     {
                         std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
                         result[c].insert(result[c].end(), sinus.begin(), sinus.end());
-
                     }
                     else
                     {
@@ -563,10 +562,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     }
     
     // CLEANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-    //for (int w=0; w<result.size(); ++w)
-    //{
-    //    result[w].clear();
-    //}
+    for (int w=0; w<result.size(); ++w)
+    {
+        result[w].clear();
+    }
     
     
     return result;
