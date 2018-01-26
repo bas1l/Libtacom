@@ -562,10 +562,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     }
     
     // CLEANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-    for (int w=0; w<result.size(); ++w)
-    {
-        result[w].clear();
-    }
+    //for (int w=0; w<result.size(); ++w)
+    //{
+     //   result[w].clear();
+    //}
     
     
     return result;
