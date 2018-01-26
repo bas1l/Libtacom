@@ -213,7 +213,34 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int chan_used
     std::vector<uint16_t> waitsinus(2000, 2048);//sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
     
     int amp_used = amp1;
-    for(int f=fbeg; f<=fend; f+=5)
+    int f = fbeg;
+    
+    if (fbeg<10)
+    {
+        for(f=fbeg; f<=5; f++)
+        {
+            for (int nor=0; nor<number_of_rep; nor++)
+            {
+                for(int c=0; c<AD5383::num_channels; c++)
+                {
+                    if (c == chan_used)
+                    {
+                        std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
+                        result[c].insert(result[c].end(), sinus.begin(), sinus.end());
+
+                    }
+                    else
+                    {
+                        result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
+                    }
+                }
+            }
+        }
+        
+        f=10;
+    }
+    
+    for(; f<=fend; f+=5)
     {
         for (int nor=0; nor<number_of_rep; nor++)
         {
@@ -232,7 +259,7 @@ void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int chan_used
             }
         }
     }
-    
+
     // for amp2
     if (0)
     {
@@ -270,7 +297,7 @@ void getfrequencies(int *fbeg, int *fend)
     
     if (f_state == 1)
     {
-        *fbeg = 10;
+        *fbeg = 1;
         *fend = 99;
     }
     else if (f_state == 2)
@@ -412,7 +439,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
             triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
             
-            // f_state = 1 (10-100Hz)
+            // f_state = 1 (1-100Hz)
             getfrequencies(&fbeg, &fend);
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
@@ -429,10 +456,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 10, 300, amp1);
+            write_file(towrite, 1, amp1, 300);
             
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
-            printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
+            printw("1hz to 300Hz\n");//, fbeg, fend, csize/2);
             break;
         }
         case 'g':
@@ -455,7 +482,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 300, 500, amp1);
+            write_file(towrite, 300, amp1, 500);
             
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
@@ -488,7 +515,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 10, 300, amp1);
+            write_file(towrite, 10, amp1, 300);
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
             break;
@@ -513,7 +540,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
             
             std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 300, 500, amp1);
+            write_file(towrite, 300, amp1, 500);
             //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
             printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
             break;
