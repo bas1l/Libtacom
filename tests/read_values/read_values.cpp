@@ -63,7 +63,7 @@ int main (void)
     {
         gpio18->getval_gpio(inputstate); //read state of GPIO18 input pin
         cout << "Current input pin state is " << inputstate  <<endl;
-        cout << "Power supply : OFF" << std:endl;
+        cout << "Power supply : OFF" << std::endl;
         
         while (inputstate == "0")
         {
