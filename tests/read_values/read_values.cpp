@@ -53,7 +53,10 @@ int main (void)
     
     for(int j = 0; j < AD5383::num_channels; ++j)
     {
-        values[j].push_back(2048);
+        for(int i = 0; i  < 50; ++i)
+        {
+            values[j].push_back(2048);
+        }
     }
     
     long ms = 10;
@@ -72,7 +75,7 @@ int main (void)
         std::cout << "Power supply : ON" << std::endl;
         
         int a = ad.execute_trajectory(values, ms *1000000);
-        
+        //ad.execute_single_target(values);
         std::cout << "Neutral : OK " << std::endl;
         std:cout << "overruns : " << std::dec << a << std::endl;
         usleep(1000000);  // wait for 0.5 seconds
