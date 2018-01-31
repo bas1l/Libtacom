@@ -3,8 +3,6 @@ cmake_minimum_required(VERSION 2.8)
 project(readvalues)
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
-add_library(libGPIOClass "GPIOClass.cpp")
-
 add_executable(${PROJECT_NAME} "read_values.cpp")
 
 link_directories(${CMAKE_BINARY_DIR})

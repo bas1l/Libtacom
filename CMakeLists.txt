@@ -19,6 +19,8 @@ target_link_libraries(libwaveformobj libutils libdevice)
 add_library(libalphabet "src/alphabet.cpp")
 target_link_libraries(libalphabet libwaveformobj libdevice)
 
+add_library(libGPIOClass "GPIOClass.cpp")
+
 
 add_subdirectory("example")
 add_subdirectory("determine-up")
