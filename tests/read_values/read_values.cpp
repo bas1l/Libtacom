@@ -57,7 +57,7 @@ int main (void)
         }
     }
     
-    long ms = 2;
+    long ms = 5;
     
     while(1)
     {
