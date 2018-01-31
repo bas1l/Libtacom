@@ -56,22 +56,26 @@ int main (void)
         values[j].push_back(2048);
     }
     
-    long ms = 900;
+    long ms = 1;
     
     
     while(1)
     {
-        usleep(50000);  // wait for 0.5 seconds
         gpio18->getval_gpio(inputstate); //read state of GPIO18 input pin
         cout << "Current input pin state is " << inputstate  <<endl;
+        cout << "Power supply : OFF" << std:endl;
+        
         while (inputstate == "0")
         {
             gpio18->getval_gpio(inputstate);
         };
         std::cout << "Power supply : ON" << std::endl;
-        int a = ad.execute_trajectory(values, ms *1000000);
+        
+        int a = ad.execute_trajectory(values, 1000);// ms *1000000);
+        
         std::cout << "Neutral : OK " << std::endl;
         std:cout << "overruns : " << std::dec << a << std::endl;
+        usleep(1000000);  // wait for 0.5 seconds
         
         
         
