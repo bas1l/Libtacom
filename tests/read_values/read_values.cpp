@@ -68,7 +68,10 @@ int main (void)
         {
             gpio18->getval_gpio(inputstate);
         };
-        std::cout << "Neutral::overruns : " << std::dec << ad.execute_trajectory(values, ms *1000000) << std::endl;
+        std::cout << "Power supply : ON" << std.endl;
+        int a = ad.execute_trajectory(values, ms *1000000);
+        std::cout << "Neutral : OK " << std::endl;
+        std:cout << "overruns : " << std::dec << a << std::endl;
         
         
         
