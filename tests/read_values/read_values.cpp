@@ -18,18 +18,13 @@ using namespace std;
 
 int main (void)
 {
+    string inputstate23;
+    GPIOClass* gpio23 = new GPIOClass("23"); //create new GPIO object to be attached to  GPIO23
 
-    string inputstate17;
-    string inputstate18;
-    GPIOClass* gpio17 = new GPIOClass("17"); //create new GPIO object to be attached to  GPIO18
-    GPIOClass* gpio18 = new GPIOClass("23"); //create new GPIO object to be attached to  GPIO18
-
-    if (gpio17->export_gpio() == - 1) {return -1;} //export GPIO18
-    if (gpio18->export_gpio() == - 1) {return -1;} //export GPIO18
+    if (gpio23->export_gpio() == - 1) {return -1;} //export GPIO23
     cout << " GPIO pins exported" << endl;
     
-    if (gpio17->setdir_gpio("in") == -1) {return -1;} //GPIO18 set to input
-    if (gpio18->setdir_gpio("in") == -1) {return -1;} //GPIO18 set to input
+    if (gpio23->setdir_gpio("in") == -1) {return -1;} //GPIO23 set to input
     cout << " Set GPIO pin directions" << endl;
     
     std::cout << "Neutral::Begin." << std::endl;
@@ -37,7 +32,6 @@ int main (void)
     struct timespec t;
     struct sched_param param;
     param.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    
     /**************** C'EST AVEC CETTE OPTION QUE TOUT BUG *********************
     if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
             perror("sched_setscheduler failed");
@@ -63,19 +57,16 @@ int main (void)
         }
     }
     
-    long ms = 10;
-    
+    long ms = 1;
     
     while(1)
     {
-        gpio17->getval_gpio(inputstate17); //read state of GPIO18 input pin
-        gpio18->getval_gpio(inputstate18); //read state of GPIO18 input pin
+        gpio23->getval_gpio(inputstate23); //read state of GPIO23 input pin
         cout << "Power supply : OFF" << std::endl;
         
-        while (inputstate17 == "0" && inputstate18 == "0")
+        while (inputstate23 == "0")
         {
-            //gpio17->getval_gpio(inputstate17);
-            gpio18->getval_gpio(inputstate18);
+            gpio23->getval_gpio(inputstate23);
         };
         
         std::cout << "Power supply : ON" << std::endl;
@@ -100,7 +91,7 @@ int main (void)
             cout << "input pin state is \"Pressed \".n Will check input pin state again in 20ms "<<endl;
             usleep(20000);
             cout << "Checking again ....." << endl;
-            gpio18->getval_gpio(inputstate); // checking again to ensure that state "0" is due to button press and not noise
+            gpio23->getval_gpio(inputstate); // checking again to ensure that state "0" is due to button press and not noise
             
             if(inputstate == "0")
             {
