@@ -20,7 +20,7 @@ int GPIOClass::export_gpio()
 {
     string export_str = "/sys/class/gpio/export";
     ofstream exportgpio(export_str.c_str()); // Open "export" file. Convert C++ string to C string. Required for all Linux pathnames
-    if (exportgpio < 0){
+    if (exportgpio.is_open()){
         cout << " OPERATION FAILED: Unable to export GPIO"<< this->gpionum <<" ."<< endl;
         return -1;
     }
