@@ -31,13 +31,13 @@ int main (void)
         cout << "Current input pin state is " << inputstate  <<endl;
         if(inputstate == "0") // if input pin is at state "0" i.e. button pressed
         {
-            cout << "input pin state is "Pressed ".n Will check input pin state again in 20ms "<<endl;
+            cout << "input pin state is \"Pressed \".n Will check input pin state again in 20ms "<<endl;
                 usleep(20000);
                     cout << "Checking again ....." << endl;
                     gpio17->getval_gpio(inputstate); // checking again to ensure that state "0" is due to button press and not noise
             if(inputstate == "0")
             {
-                cout << "input pin state is definitely "Pressed". Turning LED ON" <<endl;
+                cout << "input pin state is definitely \"Pressed\". Turning LED ON" <<endl;
                 gpio4->setval_gpio("1"); // turn LED ON
 
                 cout << " Waiting until pin is unpressed....." << endl;
@@ -48,7 +48,7 @@ int main (void)
 
             }
             else
-                cout << "input pin state is definitely "UnPressed". That was just noise." <<endl;
+                cout << "input pin state is definitely \"UnPressed\". That was just noise." <<endl;
 
         }
         gpio4->setval_gpio("0");
