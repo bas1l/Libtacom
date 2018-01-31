@@ -18,36 +18,21 @@ using namespace std;
 
 int main (void)
 {
-    string inputstate23;
-    GPIOClass* gpio23 = new GPIOClass("23"); //create new GPIO object to be attached to  GPIO23
-
-    if (gpio23->export_gpio() == - 1) {return -1;} //export GPIO23
-    cout << " GPIO pins exported" << endl;
-    
-    if (gpio23->setdir_gpio("in") == -1) {return -1;} //GPIO23 set to input
-    cout << " Set GPIO pin directions" << endl;
-    
     std::cout << "Neutral::Begin." << std::endl;
 
     struct timespec t;
     struct sched_param param;
     param.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    /**************** C'EST AVEC CETTE OPTION QUE TOUT BUG *********************
-    if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
-            perror("sched_setscheduler failed");
-            exit(-1);
-    }
-    ***************************************************************************/
     if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
             perror("mlockall failed");
             exit(-2);
     }
-
     
     AD5383 ad;
     ad.spi_open();
     ad.configure();
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
+    long ms = 5;
     
     for(int j = 0; j < AD5383::num_channels; ++j)
     {
@@ -57,62 +42,42 @@ int main (void)
         }
     }
     
-    long ms = 5;
+    
+    string inputstate23;
+    GPIOClass* gpio23 = new GPIOClass("23"); //create new GPIO object to be attached to  GPIO23
+
+    if (gpio23->export_gpio() == - 1) {return -1;} //export GPIO23
+    cout << " GPIO pins exported" << endl;
+    
+    if (gpio23->setdir_gpio("in") == -1) {return -1;} //GPIO23 set to input
+    cout << " Set GPIO pin directions" << endl;
+    
+    gpio23->getval_gpio(inputstate23); //read state of GPIO23 input pin
+    if (inputstate23 == "0") cout << "Power supply : OFF" << std::endl;
+    
     
     while(1)
     {
-        gpio23->getval_gpio(inputstate23); //read state of GPIO23 input pin
-        cout << "Power supply : OFF" << std::endl;
-        
         while (inputstate23 == "0")
         {
             gpio23->getval_gpio(inputstate23);
         };
-        
         std::cout << "Power supply : ON" << std::endl;
         
         int a = ad.execute_trajectory(values, ms *1000000);
-        
         std::cout << "Neutral : OK " << std::endl;
         std:cout << "overruns : " << std::dec << a << std::endl;
-        usleep(1000000);  // wait for 0.5 seconds
         
-        
-        
-        
-        
-        
-        
-        
-        
-        /*
-        if(inputstate == "0") // if input pin is at state "0" i.e. button pressed
+        while (inputstate23 == "1")
         {
-            cout << "input pin state is \"Pressed \".n Will check input pin state again in 20ms "<<endl;
-            usleep(20000);
-            cout << "Checking again ....." << endl;
-            gpio23->getval_gpio(inputstate); // checking again to ensure that state "0" is due to button press and not noise
-            
-            if(inputstate == "0")
-            {
-
-                cout << " Waiting until pin is unpressed....." << endl;
-                
-                cout << "pin is unpressed" << endl;
-                
-   
-
-            }
-            else
-                cout << "input pin state is definitely \"UnPressed\". That was just noise." <<endl;
-
-        }
-        */
+            gpio23->getval_gpio(inputstate23);
+            usleep(1 * 1000000);
+        };
+        cout << "Power supply : OFF" << std::endl;
     }
     
     std::cout << "Neutral::Done." << std::endl;
     ad.spi_close();
     
-    cout << "Exiting....." << endl;
     return 0;
 }
