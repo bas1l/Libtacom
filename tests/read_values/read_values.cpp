@@ -21,7 +21,7 @@ int main (void)
 
     string inputstate17;
     string inputstate18;
-    GPIOClass* gpio18 = new GPIOClass("17"); //create new GPIO object to be attached to  GPIO18
+    GPIOClass* gpio17 = new GPIOClass("17"); //create new GPIO object to be attached to  GPIO18
     GPIOClass* gpio18 = new GPIOClass("23"); //create new GPIO object to be attached to  GPIO18
 
     if (gpio17->export_gpio() == - 1) {return -1;} //export GPIO18
@@ -74,8 +74,8 @@ int main (void)
         
         while (inputstate17 == "0" && inputstate18 == "0")
         {
-            gpio17->getval_gpio(inputstate);
-            gpio18->getval_gpio(inputstate);
+            gpio17->getval_gpio(inputstate17);
+            gpio18->getval_gpio(inputstate18);
         };
         
         std::cout << "Power supply : ON" << std::endl;
