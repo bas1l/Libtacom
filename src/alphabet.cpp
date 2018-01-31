@@ -242,6 +242,7 @@ std::vector<std::vector<uint16_t>> ALPHABET::make_letter(char l)
         case 'j' :
         {
             std::vector<std::vector<std::string>> names(9,std::vector<std::string>(1));
+            names[0][0] = "mf3";
             names[1][0] = "mf2";
             names[2][0] = "mf1";
             names[3][0] = "palm12";

@@ -668,7 +668,6 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         // if last char is a space, then a word is finished
         if (letters.front() != ' ')// is part of the alphabet){
         {
-            //values = alph.getl(letters.front());
             values = getvalues(letters.front(), alph);
             ad.execute_trajectory(values, timePmessage_ns);
             

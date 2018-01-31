@@ -229,7 +229,7 @@ float * WAVEFORM::create_envelope_asc()
 {
     float * s;
     s = (float*) malloc(appasc_dur * sizeof(float));
-
+    
     float incr = M_PI/(float)(2*appasc_dur);
 
     for (int i=0; i<appasc_dur; i++){
