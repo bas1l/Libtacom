@@ -56,7 +56,7 @@ int main (void)
         values[j].push_back(2048);
     }
     
-    long ms = 1;
+    long ms = 10;
     
     
     while(1)
