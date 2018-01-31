@@ -74,8 +74,8 @@ int main (void)
         
         while (inputstate17 == "0" && inputstate18 == "0")
         {
-            gpio17->getval_gpio(inputstate17);
-            //gpio18->getval_gpio(inputstate18);
+            //gpio17->getval_gpio(inputstate17);
+            gpio18->getval_gpio(inputstate18);
         };
         
         std::cout << "Power supply : ON" << std::endl;
