@@ -57,7 +57,7 @@ int main (void)
         }
     }
     
-    long ms = 1;
+    long ms = 2;
     
     while(1)
     {
@@ -72,7 +72,7 @@ int main (void)
         std::cout << "Power supply : ON" << std::endl;
         
         int a = ad.execute_trajectory(values, ms *1000000);
-        //ad.execute_single_target(values);
+        
         std::cout << "Neutral : OK " << std::endl;
         std:cout << "overruns : " << std::dec << a << std::endl;
         usleep(1000000);  // wait for 0.5 seconds
