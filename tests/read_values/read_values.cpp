@@ -16,7 +16,7 @@ int main (void)
     if (gpio18->export_gpio() == - 1) {return -1;} //export GPIO18
     cout << " GPIO pins exported" << endl;
     
-    if (gpio18->setdir_gpio("in") == -1) {return -1;} //GPIO4 set to output
+    if (gpio18->setdir_gpio("in") == -1) {return -1;} //GPIO18 set to input
     cout << " Set GPIO pin directions" << endl;
 
     while(1)
@@ -47,7 +47,6 @@ int main (void)
                 cout << "input pin state is definitely \"UnPressed\". That was just noise." <<endl;
 
         }
-        gpio4->setval_gpio("0");
 
     }
     cout << "Exiting....." << endl;
