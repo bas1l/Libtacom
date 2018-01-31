@@ -19,12 +19,16 @@ using namespace std;
 int main (void)
 {
 
-    string inputstate;
-    GPIOClass* gpio18 = new GPIOClass("18"); //create new GPIO object to be attached to  GPIO18
+    string inputstate17;
+    string inputstate18;
+    GPIOClass* gpio18 = new GPIOClass("17"); //create new GPIO object to be attached to  GPIO18
+    GPIOClass* gpio18 = new GPIOClass("23"); //create new GPIO object to be attached to  GPIO18
 
+    if (gpio17->export_gpio() == - 1) {return -1;} //export GPIO18
     if (gpio18->export_gpio() == - 1) {return -1;} //export GPIO18
     cout << " GPIO pins exported" << endl;
     
+    if (gpio17->setdir_gpio("in") == -1) {return -1;} //GPIO18 set to input
     if (gpio18->setdir_gpio("in") == -1) {return -1;} //GPIO18 set to input
     cout << " Set GPIO pin directions" << endl;
     
@@ -64,14 +68,16 @@ int main (void)
     
     while(1)
     {
-        gpio18->getval_gpio(inputstate); //read state of GPIO18 input pin
-        cout << "Current input pin state is " << inputstate  <<endl;
+        gpio17->getval_gpio(inputstate17); //read state of GPIO18 input pin
+        gpio18->getval_gpio(inputstate18); //read state of GPIO18 input pin
         cout << "Power supply : OFF" << std::endl;
         
-        while (inputstate == "0")
+        while (inputstate17 == "0" && inputstate18 == "0")
         {
+            gpio17->getval_gpio(inputstate);
             gpio18->getval_gpio(inputstate);
         };
+        
         std::cout << "Power supply : ON" << std::endl;
         
         int a = ad.execute_trajectory(values, ms *1000000);
