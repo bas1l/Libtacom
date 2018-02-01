@@ -425,10 +425,9 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         }
     }
     
-    printw("f = %i, ", f);
-    printw("fadd = %i, ", fadd);
-    printw("a = %i, ", a);
-    printw("aadd = %i :: ", aadd);
+    printw("f=%i, ", f);
+    printw("a=%i, ", a);
+    printw("u=%i ::", u);
     
     if ((f+fadd) <= 0)
     {
@@ -510,7 +509,6 @@ int main(int argc, char *argv[])
             {
                 letters.push(ch);
             }
-            
         }
         
         if (!letters.empty())
@@ -529,7 +527,11 @@ int main(int argc, char *argv[])
             printw("traj.");
         }
         
-    }while((ch = getch()) != '*');
+        printw("getch begin\n");
+        ch = getch();
+        printw("getch end, %c\n", ch);
+
+    }while(ch != '*');
     
     
     printw("\tWHC::End\n");
