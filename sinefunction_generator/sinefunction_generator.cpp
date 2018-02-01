@@ -589,12 +589,12 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
         printw("\tStart the do generate sentence\n");
         if (ch != ERR) 
         {
-            printw("\t into the ch!=err\n");
+            printw("\tinto the ch!=err\n");
             // if part of the alphabet
             if (str_alph.find(ch) != std::string::npos)
             {
-                printw("\tif\n");
                 printw("%c", ch);
+                printw("\tif\n");
                 
                 std::unique_lock<std::mutex> lk(m);
                 sentences.push(ch);
@@ -604,15 +604,16 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
             }// if part of the ponctuation
             else if (str_ponc.find(ch) != std::string::npos)
             {
-                printw("\telseif\n");
                 printw("%c", ch);
+                printw("\telseif\n");
             }
             else
             {
                 printw("\telse\n");
                 printw("\n<Key not implemented> Need to Exit ? Press '*'.\n");
             }
-          }
+            
+        }
     }while((ch = getch()) != '*');
     
     
