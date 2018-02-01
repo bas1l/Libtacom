@@ -457,6 +457,7 @@ int main ()
   do {
     c=getchar();
     putchar (c);
+    printw("a\n");
   } while (c != '.');
   return 0;
 }
