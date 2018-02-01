@@ -540,7 +540,7 @@ int main_test(int argc, char *argv[])
         
         printw("getch begin\n");
         ch = getchar();
-        putchar (c);
+        putchar (ch);
         printw("getch end, %c\n", ch);
 
     }while(ch != '*');
