@@ -329,7 +329,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 {
     int chan_used = ACT_RINGFINGER2;
     
-    static int f = 0;
+    static int f = 1;
     static int a = 0;
     static int u = 0;
     
@@ -345,51 +345,63 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         case 'q':
         {
             fadd = -1;
+            break;
         }
         case 'w':
         {
             fadd = +1;
+            break;
         }
         case 'a':
         {
             fadd = -10;
+            break;
         }
         case 's':
         {
             fadd = +10;
+            break;
         }
         case 'z':
         {
             fadd = -100;
+            break;
         }
         case 'x':
         {
             fadd = +100;
+            break;
         }
         // value to add to the current amplitude
         case 'e':
         {
             aadd = -1;
+            break;
         }
         case 'r':
         {
             aadd = +1;
+            break;
         }
         case 'd':
         {
             aadd = -10;
+            break;
         }
         case 'f':
         {
             aadd = +10;
+            break;
         }
         case 'c':
         {
             aadd = -100;
+            break;
         }
         case 'v':
         {
             aadd = +100;
+            break;
         }
         // other type of movement
         case 'u':
@@ -484,9 +496,9 @@ int main(int argc, char *argv[])
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
     do
     {    
-        if ( (ch != ERR) || (str_used.find(ch) != std::string::npos) ) 
+        if ( (ch != ERR) && (str_used.find(ch) != std::string::npos) ) 
         {
-            printw("%c", ch);
+            printw("%c\n", ch);
 
             for (int w=0; w<values.size(); ++w)
             {
@@ -497,7 +509,7 @@ int main(int argc, char *argv[])
         else
         {
             ad.execute_trajectory(values, timePmessage_ns);
-            printw("execute the trajectory\n");
+            printw("traj.");
         }
         
     }while((ch = getch()) != '*');
