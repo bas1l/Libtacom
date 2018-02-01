@@ -424,16 +424,22 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
             break;
         }
     }
-            
+    
+    printw("f = %i, ", f);
+    printw("fadd = %i, ", fadd);
+    printw("a = %i, ", a);
+    printw("aadd = %i :: ", aadd);
+    
     if ((f+fadd) <= 0)
     {
-        printw("f cannot be equal or lower than zero\n");
+        printw("f<=0");
     }
-    else if ((a+aadd) <= 0)
+    if ((a+aadd) <= 0)
     {
-        printw("a cannot be equal or lower than zero\n");
+        printw("a<=0");
     }
-    else
+    
+    if (f+fadd) > 0) && ((a+aadd) > 0)
     {
         f = f+fadd;
         a = a+aadd;
@@ -441,6 +447,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         get_sinus(f, a, u, 1, chan_used, alph, result);
     }
     
+    printw("\n");
     return result;
 }
 
@@ -494,6 +501,8 @@ int main(int argc, char *argv[])
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
     do
     {    
+        
+        printw("l\n");
         if (ch != ERR)
         {
             printw("%c\n", ch);
