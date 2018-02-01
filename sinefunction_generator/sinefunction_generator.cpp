@@ -459,6 +459,11 @@ int main(int argc, char *argv[])
             perror("mlockall failed");
             exit(-2);
     }
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
+    
     
     DEVICE dev;
     dev.configure();
@@ -466,45 +471,48 @@ int main(int argc, char *argv[])
     wf.configure();
     ALPHABET alph(dev, wf);//, AD5383::num_channels);
     alph.configure();
-    
-    std::queue<char> sentences;
     // init drive electronics
     AD5383 ad;
     ad.spi_open();
     ad.configure();
+    
+    
     // fréquence maximale pour les sinus utilisées
     double hz_max = 1000; //Hz=1/s
     // th. de Nyquist implique :
     double freq_message = hz_max*2; // 2000 message / secondes (par chan)
     // un peu bizarre. Mais on souhaite faire 2 envoies de messages par millisec
     double timePmessage_ns = hz_max/freq_message * ms2ns; // * ns
-    
-    
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     std::vector<std::vector<uint16_t> > tmp(AD5383::num_channels);
     values = alph.getneutral();
     ad.execute_trajectory(values, timePmessage_ns);
     
-    
-    initscr();
-    raw();
-    keypad(stdscr, TRUE);
-    noecho();
-    
     int ch;
+    std::queue<char> letters;
     std::string str_used = "qwaszxerdfcvun";
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
     do
     {    
-        if ( (ch != ERR) && (str_used.find(ch) != std::string::npos) ) 
+        if (ch != ERR))
         {
             printw("%c\n", ch);
-
+            if (str_used.find(ch) != std::string::npos)
+            {
+                letters.push(ch);
+            }
+            
+        }
+        
+        if (!letters.isempty())
+        {
             for (int w=0; w<values.size(); ++w)
             {
                 values[w].clear();
             }
             values = getvalues(ch, alph);
+            
+            letters.pop();
         }
         else
         {
