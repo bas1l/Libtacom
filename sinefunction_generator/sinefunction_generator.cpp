@@ -581,7 +581,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
     keypad(stdscr, TRUE);
     noecho();
     
-    std::string str_ponc = " .,;:!?-";
+    std::string str_ponc = " .,;:!?-'";
     
     int ch;
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
@@ -657,7 +657,10 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         
         if (!(sentences.empty()))
         {
-            cv.wait(lk); // Wait for the generator to complete
+            if (sentences.empty()) 
+            {
+                cv.wait(lk); // Wait for the generator to complete
+            }
             if (sentences.empty()) 
                 continue;
 
@@ -676,8 +679,8 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
                 {
                     values[w].clear();
                 }
-                letters.pop();
             }
+            letters.pop();
         }
         else
         {

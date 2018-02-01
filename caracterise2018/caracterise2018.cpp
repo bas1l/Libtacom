@@ -581,7 +581,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
     keypad(stdscr, TRUE);
     noecho();
     
-    std::string str_ponc = " .,;:!?-";
+    std::string str_ponc = " .,;:!?-'";
     
     int ch;
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
