@@ -449,6 +449,10 @@ int main(int argc, char *argv[])
     std::thread thread_readletters(read_letters);
     std::thread thread_functiongenerator(function_generator);
     
+    thread_readletters.join();
+    thread_functiongenerator.join();
+    
+    
     
     
     return 0;
