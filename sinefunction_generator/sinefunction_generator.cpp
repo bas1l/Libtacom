@@ -439,7 +439,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         printw("a<=0");
     }
     
-    if (f+fadd) > 0) && ((a+aadd) > 0)
+    if ((f+fadd) > 0) && ((a+aadd) > 0)
     {
         f = f+fadd;
         a = a+aadd;
