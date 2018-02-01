@@ -504,7 +504,7 @@ int main(int argc, char *argv[])
             
         }
         
-        if (!letters.isempty())
+        if (!letters.empty())
         {
             for (int w=0; w<values.size(); ++w)
             {
