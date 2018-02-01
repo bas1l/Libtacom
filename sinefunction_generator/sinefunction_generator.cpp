@@ -330,7 +330,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     int chan_used = ACT_RINGFINGER2;
     
     static int f = 1;
-    static int a = 0;
+    static int a = 1;
     static int u = 0;
     
     int fadd = 0;
@@ -425,10 +425,6 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         }
     }
     
-    printw("f=%i, ", f);
-    printw("a=%i, ", a);
-    printw("u=%i ::", u);
-    
     if ((f+fadd) <= 0)
     {
         printw("f<=0");
@@ -445,6 +441,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         
         get_sinus(f, a, u, 1, chan_used, alph, result);
     }
+    
+    printw("f=%i, ", f);
+    printw("a=%i, ", a);
+    printw("u=%i ::", u);
     
     printw("\n");
     return result;
@@ -528,7 +528,7 @@ int main(int argc, char *argv[])
         }
         
         printw("getch begin\n");
-        ch = getch();
+        ch = getchar();
         printw("getch end, %c\n", ch);
 
     }while(ch != '*');
