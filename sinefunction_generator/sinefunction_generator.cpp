@@ -336,6 +336,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     int fadd = 0;
     int aadd = 0;
     
+    std::vector<std::vector<uint16_t> > result(AD5383::num_channels);
+    
     
     switch (c)
     {
@@ -415,7 +417,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     {
         printw("f cannot be equal or lower than zero\n");
     }
-    elseif ((a+aadd) <= 0)
+    else if ((a+aadd) <= 0)
     {
         printw("a cannot be equal or lower than zero\n");
     }
@@ -424,7 +426,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         f = f+fadd;
         a = a+aadd;
         
-        get_sinus(f, a, u, num_of_sinus, chan_used, alph, result);
+        get_sinus(f, a, u, 1, chan_used, alph, result);
     }
     
     return result;
