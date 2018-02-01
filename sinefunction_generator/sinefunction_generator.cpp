@@ -382,7 +382,7 @@ void read_letters ()
     
 }
 
-void void function_generator()
+void function_generator()
 {
     DEVICE dev;
     dev.configure();
