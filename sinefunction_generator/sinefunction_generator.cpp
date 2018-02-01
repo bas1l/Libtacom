@@ -384,6 +384,9 @@ void read_letters ()
 
 void function_generator()
 {
+    printw("[function_generator] Begin\n");
+    printw("[function_generator] Step1\n");
+
     DEVICE dev;
     dev.configure();
     WAVEFORM wf;
@@ -393,13 +396,16 @@ void function_generator()
     AD5383 ad;
     ad.spi_open();
     ad.configure();
+    printw("[function_generator] Step2\n");
     
     double freq_message_per_ms = 2000; // message/s
     double freq_message_per_ns = freq_message_per_ms * ms2ns; // * ns
     std::queue<char> letters_in;
+    printw("[function_generator] Step3\n");
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
+    printw("[function_generator] Step4\n");
     values = alph.getneutral();
-    printw("execute_trajectory with freqns=%f\n", freq_message_per_ns);
+    printw("execute_trajectory with freq_ns=%f\n", freq_message_per_ns);
     
     ad.execute_trajectory(values, freq_message_per_ns);
     
