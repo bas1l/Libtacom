@@ -494,7 +494,7 @@ int main(int argc, char *argv[])
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
     do
     {    
-        if (ch != ERR))
+        if (ch != ERR)
         {
             printw("%c\n", ch);
             if (str_used.find(ch) != std::string::npos)
