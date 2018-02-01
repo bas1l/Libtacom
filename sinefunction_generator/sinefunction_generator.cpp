@@ -399,6 +399,7 @@ void function_generator()
     std::queue<char> letters_in;
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     values = alph.getneutral();
+    printw("execute_trajectory with freqns=%f", freq_message_per_ns);
     
     ad.execute_trajectory(values, freq_message_per_ns);
     
