@@ -327,246 +327,105 @@ void getfrequencies(int *fbeg, int *fend)
 
 std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 {
+    int chan_used = ACT_RINGFINGER2;
+    
+    static int f = 0;
     static int a = 0;
     static int u = 0;
-    static int f = 0;
     
-    static int freq[] = {1, 2, 5, 10, 20, 50, 100, 200, 300, 500, 700};
-    static int freq_max = sizeof(freq)/sizeof(int);
-
-    static int ampl[] = {50, 100, 150, 200, 250, 300, 400, 600, 800, 1000};
-    static int ampl_max = sizeof(ampl)/sizeof(int);
+    int fadd = 0;
+    int aadd = 0;
     
-    static int upto[] = {2048};
-    //static int upto_max = sizeof(upto)/sizeof(int);
     
-    std::vector<std::vector<uint16_t> > result(AD5383::num_channels);
-    static int up = 2048;
-    
-    int chan_used = ACT_RINGFINGER2;
     switch (c)
     {
-        
+        // value to add to the current frequency
         case 'q':
         {
-            f_state = 1;
-            printw("f_state is back to 1\n");
+            fadd = -1;
         }
-            
-        case 'k' :
+        case 'w':
         {
-            int ff = freq[f];
-            int aa = ampl[a];
-            int uu = upto[u];
-            int num_of_sinus = 2;
-            
-            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
-            get_sinus(ff, aa, uu, num_of_sinus, chan_used, alph, result);
-            
-            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, ff, aa, uu);
-            
-            printw("::After : go. \n");
-            break;
+            fadd = +1;
         }
-        case 'a' :     
+        case 'a':
         {
-            amp_get_up +=50;
-            printw("amp_get_up = %i\n", amp_get_up);
-            if (a == ampl_max-1)
-            {
-                if (f == freq_max-1)
-                {
-                    //printw("::After(f=%i,a=%i)/Impossible\t", freq[f], ampl[a]);
-                }
-                else
-                {
-                    f += 1;
-                    a = 0;
-                    //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
-                }
-            }
-            else
-            {
-                a += 1;
-                //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
-            }
-            
-            
-        break;
+            fadd = -10;
         }
-        case 'b' :
-        {   
-            amp_get_up -=50;
-            printw("amp_get_up = %i\n", amp_get_up);
-            if (a == 0)
-            {
-                if (f == 0)
-                {
-                    //printw("::After(f=%i,a=%i)/Impossible\t", freq[f], ampl[a]);
-                }
-                else
-                {
-                    f -= 1;
-                    a = ampl_max-1;
-                    //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
-                }
-                
-            }
-            else
-            {
-                a -= 1;
-                //printw("::After(f=%i,a=%i).", freq[f], ampl[a]);
-            }
-            
-        break;
-        }
-        
-        case 'u':
+        case 's':
         {
-            up = get_up(result, chan_used);
-            break;
+            fadd = +10;
         }
-        case 'f':
+        case 'z':
         {
-            int fbeg;
-            int fend;
-            int upvalue = 2048-400;
-            int amp1 = 1500;
-            int amp2 = 500;
-            int number_of_rep = 2;
-            
-            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
-            
-            // f_state = 1 (1-100Hz)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            
-            number_of_rep = 1;
-            
-            // f_state = 2 (100-200)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            // f_state = 3 (200-300)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            
-            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 1, amp1, 300);
-            
-            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
-            printw("1hz to 300Hz\n");//, fbeg, fend, csize/2);
-            break;
+            fadd = -100;
         }
-        case 'g':
+        case 'x':
         {
-            int fbeg;
-            int fend;
-            int upvalue = 2048-400;
-            int amp1 = 1500;
-            int amp2 = 500;
-            int number_of_rep = 1;
-            
-            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
-            
-            // f_state = 4 (300-400Hz)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            // f_state = 5 (400-500)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 300, amp1, 500);
-            
-            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
-            printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
-            break;
+            fadd = +100;
+        }
+        // value to add to the current amplitude
+        case 'e':
+        {
+            aadd = -1;
         }
         case 'r':
         {
-            int fbeg;
-            int fend;
-            int upvalue = 2048-400;
-            int amp1 = 1000;
-            int amp2 = 500;
-            int number_of_rep = 2;
-            
-            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
-            
-            // f_state = 1 (10-100Hz)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            
-            number_of_rep = 1;
-            
-            // f_state = 2 (100-200)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            // f_state = 3 (200-300)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 10, amp1, 300);
-            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
-            printw("10hz to 300Hz\n");//, fbeg, fend, csize/2);
-            break;
+            aadd = +1;
         }
-        case 't':
+        case 'd':
         {
-            int fbeg;
-            int fend;
-            int upvalue = 2048-400;
-            int amp1 = 1000;
-            int amp2 = 500;
-            int number_of_rep = 1;
-            
-            triple_spike(alph, chan_used, result); // to fit between the laser data and the theoric data
-            
-            // f_state = 4 (300-400Hz)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            // f_state = 5 (400-500)
-            getfrequencies(&fbeg, &fend);
-            get_sinesweep(fbeg, fend, amp1, amp2, upvalue, chan_used, number_of_rep, result);
-            
-            std::vector<uint16_t> towrite(result[chan_used].begin(), result[chan_used].end());
-            write_file(towrite, 300, amp1, 500);
-            //printw("f_beg = %i, f_end = %i, size(ms) = %i\n", fbeg, fend, csize/2);
-            printw("300hz to 500Hz\n");//, fbeg, fend, csize/2);
-            break;
+            aadd = -10;
         }
-        
+        case 'f':
+        {
+            aadd = +10;
+        }
+        case 'c':
+        {
+            aadd = -100;
+        }
+        case 'v':
+        {
+            aadd = +100;
+        }
+        // other type of movement
+        case 'u':
+        {// up statement
+            u = get_up(result, chan_used);
+            return result;
+        }
         case 'n' :
-        {
-            //result = alph.getneutral();
+        {// neutral statement
+            u = 2048;
             for(int c=0; c<AD5383::num_channels; c++)
             {
-                result[c].push_back(2048);
-                result[c].push_back(2048);
+                result[c].push_back(u);
+                result[c].push_back(u);
             }
+            return result;
+        }
+        default :
+        {
             break;
         }
-        
-        default :
-            result = alph.getneutral();
-        break;
     }
-    
-    // CLEANNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
-    //for (int w=0; w<result.size(); ++w)
-    //{
-     //   result[w].clear();
-    //}
-    
+            
+    if ((f+fadd) <= 0)
+    {
+        printw("f cannot be equal or lower than zero\n");
+    }
+    elseif ((a+aadd) <= 0)
+    {
+        printw("a cannot be equal or lower than zero\n");
+    }
+    else
+    {
+        f = f+fadd;
+        a = a+aadd;
+        
+        get_sinus(f, a, u, num_of_sinus, chan_used, alph, result);
+    }
     
     return result;
 }
@@ -608,6 +467,7 @@ int main(int argc, char *argv[])
     
     
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
+    std::vector<std::vector<uint16_t> > tmp(AD5383::num_channels);
     values = alph.getneutral();
     ad.execute_trajectory(values, timePmessage_ns);
     
@@ -618,23 +478,19 @@ int main(int argc, char *argv[])
     noecho();
     
     int ch;
+    std::string str_used = "qwaszxerdfcvun";
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
-    do{
-        if (ch != ERR) 
+    do
+    {    
+        if ( (ch != ERR) || (str_used.find(ch) != std::string::npos) ) 
         {
-            // if c is part of the alphabet
-            if (alph.getlist_alphabet().find(ch) != std::string::npos)
+            printw("%c", ch);
+
+            for (int w=0; w<values.size(); ++w)
             {
-                printw("%c", ch);
-                
-                for (int w=0; w<values.size(); ++w)
-                {
-                    values[w].clear();
-                }
-                values = getvalues(ch, alph);
-                
-                ad.execute_trajectory(values, timePmessage_ns);
+                values[w].clear();
             }
+            values = getvalues(ch, alph);
         }
         else
         {
