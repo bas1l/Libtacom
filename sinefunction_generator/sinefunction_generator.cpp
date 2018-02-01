@@ -450,9 +450,19 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     return result;
 }
 
+int main ()
+{
+  int c;
+  puts ("Enter text. Include a dot ('.') in a sentence to exit:");
+  do {
+    c=getchar();
+    putchar (c);
+  } while (c != '.');
+  return 0;
+}
 
 
-int main(int argc, char *argv[])
+int main_test(int argc, char *argv[])
 {
     struct timespec t;
     struct sched_param param;
@@ -529,6 +539,7 @@ int main(int argc, char *argv[])
         
         printw("getch begin\n");
         ch = getchar();
+        putchar (c);
         printw("getch end, %c\n", ch);
 
     }while(ch != '*');
