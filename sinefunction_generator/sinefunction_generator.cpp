@@ -207,123 +207,11 @@ int get_up(std::vector<std::vector<uint16_t>>& result, int chan_used)
 }
     
 
-void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int chan_used, int number_of_rep, std::vector<std::vector<uint16_t>>& result)
-{
-    //std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
-    std::vector<uint16_t> waitsinus(2000, 2048);//sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
-    
-    int amp_used = amp1;
-    int f = fbeg;
-    
-    if (fbeg<10)
-    {
-        for(f=fbeg; f<=5; f++)
-        {
-            for (int nor=0; nor<number_of_rep; nor++)
-            {
-                for(int c=0; c<AD5383::num_channels; c++)
-                {
-                    if (c == chan_used)
-                    {
-                        std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
-                        result[c].insert(result[c].end(), sinus.begin(), sinus.end());
-                    }
-                    else
-                    {
-                        result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
-                    }
-                }
-            }
-        }
-        
-        f=10;
-    }
-    
-    for(; f<=fend; f+=5)
-    {
-        for (int nor=0; nor<number_of_rep; nor++)
-        {
-            for(int c=0; c<AD5383::num_channels; c++)
-            {
-                if (c == chan_used)
-                {
-                    std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
-                    result[c].insert(result[c].end(), sinus.begin(), sinus.end());
 
-                }
-                else
-                {
-                    result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
-                }
-            }
-        }
-    }
 
-    // for amp2
-    if (0)
-    {
-        int amp_used = amp2;
-        for(int f=fbeg; f<=fend; f+=5)
-        {
-            for (int nor=0; nor<number_of_rep; nor++)
-            {
-                for(int c=0; c<AD5383::num_channels; c++)
-                {
-                    if (c == chan_used)
-                    {
-                        std::vector<uint16_t> sinus = push_sine_wave_ret(f, amp_used, up);
-                        result[c].insert(result[c].end(), sinus.begin(), sinus.end());
 
-                    }
-                    else
-                    {
-                        result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
-                    }
-                }
-            }
-        }
-    }
-    
-    
-}
 
-static int f_state = 1;
-void getfrequencies(int *fbeg, int *fend)
-{
-    
-    int fmin = 10;
-    int fmax = 500;
-    
-    if (f_state == 1)
-    {
-        *fbeg = 1;
-        *fend = 99;
-    }
-    else if (f_state == 2)
-    {
-        *fbeg = *fend+1;
-        *fend = *fend+100;
-    }
-    else if (f_state == 3)
-    {
-        *fbeg = *fend+1;
-        *fend = *fend+100;
-    }
-    else if (f_state == 4)
-    {
-        *fbeg = *fend+1;
-        *fend = *fend+100;
-    }
-    else if (f_state == 5)
-    {
-        *fbeg = *fend+1;
-        *fend = *fend+100;
-    }
-    
-    printw("Frequencies statement = %i\n", f_state);
-    
-    f_state++;
-}
+
 
 std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 {
@@ -450,20 +338,101 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     return result;
 }
 
-int main ()
+
+
+
+
+// global variable
+std::queue<char> letters;
+std::mutex mutexLetters;
+bool work;
+std::mutex mutexWork;
+
+void read_letters ()
 {
-  int c;
-  puts ("Enter text. Include a dot ('.') in a sentence to exit:");
-  do {
-    c=getchar();
-    putchar (c);
-    printw("a\n");
-  } while (c != '.');
-  return 0;
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
+    
+    int ch;
+    std::string str_used = "qwaszxerdfcvun";
+    printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
+    
+    do
+    {
+        if (ch != ERR)
+        {
+            printw("%c\n", ch);
+            if (str_used.find(ch) != std::string::npos)
+            {
+                std::lock_guard<std::mutex> guard(mutexLetters);
+                letters.push(ch);
+            }
+        }
+        
+    }while(ch != '*');
+    
+    std::lock_guard<std::mutex> guard(mutexWork);
+    work = false;
+    
+    refresh();
+    endwin();
+    
+    
+}
+
+void void function_generator()
+{
+    DEVICE dev;
+    dev.configure();
+    WAVEFORM wf;
+    wf.configure();
+    ALPHABET alph(dev, wf);//, AD5383::num_channels);
+    alph.configure();
+    AD5383 ad;
+    ad.spi_open();
+    ad.configure();
+    
+    double freq_message_per_ms = 2000; // message/s
+    double freq_message_per_ns = freq_message_per_ms * ms2ns; // * ns
+    std::queue<char> letters_in;
+    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
+    values = alph.getneutral();
+    
+    ad.execute_trajectory(values, freq_message_per_ns);
+    
+    while(work)
+    {
+        {// parenthesis in order to destroy the lock_guard
+            std::lock_guard<std::mutex> guard(mutexLetters);
+            if (!letters.empty()) 
+            {
+                letters_in.push(letters.front());
+                letters.pop();
+            }
+        }
+        if (!letters.empty())
+        {
+            for (int w=0; w<values.size(); ++w)
+                values[w].clear();
+            values = getvalues(letters.front(), alph);
+            letters.pop();
+        }
+        else
+        {
+            ad.execute_trajectory(values, freq_message_per_ns);
+            printw("traj.");
+        }
+        
+        
+    }
+            
 }
 
 
-int main_test(int argc, char *argv[])
+
+int main(int argc, char *argv[])
 {
     struct timespec t;
     struct sched_param param;
@@ -476,79 +445,10 @@ int main_test(int argc, char *argv[])
             perror("mlockall failed");
             exit(-2);
     }
-    initscr();
-    raw();
-    keypad(stdscr, TRUE);
-    noecho();
     
+    std::thread thread_readletters(read_letters);
+    std::thread thread_functiongenerator(function_generator);
     
-    DEVICE dev;
-    dev.configure();
-    WAVEFORM wf;
-    wf.configure();
-    ALPHABET alph(dev, wf);//, AD5383::num_channels);
-    alph.configure();
-    // init drive electronics
-    AD5383 ad;
-    ad.spi_open();
-    ad.configure();
-    
-    
-    // fréquence maximale pour les sinus utilisées
-    double hz_max = 1000; //Hz=1/s
-    // th. de Nyquist implique :
-    double freq_message = hz_max*2; // 2000 message / secondes (par chan)
-    // un peu bizarre. Mais on souhaite faire 2 envoies de messages par millisec
-    double timePmessage_ns = hz_max/freq_message * ms2ns; // * ns
-    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    std::vector<std::vector<uint16_t> > tmp(AD5383::num_channels);
-    values = alph.getneutral();
-    ad.execute_trajectory(values, timePmessage_ns);
-    
-    int ch;
-    std::queue<char> letters;
-    std::string str_used = "qwaszxerdfcvun";
-    printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
-    do
-    {    
-        
-        printw("l\n");
-        if (ch != ERR)
-        {
-            printw("%c\n", ch);
-            if (str_used.find(ch) != std::string::npos)
-            {
-                letters.push(ch);
-            }
-        }
-        
-        if (!letters.empty())
-        {
-            for (int w=0; w<values.size(); ++w)
-            {
-                values[w].clear();
-            }
-            values = getvalues(ch, alph);
-            
-            letters.pop();
-        }
-        else
-        {
-            ad.execute_trajectory(values, timePmessage_ns);
-            printw("traj.");
-        }
-        
-        printw("getch begin\n");
-        ch = getchar();
-        putchar (ch);
-        printw("getch end, %c\n", ch);
-
-    }while(ch != '*');
-    
-    
-    printw("\tWHC::End\n");
-    refresh();
-    endwin();
     
     
     return 0;
