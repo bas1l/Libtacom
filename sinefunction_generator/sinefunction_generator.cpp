@@ -659,11 +659,12 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     // thread, one by one, and play them consecutively.
     while(!workdone.load() or !sentences.empty())
     {
-        std::unique_lock<std::mutex> lk(m);
         
         printw("Into the while\n");
         if (!(sentences.empty()))
         {
+            std::unique_lock<std::mutex> lk(m);
+            
             if (sentences.empty()) 
             {
                 printw("Just before the wait\n");
