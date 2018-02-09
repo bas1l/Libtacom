@@ -389,7 +389,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     
     do
     {
-    //    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
         
         ret = read(_timer_fd, &missed, sizeof (missed));
         if (ret == -1)
@@ -410,14 +410,14 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
                 values_target.push_back(values[channel][value_idx]);
             }
             
-            //ad.execute_single_target(values_target);
+            ad.execute_single_target(values_target);
         }
         ++value_idx;
         
-      //  high_resolution_clock::time_point t2 = high_resolution_clock::now();
-        //auto duration = duration_cast<microseconds>( t2 - t1 ).count();
-       // printw("duration=%f, ", duration);
-       // refresh();
+        high_resolution_clock::time_point t2 = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+        printw("duration=%f, ", duration);
+        refresh();
         
         
     } while(keep_running);
