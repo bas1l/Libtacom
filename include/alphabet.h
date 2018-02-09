@@ -59,7 +59,7 @@ private:
     WAVEFORM wf;
     
     std::string list_alphabet;
-    std::vector<std::vector<uint16_t>> neutral_statement(31);//AD5383::num_channels);
+    std::vector<std::vector<uint16_t>> neutral_statement;
     std::map<char, std::vector<std::vector<uint16_t>>> letters;
     std::map<char, std::vector<std::vector<uint16_t>>>::iterator it_letter;
     
