@@ -362,7 +362,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     keypad(stdscr, TRUE);
     noecho();
     
-    int ch = 32;
+    int ch = ERR;
     std::string str_used = "qwaszxerdfcvun";
     printw("---------------------------------------\n");
     printw("\tSine function generator\n");
