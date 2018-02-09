@@ -14,6 +14,8 @@
 #include <string>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <sys/timerfd.h>
+
 #include <time.h>
 #include <thread>
 #include <vector> 
@@ -24,6 +26,7 @@
 
 #include "alphabet.h"
 using namespace std;
+using namespace std::chrono;
 
 #ifdef _WIN32
 #include <windows.h>
@@ -367,7 +370,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
                 .it_value = ts
     };
     
-    if(values.size() > num_channels)
+    if(values.size() > AD5383::num_channels)
         throw std::runtime_error("Trajectory vector is bigger than number of channels");
     
     _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
