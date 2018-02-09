@@ -364,7 +364,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     
     int ch;
     std::string str_used = "qwaszxerdfcvun";
-    printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
+    //printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
     
     do
     {
@@ -395,8 +395,10 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
-    printw("[function_generator] Begin\n");
-    printw("[function_generator] Step1\n");
+    
+    std::cout << "[function_generator] Begin\n";
+    std::cout << "[function_generator] Step1\n";
+    
 
     DEVICE dev;
     dev.configure();
@@ -407,7 +409,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    printw("[function_generator] Step2\n");
+    std::cout << "[function_generator] Step2\n";
     
     double freq_message_per_sec = 2000; // message/s
     double freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
@@ -477,17 +479,15 @@ int main(int argc, char *argv[])
     std::mutex mutexLetters;
     std::atomic<bool> work(true);
     //std::condition_variable cv;
-    /*
-    //std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    
+    std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     //std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     
-    printw("before the join1\n");
+    std::cout << "before the join1\n";
+    thread_readLetters.join();
     
-    //thread_readLetters.join();
-    printw("before the join2\n");
+    std::cout << "before the join2\n";
     //thread_sendToDAC.join();
-    
-    */
     
     
     return 0;
