@@ -386,7 +386,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         close(_timer_fd);
         return overruns;
     }
-    /*
+    
     do
     {
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
@@ -408,7 +408,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
                 values_target[channel] = values[channel][value_idx];
             }
             
-            ad.execute_single_target(values_target);
+            //ad.execute_single_target(values_target);
         }
         ++value_idx;
         
@@ -420,7 +420,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         
     } while(keep_running);
 
-    */
+    
     
     close(_timer_fd);
 
