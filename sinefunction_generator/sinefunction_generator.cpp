@@ -373,7 +373,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     if(values.size() > AD5383::num_channels)
         throw std::runtime_error("Trajectory vector is bigger than number of channels");
     
-    _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
+    int _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
     if(_timer_fd == -1)
     {
         perror("execute_trajectory/timerfd_create");
