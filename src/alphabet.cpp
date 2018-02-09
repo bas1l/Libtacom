@@ -409,7 +409,7 @@ bool ALPHABET::configure_letters()
 
     void ALPHABET::configure_neutral()
     {
-        for(int i=0; i<neutral_statement.size();i++)
+        for(int i=0; i<neutral_statement.size(); i++)
         {
             neutral_statement[i].push_back(AD5383_DEFAULT_NEUTRAL);
         }
