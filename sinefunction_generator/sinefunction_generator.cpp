@@ -364,13 +364,28 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     
     int ch;
     std::string str_used = "qwaszxerdfcvun";
-    //printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
+    printw("-----------------------------\n");
+    printw("\tSine function generator\n");
+    printw("-----------------------------\n");
+    
+    printw("Modify amplitude +/-1 : 'q'=decrease, 'w'=increase\n");
+    printw("Modify amplitude +/-10 : 'a'=decrease, 's'=increase\n");
+    printw("Modify amplitude +/-100 : 'z'=decrease, 'x'=increase\n");
+    
+    printw("Modify frequency +/-1 : 'e'=decrease, 'r'=increase\n");
+    printw("Modify frequency +/-10 : 'd'=decrease, 'f'=increase\n");
+    printw("Modify frequency +/-100 : 'c'=decrease, 'v'=increase\n");
+    
+    printw("Up statement: 'u'\n");
+    printw("Neutral statement : 'n'\n");
+    
+    printw("--- When you are done, press '*' to Exit ---\n");
     
     do
     {
         if (ch != ERR)
         {
-            printw("%c\n", ch);
+            printw("%c", ch);
             if (str_used.find(ch) != std::string::npos)
             {
                 try
