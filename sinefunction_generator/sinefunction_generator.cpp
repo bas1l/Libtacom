@@ -402,8 +402,6 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
         }
     }while((ch = getch()) != '*');
     
-    refresh();
-    endwin();
     work = false;
 }
 
@@ -507,6 +505,9 @@ int main(int argc, char *argv[])
     thread_sendToDAC.join();
     
     
+    
+    refresh();
+    endwin();
     
     return 0;
 }
