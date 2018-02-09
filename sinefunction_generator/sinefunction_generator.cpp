@@ -416,7 +416,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>( t2 - t1 ).count();
-        printw("duration=%f, ", duration);
+        printw("duration=%f6, ", duration);
         refresh();
         
         
@@ -512,6 +512,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     
     ad.execute_trajectory(values, dur_message_per_ns);
     
+    printw("dur_message_per_ns=%f", dur_message_per_ns);
     
     while(work.load())
     {
