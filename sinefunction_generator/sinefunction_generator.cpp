@@ -356,7 +356,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 
 
 
-void read_letters (std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
+void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
     initscr();
     raw();
@@ -374,9 +374,15 @@ void read_letters (std::queue<char> & letters, std::mutex & mutexLetters, std::a
             printw("%c\n", ch);
             if (str_used.find(ch) != std::string::npos)
             {
-                std::lock_guard<std::mutex> lk(mutexLetters);
-                
-                letters.push(ch);
+                try
+                {// using a local lock_guard to lock mtx guarantees unlocking on destruction / exception:
+                    std::lock_guard<std::mutex> lk(mutexLetters);
+                    letters.push(ch);
+                }
+                catch (std::logic_error&)
+                {
+                    std::cout << "[exception caught]\n";
+                }
             }
         }
     }while((ch = getch()) != '*');
@@ -473,13 +479,13 @@ int main(int argc, char *argv[])
     //std::condition_variable cv;
     
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    //std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     
     printw("before the join1\n");
     
     thread_readLetters.join();
     printw("before the join2\n");
-    thread_sendToDAC.join();
+    //thread_sendToDAC.join();
     
     
     
