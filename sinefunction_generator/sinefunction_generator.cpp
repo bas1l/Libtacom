@@ -513,6 +513,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     ad.execute_trajectory(values, dur_message_per_ns);
     
     printw("dur_message_per_ns=%f", dur_message_per_ns);
+    refresh();
     
     while(work.load())
     {
@@ -542,8 +543,8 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         else
         {
             execute(std::ref(ad), values, dur_message_per_ns);
-            printw(".");
-            refresh();
+            //printw(".");
+            //refresh();
         }
     }
     
