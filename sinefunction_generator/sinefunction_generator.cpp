@@ -471,12 +471,14 @@ int main(int argc, char *argv[])
     std::mutex mutexLetters;
     std::atomic<bool> work(true);
     //std::condition_variable cv;
-
+    
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     
+    printw("before the join1\n");
     
     thread_readLetters.join();
+    printw("before the join2\n");
     thread_sendToDAC.join();
     
     
