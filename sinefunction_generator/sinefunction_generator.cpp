@@ -406,7 +406,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
             values_target.clear();
             for(unsigned int channel = 0; channel < AD5383::num_channels; ++channel)
             {
-                values_target.push_back(values[channel][value_idx]);
+                //values_target.push_back(values[channel][value_idx]);
             }
             
             //ad.execute_single_target(values_target);
