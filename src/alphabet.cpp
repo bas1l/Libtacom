@@ -409,7 +409,7 @@ bool ALPHABET::configure_letters()
 
 void ALPHABET::configure_neutral()
 {
-    vector<uint16_t> temp; 
+    std::vector<uint16_t> temp; 
     temp.push_back(AD5383_DEFAULT_NEUTRAL);
     
     for(int i=0; i<AD5383::num_channels; i++)
