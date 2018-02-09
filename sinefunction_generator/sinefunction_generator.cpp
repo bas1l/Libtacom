@@ -421,13 +421,19 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     
     while(work.load())
     {
-        std::lock_guard<std::mutex> lk(mutexLetters);
-        if (!letters.empty())
-        {
-            letters_in.push(letters.front());
-            letters.pop();
+        try
+        {// using a local lock_guard to lock mtx guarantees unlocking on destruction / exception:
+            std::lock_guard<std::mutex> lk(mutexLetters);
+            if (!letters.empty())
+            {
+                letters_in.push(letters.front());
+                letters.pop();
+            }
         }
-        delete lk;
+        catch (std::logic_error&)
+        {
+            std::cout << "[exception caught]\n";
+        }
         
         if (!letters_in.empty()) 
         {
