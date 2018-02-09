@@ -458,7 +458,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
 
 int main(int argc, char *argv[])
 {
-    /*
+    
     struct timespec t;
     struct sched_param param;
     param.sched_priority = sched_get_priority_max(SCHED_FIFO);
@@ -471,7 +471,7 @@ int main(int argc, char *argv[])
             exit(-2);
     }
     
-
+/*
     // global variable
     std::queue<char> letters;
     std::mutex mutexLetters;
