@@ -459,11 +459,12 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
                 values[w].clear();
             values = getvalues(letters_in.front(), alph);
             letters_in.pop();
+            printw("|");
         }
         else
         {
-            ad.execute_trajectory(values, freq_message_per_ns);
-            //printw("traj.");
+            //ad.execute_trajectory(values, freq_message_per_ns);
+            printw(".");
         }
     }
     
