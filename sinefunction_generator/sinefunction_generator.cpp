@@ -429,12 +429,12 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     std::queue<char> letters_in;
     std::cout << "[function_generator] Step3\n";
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    //printw("[function_generator] Step4\n");
+    std::cout << "[function_generator] Step4\n";
     values = alph.getneutral();
     //printw("execute_trajectory with freq_ns=%f\n", freq_message_per_ns);
     
     ad.execute_trajectory(values, freq_message_per_ns);
-    
+    std::cout << "execute trajectory end\n" ;
     
     
     while(work.load())
