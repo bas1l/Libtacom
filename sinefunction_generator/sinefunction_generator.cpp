@@ -501,8 +501,8 @@ int main(int argc, char *argv[])
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     thread_readLetters.join();
     
-    //std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    //thread_sendToDAC.join();
+    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    thread_sendToDAC.join();
     
     
     
