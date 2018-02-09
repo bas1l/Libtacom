@@ -424,16 +424,18 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     ad.configure();
     printw("[function_generator] Step2\n");
     
-    long freq_message_per_sec = 2000; // message/s
-    long freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
+    double freq_message_per_sec = 2000; // message/s
+    double dur_message_per_ms = (1/freq_message_per_sec) *1000; // dur_message_per_sec * sec2ms
+    long dur_message_per_ns = dur_message_per_ms * ms2ns; // * ns
+    
     std::queue<char> letters_in;
     std::cout << "[function_generator] Step3\n";
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     std::cout << "[function_generator] Step4\n";
     values = alph.getneutral();
-    std::cout << "execute_trajectory with freq_ns= " << freq_message_per_ns << std::endl;
+    std::cout << "execute_trajectory with freq_ns= " << dur_message_per_ns << std::endl;
     
-    ad.execute_trajectory(values, freq_message_per_ns);
+    ad.execute_trajectory(values, dur_message_per_ns);
     std::cout << "execute trajectory end\n" ;
     
     
@@ -463,7 +465,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         }
         else
         {
-            //ad.execute_trajectory(values, freq_message_per_ns);
+            //ad.execute_trajectory(values, dur_message_per_ns);
             printw(".");
         }
     }
