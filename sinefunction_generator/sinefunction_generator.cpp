@@ -14,6 +14,7 @@
 #include <string>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
+#include <time.h>
 #include <thread>
 #include <vector> 
 
@@ -352,20 +353,23 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     unsigned long long missed = 0;
     int overruns = 0;
     int value_idx = 0;
-
+    
+    std::vector<uint16_t> values_target(AD5383::num_channels);
+    int vmax = values[0].size();
+    
     struct timespec ts = {
         .tv_sec = 0,
                 .tv_nsec = period_ns
     };
-
+    
     struct itimerspec its = {
         .it_interval = ts,
                 .it_value = ts
     };
-
+    
     if(values.size() > num_channels)
         throw std::runtime_error("Trajectory vector is bigger than number of channels");
-
+    
     _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
     if(_timer_fd == -1)
     {
@@ -379,9 +383,10 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         close(_timer_fd);
         return overruns;
     }
-
+    
     do
     {
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
         ret = read(_timer_fd, &missed, sizeof (missed));
         if (ret == -1)
         {
@@ -390,28 +395,26 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
             return overruns;
         }
         overruns += missed - 1;
-
-        keep_running = false;
         
-        high_resolution_clock::time_point t1 = high_resolution_clock::now();
-        for(unsigned int channel = 0; channel < values.size(); ++channel)
+        keep_running = false;
+        if(vmax > value_idx)
         {
-            if(values[channel].size() > value_idx)
+            keep_running = true;
+            for(unsigned int channel = 0; channel < AD5383::num_channels; ++channel)
             {
-                keep_running = true;
-                spi_xfer(AD5383_REG_A,AD5383_WRITE,channel,AD5383_REG_DATA,values[channel][value_idx]);
+                values_target[channel] = values[channel][value_idx];
             }
+            
+            ad.execute_single_target(values_target);
         }
-        function();
+        ++value_idx;
+        
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
-
         auto duration = duration_cast<microseconds>( t2 - t1 ).count();
-
         printw("duration=%f, ", duration);
         refresh();
         
-        ++value_idx;
-
+        
     } while(keep_running);
     close(_timer_fd);
 
