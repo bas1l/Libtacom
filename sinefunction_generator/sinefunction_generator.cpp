@@ -409,10 +409,6 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
-    printw("[function_generator] Begin\n");
-    printw("[function_generator] Step1\n");
-    
-
     DEVICE dev;
     dev.configure();
     WAVEFORM wf;
@@ -422,21 +418,16 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    printw("[function_generator] Step2\n");
     
-    double freq_message_per_sec = 2000; // message/s
-    double dur_message_per_ms = (1/freq_message_per_sec) *1000; // dur_message_per_sec * sec2ms
+    int freq_message_per_sec = 2000; // message/s
+    double dur_message_per_ms = (1/(double)freq_message_per_sec) *1000; // dur_message_per_sec * sec2ms
     long dur_message_per_ns = dur_message_per_ms * ms2ns; // * ns
     
     std::queue<char> letters_in;
-    std::cout << "[function_generator] Step3\n";
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    std::cout << "[function_generator] Step4\n";
     values = alph.getneutral();
-    std::cout << "execute_trajectory with freq_ns= " << dur_message_per_ns << std::endl;
     
     ad.execute_trajectory(values, dur_message_per_ns);
-    std::cout << "execute trajectory end\n" ;
     
     
     while(work.load())
@@ -462,11 +453,14 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
             values = getvalues(letters_in.front(), alph);
             letters_in.pop();
             printw("|");
+            refresh();
         }
         else
         {
-            //ad.execute_trajectory(values, dur_message_per_ns);
+            ad.execute_single_target(const std::vector<uint16_t> values)
+            ad.execute_trajectory(values, dur_message_per_ns);
             printw(".");
+            refresh();
         }
     }
     
