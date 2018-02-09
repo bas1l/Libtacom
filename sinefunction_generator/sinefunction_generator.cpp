@@ -377,8 +377,6 @@ void read_letters (std::queue<char> & letters, std::mutex & mutexLetters, std::a
                 std::lock_guard<std::mutex> lk(mutexLetters);
                 
                 letters.push(ch);
-                
-                delete lk;
             }
         }
     }while((ch = getch()) != '*');
