@@ -499,11 +499,10 @@ int main(int argc, char *argv[])
     //std::condition_variable cv;
     
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    thread_readLetters.join();
-    
     std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+
     thread_sendToDAC.join();
-    
+    thread_readLetters.join();
     
     
     refresh();
