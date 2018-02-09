@@ -345,6 +345,78 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 
 
 
+int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period_ns)
+{
+    bool keep_running;
+    int ret;
+    unsigned long long missed = 0;
+    int overruns = 0;
+    int value_idx = 0;
+
+    struct timespec ts = {
+        .tv_sec = 0,
+                .tv_nsec = period_ns
+    };
+
+    struct itimerspec its = {
+        .it_interval = ts,
+                .it_value = ts
+    };
+
+    if(values.size() > num_channels)
+        throw std::runtime_error("Trajectory vector is bigger than number of channels");
+
+    _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
+    if(_timer_fd == -1)
+    {
+        perror("execute_trajectory/timerfd_create");
+        _timer_fd = 0;
+        return overruns;
+    }
+    if(timerfd_settime(_timer_fd, 0, &its, NULL) == -1)
+    {
+        perror("execute_trajectory/timerfd_settime");
+        close(_timer_fd);
+        return overruns;
+    }
+
+    do
+    {
+        ret = read(_timer_fd, &missed, sizeof (missed));
+        if (ret == -1)
+        {
+            perror("execute_trajectory/read");
+            close(_timer_fd);
+            return overruns;
+        }
+        overruns += missed - 1;
+
+        keep_running = false;
+        
+        high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        for(unsigned int channel = 0; channel < values.size(); ++channel)
+        {
+            if(values[channel].size() > value_idx)
+            {
+                keep_running = true;
+                spi_xfer(AD5383_REG_A,AD5383_WRITE,channel,AD5383_REG_DATA,values[channel][value_idx]);
+            }
+        }
+        function();
+        high_resolution_clock::time_point t2 = high_resolution_clock::now();
+
+        auto duration = duration_cast<microseconds>( t2 - t1 ).count();
+
+        printw("duration=%f, ", duration);
+        refresh();
+        
+        ++value_idx;
+
+    } while(keep_running);
+    close(_timer_fd);
+
+    return overruns;
+}
 
 
 
@@ -457,8 +529,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         }
         else
         {
-            //ad.execute_single_target(const std::vector<uint16_t> values)
-            ad.execute_trajectory(values, dur_message_per_ns);
+            execute(std::ref(ad), values, dur_message_per_ns);
             printw(".");
             refresh();
         }
