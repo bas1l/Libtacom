@@ -388,7 +388,6 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     {
         if (ch != ERR)
         {
-            printw("%c", ch);
             if (str_used.find(ch) != std::string::npos)
             {
                 try
@@ -401,6 +400,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
                     std::cout << "[exception caught]\n";
                 }
             }
+            printw("%c", ch);
         }
     }while((ch = getch()) != '*');
     
@@ -414,8 +414,8 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
     
-    std::cout << "[function_generator] Begin\n";
-    std::cout << "[function_generator] Step1\n";
+    //std::cout << "[function_generator] Begin\n";
+    //std::cout << "[function_generator] Step1\n";
     
 
     DEVICE dev;
@@ -427,16 +427,16 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    std::cout << "[function_generator] Step2\n";
+    //std::cout << "[function_generator] Step2\n";
     
     double freq_message_per_sec = 2000; // message/s
     double freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
     std::queue<char> letters_in;
-    printw("[function_generator] Step3\n");
+    //std::cout << "[function_generator] Step3\n";
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    printw("[function_generator] Step4\n");
+    //printw("[function_generator] Step4\n");
     values = alph.getneutral();
-    printw("execute_trajectory with freq_ns=%f\n", freq_message_per_ns);
+    //printw("execute_trajectory with freq_ns=%f\n", freq_message_per_ns);
     
     ad.execute_trajectory(values, freq_message_per_ns);
     
@@ -468,7 +468,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         else
         {
             ad.execute_trajectory(values, freq_message_per_ns);
-            printw("traj.");
+            //printw("traj.");
         }
      }
 
@@ -499,13 +499,10 @@ int main(int argc, char *argv[])
     //std::condition_variable cv;
     
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    //std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     
-    std::cout << "before the join1\n";
     thread_readLetters.join();
-    
-    std::cout << "before the join2\n";
-    //thread_sendToDAC.join();
+    thread_sendToDAC.join();
     
     
     return 0;
