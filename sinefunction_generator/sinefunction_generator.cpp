@@ -357,7 +357,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     int overruns = 0;
     int value_idx = 0;
     
-    std::vector<uint16_t> values_target(AD5383::num_channels);
+    std::vector<uint16_t> values_target(AD5383::num_channels, 1);
     int vmax = values[0].size();
     
     struct timespec ts = {
@@ -405,7 +405,8 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
             keep_running = true;
             for(unsigned int channel = 0; channel < AD5383::num_channels; ++channel)
             {
-                values_target[channel] = values[channel][value_idx];
+                values_target[channel].clear();
+                values_target[channel].push_back(values[channel][value_idx]);
             }
             
             //ad.execute_single_target(values_target);
