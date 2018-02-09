@@ -1,19 +1,21 @@
-#include <fstream>
-#include <iostream>
-#include <sys/mman.h>
+
 #include <algorithm>
-#include <thread>
-#include <condition_variable>
-#include <queue>
-#include <cstdlib>
-#include <chrono>
-#include <ctime>
-#include <random>
 #include <atomic>
-#include <sys/ioctl.h>
-#include <string>
-#include <ncurses.h>
+#include <chrono>
+#include <condition_variable>
+#include <cstdlib>
+#include <ctime>
+#include <iostream>
+#include <fstream>
 #include <math.h>
+#include <mutex>
+#include <ncurses.h>
+#include <queue>
+#include <random>
+#include <string>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+#include <thread>
 #include <vector> 
 
 #include "waveform.h"
