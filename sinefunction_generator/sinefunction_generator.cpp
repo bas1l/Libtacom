@@ -364,6 +364,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     
     int ch = ERR;
     std::string str_used = "qwaszxerdfcvun";
+    
     printw("---------------------------------------\n");
     printw("\tSine function generator\n");
     printw("---------------------------------------\n");
@@ -437,7 +438,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     double freq_message_per_sec = 2000; // message/s
     double freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
     std::queue<char> letters_in;
-    //std::cout << "[function_generator] Step3\n";
+    std::cout << "[function_generator] Step3\n";
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     //printw("[function_generator] Step4\n");
     values = alph.getneutral();
