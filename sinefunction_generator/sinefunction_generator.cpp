@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <atomic>
 #include <chrono>
-#include <condition_variable>
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
@@ -459,6 +458,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
 
 int main(int argc, char *argv[])
 {
+    /*
     struct timespec t;
     struct sched_param param;
     param.sched_priority = sched_get_priority_max(SCHED_FIFO);
@@ -487,7 +487,7 @@ int main(int argc, char *argv[])
     printw("before the join2\n");
     //thread_sendToDAC.join();
     
-    
+    */
     
     
     return 0;
