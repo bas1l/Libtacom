@@ -357,10 +357,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 
 void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
-    initscr();
-    raw();
-    keypad(stdscr, TRUE);
-    noecho();
+    
     
     int ch = ERR;
     std::string str_used = "qwaszxerdfcvun";
@@ -492,6 +489,10 @@ int main(int argc, char *argv[])
             exit(-2);
     }
     
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
 
     // global variable
     std::queue<char> letters;
