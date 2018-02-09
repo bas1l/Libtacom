@@ -457,7 +457,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         }
         else
         {
-            ad.execute_single_target(const std::vector<uint16_t> values)
+            //ad.execute_single_target(const std::vector<uint16_t> values)
             ad.execute_trajectory(values, dur_message_per_ns);
             printw(".");
             refresh();
