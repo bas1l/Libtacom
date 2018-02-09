@@ -364,20 +364,23 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     
     int ch;
     std::string str_used = "qwaszxerdfcvun";
-    printw("-----------------------------\n");
+    printw("---------------------------------------\n");
     printw("\tSine function generator\n");
-    printw("-----------------------------\n");
+    printw("---------------------------------------\n");
     
-    printw("Modify amplitude +/-1 : 'q'=decrease, 'w'=increase\n");
-    printw("Modify amplitude +/-10 : 'a'=decrease, 's'=increase\n");
-    printw("Modify amplitude +/-100 : 'z'=decrease, 'x'=increase\n");
+    printw("[Modify amplitude]\n");
+    printw("\t+/-1   : 'q'=decrease, 'w'=increase\n");
+    printw("\t+/-10  : 'a'=decrease, 's'=increase\n");
+    printw("\t+/-100 : 'z'=decrease, 'x'=increase\n");
     
-    printw("Modify frequency +/-1 : 'e'=decrease, 'r'=increase\n");
-    printw("Modify frequency +/-10 : 'd'=decrease, 'f'=increase\n");
-    printw("Modify frequency +/-100 : 'c'=decrease, 'v'=increase\n");
+    printw("[Modify frequency]\n");
+    printw("\t+/-1   : 'e'=decrease, 'r'=increase\n");
+    printw("\t+/-10  : 'd'=decrease, 'f'=increase\n");
+    printw("\t+/-100 : 'c'=decrease, 'v'=increase\n");
     
-    printw("Up statement: 'u'\n");
-    printw("Neutral statement : 'n'\n");
+    printw("[Modify statement(offset)]\n");
+    printw("\tUp      : 'u'\n");
+    printw("\tNeutral : 'n'\n");
     
     printw("--- When you are done, press '*' to Exit ---\n");
     
