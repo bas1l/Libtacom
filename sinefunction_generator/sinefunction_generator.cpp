@@ -362,7 +362,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     keypad(stdscr, TRUE);
     noecho();
     
-    int ch;
+    int ch = 32;
     std::string str_used = "qwaszxerdfcvun";
     printw("---------------------------------------\n");
     printw("\tSine function generator\n");
@@ -499,10 +499,11 @@ int main(int argc, char *argv[])
     //std::condition_variable cv;
     
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    
     thread_readLetters.join();
-    thread_sendToDAC.join();
+    
+    //std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    //thread_sendToDAC.join();
+    
     
     
     return 0;
