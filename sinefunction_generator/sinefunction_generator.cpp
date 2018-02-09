@@ -424,8 +424,8 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     ad.configure();
     printw("[function_generator] Step2\n");
     
-    double freq_message_per_sec = 2000; // message/s
-    double freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
+    long freq_message_per_sec = 2000; // message/s
+    long freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
     std::queue<char> letters_in;
     std::cout << "[function_generator] Step3\n";
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
