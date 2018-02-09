@@ -342,13 +342,19 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 
 
 
-// global variable
-std::queue<char> letters;
-std::mutex mutexLetters;
-bool work;
-std::mutex mutexWork;
 
-void read_letters ()
+
+
+
+
+
+
+
+
+
+
+
+void read_letters (std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
     initscr();
     raw();
@@ -366,23 +372,23 @@ void read_letters ()
             printw("%c\n", ch);
             if (str_used.find(ch) != std::string::npos)
             {
-                std::lock_guard<std::mutex> guard(mutexLetters);
+                std::lock_guard<std::mutex> lk(mutexLetters);
+                
                 letters.push(ch);
+                
+                delete lk;
             }
         }
-        
-    }while(ch != '*');
-    
-    std::lock_guard<std::mutex> guard(mutexWork);
-    work = false;
+    }while((ch = getch()) != '*');
     
     refresh();
     endwin();
-    
-    
+    work = false;
 }
 
-void function_generator()
+
+
+void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
     printw("[function_generator] Begin\n");
     printw("[function_generator] Step1\n");
@@ -398,8 +404,8 @@ void function_generator()
     ad.configure();
     printw("[function_generator] Step2\n");
     
-    double freq_message_per_ms = 2000; // message/s
-    double freq_message_per_ns = freq_message_per_ms * ms2ns; // * ns
+    double freq_message_per_sec = 2000; // message/s
+    double freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
     std::queue<char> letters_in;
     printw("[function_generator] Step3\n");
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
@@ -409,32 +415,32 @@ void function_generator()
     
     ad.execute_trajectory(values, freq_message_per_ns);
     
-    while(work)
+    
+    
+    while(work.load())
     {
-        {// parenthesis in order to destroy the lock_guard
-            std::lock_guard<std::mutex> guard(mutexLetters);
-            if (!letters.empty()) 
-            {
-                letters_in.push(letters.front());
-                letters.pop();
-            }
-        }
+        std::lock_guard<std::mutex> lk(mutexLetters);
         if (!letters.empty())
+        {
+            letters_in.push(letters.front());
+            letters.pop();
+        }
+        delete lk;
+        
+        if (!letters_in.empty()) 
         {
             for (int w=0; w<values.size(); ++w)
                 values[w].clear();
-            values = getvalues(letters.front(), alph);
-            letters.pop();
+            values = getvalues(letters_in.front(), alph);
+            letters_in.pop();
         }
         else
         {
             ad.execute_trajectory(values, freq_message_per_ns);
             printw("traj.");
         }
-        
-        
-    }
-            
+     }
+
 }
 
 
@@ -453,11 +459,19 @@ int main(int argc, char *argv[])
             exit(-2);
     }
     
-    std::thread thread_readletters(read_letters);
-    std::thread thread_functiongenerator(function_generator);
+
+    // global variable
+    std::queue<char> letters;
+    std::mutex mutexLetters;
+    std::atomic<bool> work(true);
+    //std::condition_variable cv;
+
+    std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
     
-    thread_readletters.join();
-    thread_functiongenerator.join();
+    
+    thread_readLetters.join();
+    thread_sendToDAC.join();
     
     
     
