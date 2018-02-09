@@ -414,12 +414,6 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
-    
-    initscr();
-    raw();
-    keypad(stdscr, TRUE);
-    noecho();
-    
     printw("[function_generator] Begin\n");
     printw("[function_generator] Step1\n");
     
@@ -479,8 +473,6 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     }
     
     
-    refresh();
-    endwin();
 }
 
 
