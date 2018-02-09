@@ -413,9 +413,13 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
     
-    //std::cout << "[function_generator] Begin\n";
-    //std::cout << "[function_generator] Step1\n";
+    printw("[function_generator] Begin\n");
+    printw("[function_generator] Step1\n");
     
 
     DEVICE dev;
@@ -427,7 +431,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    //std::cout << "[function_generator] Step2\n";
+    printw("[function_generator] Step2\n");
     
     double freq_message_per_sec = 2000; // message/s
     double freq_message_per_ns = freq_message_per_sec * ms2ns; // * ns
@@ -471,7 +475,10 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
             //printw("traj.");
         }
      }
-
+    
+    
+    refresh();
+    endwin();
 }
 
 
