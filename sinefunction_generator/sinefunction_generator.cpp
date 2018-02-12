@@ -182,8 +182,8 @@ int get_up(std::vector<uint16_t>& result, int nsample)
     int go_up_quarter = (int)(go_up.size()/4);
     result.insert(result.end(), go_up.begin(), go_up.begin()+go_up_quarter);
   
-    printw("amp_get_up = %i\n", amp_get_up);
-    return go_up[3*go_up_quarter];
+    //printw("amp_get_up = %i\n", amp_get_up);
+    return go_up[go_up_quarter];
 }
     
 
@@ -201,7 +201,7 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
 {
     static int f = 1;
     static int a = 1;
-    static int u = 0;
+    static int u = 2048;
     
     int fadd = 0;
     int aadd = 0;
