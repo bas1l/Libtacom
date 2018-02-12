@@ -390,9 +390,6 @@ void changeVariables(char c, int * f, int * a, int * u)
         case 'n' :
         {// neutral statement
             *u = 2048;
-            result.clear();
-            result.push_back(*u);
-            result.push_back(*u);
             break;
         }
         default :
@@ -585,7 +582,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     int u = 2048;
     int v_up;
     // get value of the up/offset
-    change_variables('u', &f, &a, &v_up);
+    changeVariables('u', &f, &a, &v_up);
     
     int ret;
     unsigned long long missed = 0;
@@ -650,13 +647,15 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         
         if (!letters_in.empty()) 
         {
-            
             if (letters_in.front() == 'u')
             {
-                execute_up(ad, channel, nmessage_sec);
                 u = v_up;
+                execute_up(ad, channel, nmessage_sec);
             }
-            changeVariables(letters_in.front(), &f, &a, &u);
+            else
+            {
+                changeVariables(letters_in.front(), &f, &a, &u);
+            }
             
             letters_in.pop();
         }
@@ -665,7 +664,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             ad.execute_single_channel((uint16_t) floor(a * sin(i*incr*f) + u), channel);
         }
 
-        i = (i+1)%nsample;
+        i = (i+1)%nmessage_sec;
     }
     
     
