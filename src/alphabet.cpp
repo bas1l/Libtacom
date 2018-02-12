@@ -393,7 +393,7 @@ bool ALPHABET::configure_letters()
         letters.clear();
     }
     
-    std::cout << "configure_letters()" << std::endl;
+    //std::cout << "configure_letters()" << std::endl;
     char l;
     for(std::string::size_type i = 0; i < list_alphabet.length(); ++i)
     {
@@ -402,7 +402,7 @@ bool ALPHABET::configure_letters()
         letters[l] = make_letter(l);
     }
     
-    std::cout << "configure_letters().end" << std::endl;
+    //std::cout << "configure_letters().end" << std::endl;
     return true;
 }
 

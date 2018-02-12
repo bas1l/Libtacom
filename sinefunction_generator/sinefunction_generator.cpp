@@ -156,19 +156,8 @@ void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint
     {
         result[c].insert(result[c].end(),  wait[c].begin(), wait[c].end());
     }
-    
 }
 
-void get_sinus(int f, int a, int u, int nos, int nsample, std::vector<uint16_t>& result)
-{
-    int phase = 0;
-    std::vector<uint16_t> sinus = createsine_vector(f, a, u, phase, nsample);
-    
-    for (int i=0; i!=nos; i++)
-    {
-            result.insert(result.end(), sinus.begin(), sinus.end());
-    }
-}
 
 static int amp_get_up = 500;
 int get_up(std::vector<uint16_t>& result, int nsample)
@@ -177,13 +166,13 @@ int get_up(std::vector<uint16_t>& result, int nsample)
     int freq = 1;
     int phase = M_PI;
     
-    std::vector<uint16_t> go_up = createsine_vector(freq, amp_get_up, offset, phase, nsample);
+    std::vector<uint16_t> s = createsine_vector(freq, amp_get_up, offset, phase, nsample);
     
-    int go_up_quarter = (int)(go_up.size()/4);
-    result.insert(result.end(), go_up.begin(), go_up.begin()+go_up_quarter);
+    int go_up_idx = (int)(s.size()/4);
+    result.insert(result.end(), s.begin(), s.begin()+go_up_idx);
   
-    //printw("amp_get_up = %i\n", amp_get_up);
-    return go_up[go_up_quarter];
+    printw("s[go_up_idx] = %i\n", s[go_up_idx]);
+    return s[go_up_idx];
 }
     
 
@@ -559,8 +548,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         else
         {
             ad.execute_single_channel(current_v, channel);
-            printw(".");
-            refresh();
+            //printw(".");
+            //refresh();
         }
         
         std::advance(valuesit, 1);
