@@ -274,7 +274,6 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         case 'u':
         {// up statement
             u = get_up(result, nsample);
-            return result;
         }
         case 'n' :
         {// neutral statement
@@ -282,7 +281,6 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
             result.clear();
             result.push_back(u);
             result.push_back(u);
-            return result;
         }
         default :
         {
