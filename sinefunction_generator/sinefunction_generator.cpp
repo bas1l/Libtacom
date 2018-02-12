@@ -418,8 +418,8 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         ++value_idx;
         
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
-        double duration = duration_cast<double, std::chrono::nanoseconds>( t2 - t1 ).count();
-        printw("duration=%f, ", duration);
+        double duration = duration_cast<std::chrono::nanoseconds>( t2 - t1 ).count();
+        printw("duration=%f, ", duration.count());
         refresh();
         
         
