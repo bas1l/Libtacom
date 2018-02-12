@@ -171,7 +171,6 @@ int get_up(std::vector<uint16_t>& result, int nsample)
     int go_up_idx = (int)(s.size()/4);
     result.insert(result.end(), s.begin(), s.begin()+go_up_idx);
   
-    printw("s[go_up_idx] = %i\n", s[go_up_idx]);
     return s[go_up_idx];
 }
     
@@ -263,8 +262,7 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         case 'u':
         {// up statement
             u = get_up(result, nsample);
-            printw("getup = %i\n",get_up(result, nsample));
-            printw("u = %i\n",u);
+            break;
         }
         case 'n' :
         {// neutral statement
@@ -272,7 +270,7 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
             result.clear();
             result.push_back(u);
             result.push_back(u);
-            printw("n called\n");
+            break;
         }
         default :
         {
