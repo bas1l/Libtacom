@@ -537,12 +537,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
 
         //printw("2");
         //refresh();
-        if (valuesit == values.end())
-        {
-            valuesit = values.begin();
-            printw("_");
-            refresh();
-        }
+        
         
         try
         {// using a local lock_guard to lock mtx guarantees unlocking on destruction / exception:
@@ -570,18 +565,15 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             {
                 execute_up(ad, channel, nmessage_sec);
             }
-            for(int i = 0; i<values.size(); i++)
+            for(uint16_t v : values)
             {
-                printw("%i/", values[i]);
+                printw("%i/", v);
                 refresh();
             }
   
             letters_in.pop();
             
             valuesit = std::find(values.begin(), values.end(), current_v);
-            
-            //printw("|");
-            //refresh();
         }
         else
         {
@@ -590,6 +582,12 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             //refresh();
         }
         
+        if (valuesit == values.end())
+        {
+            valuesit = values.begin();
+            printw("_");
+            refresh();
+        }
         ++valuesit;
         //std::advance(valuesit, 1);
     }
