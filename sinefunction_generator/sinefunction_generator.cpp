@@ -391,7 +391,7 @@ int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int chann
 }
 
 
-void execute_up(AD5383 & ad, int channel)
+void execute_up(AD5383 & ad, int channel, int nsample)
 {
     std::vector<uint16_t> result;
     u = get_up(result, nsample);
@@ -565,7 +565,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             getvalues(values, letters_in.front(), nmessage_sec);
             if (letters_in.front() == 'u')
             {
-                execute_up(ad, channel);
+                execute_up(ad, channel, nmessage_sec);
             }
             letters_in.pop();
             
