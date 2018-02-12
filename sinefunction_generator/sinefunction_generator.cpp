@@ -584,7 +584,7 @@ int main(int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
     int nmessage_sec;
-    if (argc == 2) {
+    if (argc == 1) {
         nmessage_sec = 2000;
     } else {
         nmessage_sec = atoi(argv[1]);
