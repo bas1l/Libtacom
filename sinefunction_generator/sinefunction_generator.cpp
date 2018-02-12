@@ -468,7 +468,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     ad.spi_open();
     ad.configure();
     ad.execute_trajectory(alph.getneutral(), dur_message_ns);
-    struct actuator current_actuator = dev.getact('rf2');
+    struct actuator current_actuator = dev.getact("rf2");
     
     //int nmessage_sec = 2000; // message/s
     double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
@@ -526,9 +526,9 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         }
         overruns += missed - 1;
 
-        if (valuesit == value.end())
+        if (valuesit == values.end())
         {
-            valuesit = value.begin();
+            valuesit = values.begin();
         }
         
         try
@@ -553,7 +553,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             values = getvalues(letters_in.front(), nmessage_sec);
             letters_in.pop();
             
-            valuesit = find(values.begin(), values.end(), current_v);
+            valuesit = std::find(values.begin(), values.end(), current_v);
             
             printw("|");
             refresh();
