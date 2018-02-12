@@ -560,6 +560,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         }
         else
         {
+            printw(".");
+            refresh();
             ad.execute_single_channel(*valuesit, channel);
             printw(".");
             refresh();
