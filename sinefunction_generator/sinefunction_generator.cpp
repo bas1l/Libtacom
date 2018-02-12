@@ -387,11 +387,6 @@ void changeVariables(char c, int * f, int * a, int * u)
             break;
         }
         // other type of movement
-        case 'u' :
-        {
-            *u = get_up(result, nsample);
-            break;
-        }
         case 'n' :
         {// neutral statement
             *u = 2048;
@@ -411,11 +406,6 @@ void changeVariables(char c, int * f, int * a, int * u)
     
     if ((*f+fadd) <= 0) printw("f<=0");
     if ((*a+aadd) <= 0) printw("a<=0");
-    printw("\n");
-    printw("f=%i, ", *f);
-    printw("a=%i, ", *a);
-    printw("u=%i", *u);
-    refresh();
 }
 
 
@@ -493,17 +483,28 @@ int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int chann
 }
 
 
-void execute_up(AD5383 & ad, int channel, int nsample)
+int execute_up(AD5383 & ad, int channel, int nsample)
 {
     std::vector<uint16_t> result;
-    get_up(result, nsample);
+    itn u = get_up(result, nsample);
     
     for(int i=0; i<result.size(); i++)
     {
         ad.execute_single_channel(result[i], channel);
     }
+    
+    return u;
 }
 
+void print_fau(int * f, int * a, int * u)
+{
+    
+    printw("\n");
+    printw("f=%i, ", *f);
+    printw("a=%i, ", *a);
+    printw("u=%i", *u);
+    refresh();
+}
 
 void print_instructions()
 {
@@ -585,9 +586,6 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     int f = 1;
     int a = 1;
     int u = 2048;
-    int v_up;
-    // get value of the up/offset
-    changeVariables('u', &f, &a, &v_up);
     
     int ret;
     unsigned long long missed = 0;
@@ -654,14 +652,14 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         {
             if (letters_in.front() == 'u')
             {
-                u = v_up;
-                execute_up(ad, channel, nmessage_sec);
+                u = execute_up(ad, channel, nmessage_sec);
             }
             else
             {
                 changeVariables(letters_in.front(), &f, &a, &u);
             }
             
+            print_fau(f, a, u);
             letters_in.pop();
         }
         else
