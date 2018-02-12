@@ -170,6 +170,12 @@ int get_up(std::vector<uint16_t>& result, int nsample)
     
     int go_up_idx = (int)(s.size()/4);
     result.insert(result.end(), s.begin(), s.begin()+go_up_idx);
+    
+    for(int i = 0; i<result.size(); i++)
+    {
+        printw("%i ", result[i]);
+        refresh();
+    }
   
     return s[go_up_idx];
 }
@@ -261,6 +267,7 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         // other type of movement
         case 'u':
         {// up statement
+            result.clear();
             u = get_up(result, nsample);
             break;
         }
@@ -540,11 +547,11 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         {
             std::cout << "[exception caught]\n";
         }
-        printw(".%i", *valuesit);
-        refresh();
+        //printw(".%i", *valuesit);
+        //refresh();
         current_v = *valuesit;
-        printw("4");
-        refresh();
+        //printw("4");
+        //refresh();
         if (!letters_in.empty()) 
         {
             getvalues(values, letters_in.front(), nmessage_sec);
