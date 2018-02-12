@@ -513,17 +513,26 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         return overruns;
     }
     
+    printw("Before the while\n");
+    refresh();
     uint16_t current_v = 0;
     std::vector<uint16_t>::iterator valuesit;
     while(work.load())
     {
+        
+        printw("Meanwhile ");
+        refresh();
         ret = read(_timer_fd, &missed, sizeof(missed));
+        printw("the ");
+        refresh();
         if (ret == -1)
         {
             perror("execute_single_channel/read");
             close(_timer_fd);
             return overruns;
         }
+        printw("while");
+        refresh();
         overruns += missed - 1;
 
         if (valuesit == values.end())
