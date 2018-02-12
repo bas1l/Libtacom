@@ -349,22 +349,12 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
 
 
 
-int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period_ns)
+int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int channel)
 {
-    bool keep_running;
+    int vsize = values.size();
     int ret;
     unsigned long long missed = 0;
     int overruns = 0;
-    int value_idx = 0;
-    
-    std::vector<uint16_t> values_target;
-    int vmax = values[0].size();
-    
-    if(values.size() != AD5383::num_channels)
-        throw std::runtime_error("Trajectory vector is bigger than number of channels");
-    
-    printw("PERIOD NANOSECONDS=%ld, ", period_ns);
-    refresh();
     
     struct timespec ts = {
         .tv_sec = 0,
@@ -398,9 +388,10 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         return overruns;
     }
     
-    do
+    for(unsigned int value_idx = 0; value_idx < vsize; ++value_idx)
     {
-        auto t1 = std::chrono::high_resolution_clock::now();
+        //auto t1 = std::chrono::high_resolution_clock::now();
+        
         ret = read(_timer_fd, &missed, sizeof(missed));
         if (ret == -1)
         {
@@ -410,34 +401,20 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         }
         overruns += missed - 1;
         
-        keep_running = false;
-        if(vmax > value_idx)
-        {
-            keep_running = true;
-            values_target.clear();
-            for(unsigned int channel = 0; channel < AD5383::num_channels; ++channel)
-            {
-                values_target.push_back(values[channel][value_idx]);
-            }
-            
-            ad.execute_single_target(values_target);
-        }
-        ++value_idx;
+        ad.execute_single_channel(values[value_idx], channel);
         
-        auto t2 = std::chrono::high_resolution_clock::now();
-        auto int_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
+        //auto t2 = std::chrono::high_resolution_clock::now();
+        //auto int_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
         // converting integral duration to integral duration of shorter divisible time unit:
         // no duration_cast needed
-        std::chrono::duration<long, std::nano> dur_usec = int_ns;
-        printw("duration=%ld, ", dur_usec.count());
-        refresh();
-        
-        
-    } while(keep_running);
+        //std::chrono::duration<long, std::nano> dur_usec = int_ns;
+        //printw("duration=%ld, ", dur_usec.count());
+        //refresh();
+    }
 
     
-    printw(" \n");
-    refresh();
+    //printw(" \n");
+    //refresh();
     
     close(_timer_fd);
 
@@ -518,26 +495,17 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     ad.configure();
     
     int freq_message_per_sec = 2000; // message/s
-    double dur_message_per_ms = (1/(double)freq_message_per_sec) *1000; // dur_message_per_sec * sec2ms
-    long dur_message_per_ns = dur_message_per_ms * ms2ns; // * ns
+    double dur_message_ms = (1/(double)freq_message_per_sec) *1000; // dur_message_per_sec * sec2ms
+    long dur_message_ns = dur_message_ms * ms2ns; // * ns
+    
+    int channel = ACT_RINGFINGER2;
     
     std::queue<char> letters_in;
-    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    values = alph.getneutral();
-    for(int i = 0; i<values.size(); ++i)
-    {
-        values[i].push_back(2048);
-        values[i].push_back(2048);
-        values[i].push_back(2048);
-        values[i].push_back(2048);
-        values[i].push_back(2048);
-        values[i].push_back(2048);
-        values[i].push_back(2048);
-    }
+    ad.execute_trajectory(alph.getneutral(), dur_message_ns);
     
-    ad.execute_trajectory(values, dur_message_per_ns);
+    std::vector<uint16_t> values;
     
-    printw("dur_message_per_ns=%f", dur_message_per_ns);
+    printw("dur_message_per_ns=%f", dur_message_ns);
     refresh();
     
     while(work.load())
@@ -567,7 +535,7 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         }
         else
         {
-            execute(std::ref(ad), values, dur_message_per_ns);
+            execute(std::ref(ad), values, dur_message_ns, channel);
             //printw(".");
             //refresh();
         }

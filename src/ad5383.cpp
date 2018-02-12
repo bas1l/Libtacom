@@ -221,6 +221,11 @@ void AD5383::execute_single_target(const std::vector<uint16_t> values)
     }
 }
 
+void AD5383::execute_single_channel(uint16_t value, int channel)
+{
+    spi_xfer(AD5383_REG_A,AD5383_WRITE, channel ,AD5383_REG_DATA, value);
+}
+
 uint8_t* AD5383::format_msg(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data)
 {
     _out_buffer[0] = (!!reg_b << 7) | (!!reg_read << 6) | (reg_channels & 0x1F);

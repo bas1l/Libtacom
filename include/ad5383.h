@@ -70,6 +70,12 @@ public:
      */
     void execute_single_target(const std::vector<uint16_t> values);
 
+    /**
+     * @brief Updates the dac output for a particular channel
+     * @param value (between 0 and 4095)
+     */
+    void execute_single_channel(uint16_t value, int channel);
+
 private:
     uint8_t* format_msg(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data);
     uint16_t spi_xfer(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data);
