@@ -507,7 +507,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     valuesit = values.begin();
     while(work.load())
     {
-        printw("t1 ");
+        printw("1");
         refresh();
         ret = read(_timer_fd, &missed, sizeof(missed));
         if (ret == -1)
@@ -518,7 +518,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         }
         overruns += missed - 1;
 
-        printw("t2 ");
+        printw("2");
         refresh();
         if (valuesit == values.end())
         {
@@ -538,10 +538,10 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         {
             std::cout << "[exception caught]\n";
         }
-        printw("t3 ");
+        printw("3");
         refresh();
         current_v = *valuesit;
-        printw("t4 ");
+        printw("4");
         refresh();
         if (!letters_in.empty()) 
         {
