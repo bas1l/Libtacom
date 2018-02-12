@@ -396,7 +396,7 @@ void execute_up(AD5383 & ad, int channel, int nsample)
     std::vector<uint16_t> result;
     get_up(result, nsample);
     
-    for(int i=0; i<u.size(); i++)
+    for(int i=0; i<result.size(); i++)
     {
         ad.execute_single_channel(result[i], channel);
     }
