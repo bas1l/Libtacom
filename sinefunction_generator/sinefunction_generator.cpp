@@ -523,6 +523,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         if (valuesit == values.end())
         {
             valuesit = values.begin();
+            printw("_");
+            refresh();
         }
         
         try
