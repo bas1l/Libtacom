@@ -308,11 +308,12 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         result.insert(result.end(), sinus.begin(), sinus.end());
     }
     
+    printw("\n");
     printw("f=%i, ", f);
     printw("a=%i, ", a);
-    printw("u=%i ::", u);
+    printw("u=%i", u);
+    refresh();
     
-    printw("\n");
 }
 
 
@@ -445,7 +446,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
                     std::cout << "[exception caught]\n";
                 }
             }
-            printw("%c", ch);
+            //printw("%c", ch);
         }
     }while((ch = getch()) != '*');
     
@@ -552,8 +553,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             
             valuesit = std::find(values.begin(), values.end(), current_v);
             
-            printw("|");
-            refresh();
+            //printw("|");
+            //refresh();
         }
         else
         {
