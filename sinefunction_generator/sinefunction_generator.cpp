@@ -418,7 +418,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         ++value_idx;
         
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
-        auto duration = duration_cast<std::chrono::nanoseconds>( t2 - t1 ).count();
+        double duration = duration_cast<double, std::chrono::nanoseconds>( t2 - t1 ).count();
         printw("duration=%f, ", duration);
         refresh();
         
