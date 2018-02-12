@@ -531,6 +531,7 @@ int main(int argc, char *argv[])
     } else {
         nmessage_sec = atoi(argv[1]);
     }
+    fprintf(stderr, "%i need the number of message per second\n", nmessage_sec);
     
     struct timespec t;
     struct sched_param param;
