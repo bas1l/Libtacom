@@ -309,6 +309,14 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
     printw("a=%i, ", a);
     printw("u=%i", u);
     refresh();
+     
+    
+    for(int i = 0; i<result.size(); i++)
+    {
+        printw("%i ", result[i]);
+        refresh();
+    }
+  
     
 }
 
