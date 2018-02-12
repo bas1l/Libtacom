@@ -170,13 +170,13 @@ int get_up(std::vector<uint16_t>& result, int nsample)
     
     int go_up_idx = (int)(s.size()/4);
     result.insert(result.end(), s.begin(), s.begin()+go_up_idx);
-    
+    /*
     for(int i = 0; i<result.size(); i++)
     {
         printw("%i ", result[i]);
         refresh();
     }
-  
+  */
     return s[go_up_idx];
 }
     
