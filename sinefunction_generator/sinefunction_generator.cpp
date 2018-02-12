@@ -659,7 +659,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
                 changeVariables(letters_in.front(), &f, &a, &u);
             }
             
-            print_fau(f, a, u);
+            print_fau(&f, &a, &u);
             letters_in.pop();
         }
         else
