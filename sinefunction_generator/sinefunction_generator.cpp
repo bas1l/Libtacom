@@ -197,7 +197,7 @@ int get_up(std::vector<uint16_t>& result, int nsample)
  *          Functions 
  * 
  **********************************/
-std::vector<uint16_t> getvalues(char c, int nsample)
+void getvalues(std::vector<uint16_t> & result, char c, int nsample)
 {
     static int f = 1;
     static int a = 1;
@@ -205,8 +205,6 @@ std::vector<uint16_t> getvalues(char c, int nsample)
     
     int fadd = 0;
     int aadd = 0;
-    
-    std::vector<uint16_t> result;
     
     switch (c)
     {
@@ -281,6 +279,7 @@ std::vector<uint16_t> getvalues(char c, int nsample)
         case 'n' :
         {// neutral statement
             u = 2048;
+            result.clear();
             result.push_back(u);
             result.push_back(u);
             return result;
@@ -306,6 +305,8 @@ std::vector<uint16_t> getvalues(char c, int nsample)
         a = a+aadd;
         int phase = 0;
         std::vector<uint16_t> sinus = createsine_vector(f, a, u, phase, nsample);
+        
+        result.clear();
         result.insert(result.end(), sinus.begin(), sinus.end());
     }
     
@@ -513,27 +514,18 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         return overruns;
     }
     
-    printw("Before the while\n");
-    refresh();
     uint16_t current_v = 0;
     std::vector<uint16_t>::iterator valuesit;
     valuesit = values.begin();
     while(work.load())
     {
-        
-        printw("Meanwhile ");
-        refresh();
         ret = read(_timer_fd, &missed, sizeof(missed));
-        printw("the ");
-        refresh();
         if (ret == -1)
         {
             perror("execute_single_channel/read");
             close(_timer_fd);
             return overruns;
         }
-        printw("while");
-        refresh();
         overruns += missed - 1;
 
         if (valuesit == values.end())
@@ -558,9 +550,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         current_v = *valuesit;
         if (!letters_in.empty()) 
         {
-            
-            values.clear();
-            values = getvalues(letters_in.front(), nmessage_sec);
+            getvalues(values, letters_in.front(), nmessage_sec);
             letters_in.pop();
             
             valuesit = std::find(values.begin(), values.end(), current_v);
@@ -570,8 +560,6 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         }
         else
         {
-            printw(".");
-            refresh();
             ad.execute_single_channel(current_v, channel);
             printw(".");
             refresh();
