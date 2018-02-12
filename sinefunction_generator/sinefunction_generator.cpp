@@ -387,6 +387,11 @@ void changeVariables(char c, int * f, int * a, int * u)
             break;
         }
         // other type of movement
+        case 'u' :
+        {
+            *u = get_up(result, nsample);
+            break;
+        }
         case 'n' :
         {// neutral statement
             *u = 2048;
