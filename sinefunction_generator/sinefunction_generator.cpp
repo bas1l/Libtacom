@@ -540,7 +540,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         {
             std::cout << "[exception caught]\n";
         }
-        printw("3");
+        printw(".%i", *valuesit);
         refresh();
         current_v = *valuesit;
         printw("4");
