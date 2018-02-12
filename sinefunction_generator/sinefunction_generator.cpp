@@ -267,7 +267,6 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         // other type of movement
         case 'u':
         {// up statement
-            result.clear();
             u = get_up(result, nsample);
             break;
         }
@@ -392,7 +391,16 @@ int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int chann
 }
 
 
-
+void execute_up(AD5383 & ad, int channel)
+{
+    std::vector<uint16_t> result;
+    u = get_up(result, nsample);
+    
+    for(int i=0; i<u.size(); i++)
+    {
+        ad.execute_single_channel(result[i], channel);
+    }
+}
 
 
 void print_instructions()
@@ -453,7 +461,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, int nmessage_sec)
-{
+{   
     DEVICE dev;
     dev.configure();
     WAVEFORM wf;
@@ -555,6 +563,10 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         if (!letters_in.empty()) 
         {
             getvalues(values, letters_in.front(), nmessage_sec);
+            if (letters_in.front() == 'u')
+            {
+                execute_up(ad, channel);
+            }
             letters_in.pop();
             
             valuesit = std::find(values.begin(), values.end(), current_v);
