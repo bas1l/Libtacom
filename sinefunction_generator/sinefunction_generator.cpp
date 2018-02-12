@@ -419,7 +419,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         
         auto t2 = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double, std::milli> dur = t2-t1;
-        printw("duration=%ld, ", dur.count());
+        printw("duration=%f, ", dur.count());
         refresh();
         
         
