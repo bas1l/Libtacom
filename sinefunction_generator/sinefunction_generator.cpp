@@ -507,8 +507,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     valuesit = values.begin();
     while(work.load())
     {
-        printw("1");
-        refresh();
+        //printw("1");
+        //refresh();
         ret = read(_timer_fd, &missed, sizeof(missed));
         if (ret == -1)
         {
@@ -518,8 +518,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         }
         overruns += missed - 1;
 
-        printw("2");
-        refresh();
+        //printw("2");
+        //refresh();
         if (valuesit == values.end())
         {
             valuesit = values.begin();
@@ -562,7 +562,8 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             //refresh();
         }
         
-        std::advance(valuesit, 1);
+        ++valuesit;
+        //std::advance(valuesit, 1);
     }
     
     
