@@ -37,22 +37,6 @@ using namespace std::chrono;
 #endif
 
     
-    
-
-uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
-{
-	uint16_t * s;
-	s = (uint16_t*) malloc(nsample * sizeof(uint16_t));
-	
-        // Suivant le nombre d'échantillons voulus :
-	float incr = 2*M_PI/((float)nsample);
-	for (int i=0; i<nsample; i++){
-                //s[i] = sin(i*incr*freq +phase);
-		s[i] = (uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset);
-                //printw("%i,", s[i]);
-	}
-	return s;
-}
 
 static int number_of_the_file = 1;
 void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
@@ -86,17 +70,37 @@ void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
     number_of_the_file++;
 }
 
-std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, int nsample)
+/***********************************
+ *
+ *          Creation of 
+ *          arrays
+ *          vectors
+ *          matrices
+ * 
+ **********************************/
+uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
 {
-    int phase = 0;
-    std::vector<uint16_t> sinus;//nothing, just a break.
-    
-    uint16_t * s = create_sin(freq, ampl, phase, nsample, offset);
+	uint16_t * s;
+	s = (uint16_t*) malloc(nsample * sizeof(uint16_t));
+	
+        // Suivant le nombre d'échantillons voulus :
+	float incr = 2*M_PI/((float)nsample);
+	for (int i=0; i<nsample; i++){
+                //s[i] = sin(i*incr*freq +phase);
+		s[i] = (uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset);
+                //printw("%i,", s[i]);
+	}
+	return s;
+}
+
+std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, int phase, int nsample)
+{
+    std::vector<uint16_t> sinus;
+    float incr = 2*M_PI/((float)nsample);
     
     for(int i=0; i < nsample; i++){
-        sinus.push_back(s[i]);
+        sinus.push_back((uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset));
     }
-    //sinus.push_back(2048);
     
     return sinus;
 }
@@ -114,6 +118,15 @@ std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
     return result;
 }
 
+
+
+
+/***********************************
+ *
+ *          Creation of 
+ *          patterns
+ * 
+ **********************************/
 void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint16_t>>& result)
 {
     
@@ -145,11 +158,10 @@ void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint
     
 }
 
-
-
 void get_sinus(int f, int a, int u, int nos, int nsample, std::vector<uint16_t>& result)
 {
-    std::vector<uint16_t> sinus = createsine_vector(f, a, u, nsample);
+    int phase = 0;
+    std::vector<uint16_t> sinus = createsine_vector(f, a, u, phase, nsample);
     
     for (int i=0; i!=nos; i++)
     {
@@ -162,15 +174,12 @@ int get_up(std::vector<uint16_t>& result, int nsample)
 {
     int offset = 2048;
     int freq = 1;
-    //int amp = 2000;
+    int phase = M_PI;
     
-    std::vector<uint16_t> go_up = createsine_vector(freq, amp_get_up, offset, nsample);
+    std::vector<uint16_t> go_up = createsine_vector(freq, amp_get_up, offset, phase, nsample);
     
     int go_up_quarter = (int)(go_up.size()/4);
-    int go_up_begin = go_up.begin()+2*go_up_quarter;
-    int go_up_end = go_up_begin + go_up_quarter;
-    
-    result.insert(result.end(), go_up_begin, go_up_end);
+    result.insert(result.end(), go_up.begin(), go_up.begin()+go_up_quarter);
   
     printw("amp_get_up = %i\n", amp_get_up);
     return go_up[3*go_up_quarter];
@@ -182,7 +191,11 @@ int get_up(std::vector<uint16_t>& result, int nsample)
 
 
 
-
+/***********************************
+ *
+ *          Functions 
+ * 
+ **********************************/
 std::vector<uint16_t> getvalues(char c, int nsample)
 {
     static int f = 1;
@@ -442,7 +455,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 
-void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, std::int nmessage_sec)
+void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, std::int& nmessage_sec)
 {
     DEVICE dev;
     dev.configure();
