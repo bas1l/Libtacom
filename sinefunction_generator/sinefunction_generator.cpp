@@ -467,13 +467,13 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    ad.execute_trajectory(alph.getneutral(), dur_message_ns);
     struct actuator current_actuator = dev.getact("rf2");
     
     //int nmessage_sec = 2000; // message/s
     double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
-    
     long dur_message_ns = dur_message_ms * ms2ns; // * ns
+    ad.execute_trajectory(alph.getneutral(), dur_message_ns);
+    
     int channel = current_actuator.chan;
     std::vector<uint16_t> values(10, current_actuator.vneutral);
     
