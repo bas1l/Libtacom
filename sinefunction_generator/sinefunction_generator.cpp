@@ -575,7 +575,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     ad.execute_trajectory(alph.getneutral(), dur_message_ns);
     
     std::queue<char> letters_in;
-    float incr = 2*M_PI/((float)nsample);   
+    float incr = 2*M_PI/((float)nmessage_sec);   
     int i = 0;
     int f = 1;
     int a = 1;
