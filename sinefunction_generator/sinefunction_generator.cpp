@@ -263,6 +263,8 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         case 'u':
         {// up statement
             u = get_up(result, nsample);
+            printw("getup = %i\n",get_up(result, nsample));
+            printw("u = %i\n",u);
         }
         case 'n' :
         {// neutral statement
