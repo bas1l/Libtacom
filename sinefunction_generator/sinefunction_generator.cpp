@@ -86,10 +86,9 @@ void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
     number_of_the_file++;
 }
 
-std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset)
+std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, int nsample)
 {
     int phase = 0;
-    int nsample = 2000;
     std::vector<uint16_t> sinus;//nothing, just a break.
     
     uint16_t * s = create_sin(freq, ampl, phase, nsample, offset);
@@ -146,69 +145,35 @@ void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint
     
 }
 
-void get_sinus(int f, int a, int u, int nos, int chan_current, ALPHABET& alph, std::vector<std::vector<uint16_t>>& result)
+
+
+void get_sinus(int f, int a, int u, int nos, int nsample, std::vector<uint16_t>& result)
 {
-    
-    std::vector<std::vector<uint16_t>> wait = creatematrix(2000, 2048);
-    std::vector<std::vector<uint16_t>> sinus4all(AD5383::num_channels);
-    
-    
-    std::vector<uint16_t> sinus = push_sine_wave_ret(f, a, u);
-    std::vector<uint16_t> waitsinus(sinus.size(), 2048); //std::fill(waitsinus.begin(), waitsinus.end(), 2048);
-    
-    for(int chan=0; chan<AD5383::num_channels; chan++)
-    {
-        if (chan == chan_current)
-        {
-            sinus4all[chan].assign(sinus.begin(), sinus.end());
-        }
-        else
-        {
-            sinus4all[chan].assign(waitsinus.begin(), waitsinus.end());
-        }
-    }
+    std::vector<uint16_t> sinus = createsine_vector(f, a, u, nsample);
     
     for (int i=0; i!=nos; i++)
     {
-        for(int c=0; c<AD5383::num_channels; c++)
-        {
-            result[c].insert(result[c].end(), sinus4all[c].begin(), sinus4all[c].end());
-            result[c].insert(result[c].end(),  wait[c].begin(), wait[c].end());   
-        }
+            result.insert(result.end(), sinus.begin(), sinus.end());
     }
-    
 }
 
 static int amp_get_up = 500;
-int get_up(std::vector<std::vector<uint16_t>>& result, int chan_used)
+int get_up(std::vector<uint16_t>& result, int nsample)
 {
     int offset = 2048;
     int freq = 1;
     //int amp = 2000;
     
-    std::vector<uint16_t> go_up = push_sine_wave_ret(freq, amp_get_up, offset);
+    std::vector<uint16_t> go_up = createsine_vector(freq, amp_get_up, offset, nsample);
     
-    int go_up_length = (int)(go_up.size()/4);
-    std::vector<uint16_t> waitsinus(go_up_length, 2048);
+    int go_up_quarter = (int)(go_up.size()/4);
+    int go_up_begin = go_up.begin()+2*go_up_quarter;
+    int go_up_end = go_up_begin + go_up_quarter;
     
-    for(int c=0; c<AD5383::num_channels; c++)
-        {
-            if (c == chan_used)
-            {
-                //result[c].push_back(1000);
-                result[c].insert(result[c].end(), go_up.begin()+2*go_up_length, go_up.begin()+3*go_up_length);
-            }
-            else
-            {
-                //result[c].push_back(2048);
-                result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
-            }
-        }
-
-    
-    
+    result.insert(result.end(), go_up_begin, go_up_end);
+  
     printw("amp_get_up = %i\n", amp_get_up);
-    return go_up[3*go_up_length];
+    return go_up[3*go_up_quarter];
 }
     
 
@@ -218,10 +183,8 @@ int get_up(std::vector<std::vector<uint16_t>>& result, int chan_used)
 
 
 
-std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
+std::vector<uint16_t> getvalues(char c, int nsample)
 {
-    int chan_used = ACT_RINGFINGER2;
-    
     static int f = 1;
     static int a = 1;
     static int u = 0;
@@ -229,8 +192,7 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     int fadd = 0;
     int aadd = 0;
     
-    std::vector<std::vector<uint16_t> > result(AD5383::num_channels);
-    
+    std::vector<uint16_t> result;
     
     switch (c)
     {
@@ -299,17 +261,14 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         // other type of movement
         case 'u':
         {// up statement
-            u = get_up(result, chan_used);
+            u = get_up(result, nsample);
             return result;
         }
         case 'n' :
         {// neutral statement
             u = 2048;
-            for(int c=0; c<AD5383::num_channels; c++)
-            {
-                result[c].push_back(u);
-                result[c].push_back(u);
-            }
+            result.push_back(u);
+            result.push_back(u);
             return result;
         }
         default :
@@ -332,7 +291,8 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
         f = f+fadd;
         a = a+aadd;
         
-        get_sinus(f, a, u, 1, chan_used, alph, result);
+        std::vector<uint16_t> sinus = createsine_vector(f, a, u, nsample);
+        result.insert(result.end(), sinus.begin(), sinus.end());
     }
     
     printw("f=%i, ", f);
@@ -482,7 +442,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 
-void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
+void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, std::int nmessage_sec)
 {
     DEVICE dev;
     dev.configure();
@@ -494,8 +454,8 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     ad.spi_open();
     ad.configure();
     
-    int freq_message_per_sec = 2000; // message/s
-    double dur_message_ms = (1/(double)freq_message_per_sec) *1000; // dur_message_per_sec * sec2ms
+    //int nmessage_sec = 2000; // message/s
+    double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
     long dur_message_ns = dur_message_ms * ms2ns; // * ns
     
     int channel = ACT_RINGFINGER2;
@@ -526,9 +486,8 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         
         if (!letters_in.empty()) 
         {
-            for (int w=0; w<values.size(); ++w)
-                values[w].clear();
-            values = getvalues(letters_in.front(), alph);
+            values.clear();
+            values = getvalues(letters_in.front(), nmessage_sec);
             letters_in.pop();
             printw("|");
             refresh();
@@ -548,6 +507,17 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
 
 int main(int argc, char *argv[])
 {
+    if ((argc != 2) && (argc != 3)) 
+    {
+        fprintf(stderr, "%s need the number of message per second]\n", argv[0]);
+        exit(EXIT_FAILURE);
+    }
+    int nmessage_sec;
+    if (argc == 2) {
+        nmessage_sec = 2000;
+    } else {
+        nmessage_sec = atoi(argv[2]);
+    }
     
     struct timespec t;
     struct sched_param param;
@@ -573,7 +543,7 @@ int main(int argc, char *argv[])
     //std::condition_variable cv;
     
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work));
+    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work), std::ref(nmessage_sec));
 
     thread_sendToDAC.join();
     thread_readLetters.join();
