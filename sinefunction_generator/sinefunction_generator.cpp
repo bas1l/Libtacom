@@ -272,6 +272,7 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
             result.clear();
             result.push_back(u);
             result.push_back(u);
+            printw("n called\n");
         }
         default :
         {
