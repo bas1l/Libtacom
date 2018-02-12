@@ -436,6 +436,8 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     } while(keep_running);
 
     
+    printw(" \n");
+    refresh();
     
     close(_timer_fd);
 
