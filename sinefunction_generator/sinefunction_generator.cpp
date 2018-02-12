@@ -303,8 +303,8 @@ std::vector<uint16_t> getvalues(char c, int nsample)
     {
         f = f+fadd;
         a = a+aadd;
-        
-        std::vector<uint16_t> sinus = createsine_vector(f, a, u, nsample);
+        int phase = 0;
+        std::vector<uint16_t> sinus = createsine_vector(f, a, u, phase, nsample);
         result.insert(result.end(), sinus.begin(), sinus.end());
     }
     
@@ -455,7 +455,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 
-void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, std::int& nmessage_sec)
+void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, int nmessage_sec)
 {
     DEVICE dev;
     dev.configure();
@@ -556,7 +556,7 @@ int main(int argc, char *argv[])
     //std::condition_variable cv;
     
     std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work), std::ref(nmessage_sec));
+    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work), nmessage_sec);
 
     thread_sendToDAC.join();
     thread_readLetters.join();
