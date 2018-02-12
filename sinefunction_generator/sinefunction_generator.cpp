@@ -315,7 +315,6 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
     printw("u=%i ::", u);
     
     printw("\n");
-    return result;
 }
 
 
