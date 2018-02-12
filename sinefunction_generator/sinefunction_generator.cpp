@@ -390,10 +390,18 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         return overruns;
     }
     
+    ret = read(_timer_fd, &missed, sizeof(missed));
+    if (ret == -1)
+    {
+        perror("execute_trajectory/read");
+        close(_timer_fd);
+        return overruns;
+    }
+    
     do
     {
-        auto t1 = std::chrono::high_resolution_clock::now();
         
+        auto t1 = std::chrono::high_resolution_clock::now();
         ret = read(_timer_fd, &missed, sizeof(missed));
         if (ret == -1)
         {
@@ -418,8 +426,11 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         ++value_idx;
         
         auto t2 = std::chrono::high_resolution_clock::now();
-        std::chrono::duration<double, std::milli> dur = t2-t1;
-        printw("duration=%f, ", dur.count());
+        auto int_dur = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+        // converting integral duration to integral duration of shorter divisible time unit:
+        // no duration_cast needed
+        std::chrono::duration<long, std::micro> dur = int_dur;
+        printw("duration=%ld, ", dur.count());
         refresh();
         
         
