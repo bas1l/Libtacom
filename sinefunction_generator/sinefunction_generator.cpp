@@ -554,9 +554,9 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             std::cout << "[exception caught]\n";
         }
         
+        current_v = *valuesit;
         if (!letters_in.empty()) 
         {
-            current_v = *valuesit;
             
             values.clear();
             values = getvalues(letters_in.front(), nmessage_sec);
@@ -571,7 +571,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         {
             printw(".");
             refresh();
-            ad.execute_single_channel(*valuesit, channel);
+            ad.execute_single_channel(current_v, channel);
             printw(".");
             refresh();
         }
