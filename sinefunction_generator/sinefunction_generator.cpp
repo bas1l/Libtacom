@@ -360,6 +360,12 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     std::vector<uint16_t> values_target;
     int vmax = values[0].size();
     
+    if(values.size() != AD5383::num_channels)
+        throw std::runtime_error("Trajectory vector is bigger than number of channels");
+    
+    printw("PERIOD NANOSECONDS=%ld, ", period_ns);
+    refresh();
+    
     struct timespec ts = {
         .tv_sec = 0,
                 .tv_nsec = period_ns
@@ -369,9 +375,6 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         .it_interval = ts,
                 .it_value = ts
     };
-    
-    if(values.size() != AD5383::num_channels)
-        throw std::runtime_error("Trajectory vector is bigger than number of channels");
     
     int _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
     if(_timer_fd == -1)
@@ -391,7 +394,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     {
         high_resolution_clock::time_point t1 = high_resolution_clock::now();
         
-        ret = read(_timer_fd, &missed, sizeof (missed));
+        ret = read(_timer_fd, &missed, sizeof(missed));
         if (ret == -1)
         {
             perror("execute_trajectory/read");
@@ -416,7 +419,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         
         high_resolution_clock::time_point t2 = high_resolution_clock::now();
         auto duration = duration_cast<microseconds>( t2 - t1 ).count();
-        printw("duration=%f6, ", duration);
+        printw("duration=%f, ", duration);
         refresh();
         
         
