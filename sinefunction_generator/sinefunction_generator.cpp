@@ -508,8 +508,8 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         else
         {
             execute(std::ref(ad), values, dur_message_ns, channel);
-            //printw(".");
-            //refresh();
+            printw(".");
+            refresh();
         }
     }
     
@@ -520,16 +520,16 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
 
 int main(int argc, char *argv[])
 {
-    if ((argc != 2) && (argc != 3)) 
+    if ((argc != 1) && (argc != 2)) 
     {
-        fprintf(stderr, "%s need the number of message per second]\n", argv[0]);
+        fprintf(stderr, "%s need the number of message per second\n", argv[0]);
         exit(EXIT_FAILURE);
     }
     int nmessage_sec;
     if (argc == 2) {
         nmessage_sec = 2000;
     } else {
-        nmessage_sec = atoi(argv[2]);
+        nmessage_sec = atoi(argv[1]);
     }
     
     struct timespec t;
