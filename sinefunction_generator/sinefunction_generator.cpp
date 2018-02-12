@@ -311,12 +311,6 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
     refresh();
      
     
-    for(int i = 0; i<result.size(); i++)
-    {
-        printw("%i ", result[i]);
-        refresh();
-    }
-  
     
 }
 
@@ -576,6 +570,12 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             {
                 execute_up(ad, channel, nmessage_sec);
             }
+            for(int i = 0; i<values.size(); i++)
+            {
+                printw("%i/", values[i]);
+                refresh();
+            }
+  
             letters_in.pop();
             
             valuesit = std::find(values.begin(), values.end(), current_v);
