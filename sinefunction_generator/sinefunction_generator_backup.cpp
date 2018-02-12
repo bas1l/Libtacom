@@ -570,16 +570,17 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     ad.spi_open();
     ad.configure();
     struct actuator current_actuator = dev.getact("rf2");
-    int channel = current_actuator.chan;
     
     //int nmessage_sec = 2000; // message/s
     double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
     long dur_message_ns = dur_message_ms * ms2ns; // * ns
     ad.execute_trajectory(alph.getneutral(), dur_message_ns);
     
+    int channel = current_actuator.chan;
+    std::vector<uint16_t> values(10, current_actuator.vneutral);
+    
     std::queue<char> letters_in;
-    float incr = 2*M_PI/((float)nsample);   
-    int i = 0;
+        
     int f = 1;
     int a = 1;
     int u = 2048;
@@ -620,7 +621,9 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         return overruns;
     }
     
-    
+    uint16_t current_v = 0;
+    std::vector<uint16_t>::iterator valuesit;
+    valuesit = values.begin();
     while(work.load())
     {
         //printw("1");
@@ -634,6 +637,10 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         }
         overruns += missed - 1;
 
+        //printw("2");
+        //refresh();
+        
+        
         try
         {// using a local lock_guard to lock mtx guarantees unlocking on destruction / exception:
             std::lock_guard<std::mutex> lk(mutexLetters);
@@ -648,6 +655,11 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             std::cout << "[exception caught]\n";
         }
         
+        //printw(".%i", *valuesit);
+        //refresh();
+        current_v = *valuesit;
+        //printw("4");
+        //refresh();
         if (!letters_in.empty()) 
         {
             
@@ -658,14 +670,35 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             }
             changeVariables(letters_in.front(), &f, &a, &u);
             
+            /*
+            getvalues(values, letters_in.front(), nmessage_sec);
+            for(uint16_t v : values)
+            {
+                printw("%i/", v); refresh();
+            }
+            */
+  
             letters_in.pop();
+            
+            valuesit = std::find(values.begin(), values.end(), current_v);
         }
         else
         {
-            ad.execute_single_channel((uint16_t) floor(a * sin(i*incr*f) + u), channel);
+            (uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset)
+            ad.execute_single_channel(current_v, channel);
+            //printw(".");
+            //refresh();
         }
-
-        i = (i+1)%nsample;
+        
+        // check if loop 
+        if (valuesit == values.end())
+        {
+            valuesit = values.begin();
+            printw("_");
+            refresh();
+        }
+        ++valuesit;
+        //std::advance(valuesit, 1);
     }
     
     
