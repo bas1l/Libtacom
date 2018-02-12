@@ -392,7 +392,7 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
     
     do
     {
-        high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        auto t1 = std::chrono::high_resolution_clock::now();
         
         ret = read(_timer_fd, &missed, sizeof(missed));
         if (ret == -1)
@@ -417,8 +417,8 @@ int execute(AD5383& ad, std::vector<std::vector<uint16_t> >& values, long period
         }
         ++value_idx;
         
-        high_resolution_clock::time_point t2 = high_resolution_clock::now();
-        std::chrono::duration<long, std::micro> dur = t2-t1;
+        auto t2 = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> dur = t2-t1;
         printw("duration=%ld, ", dur.count());
         refresh();
         
