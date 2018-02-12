@@ -565,11 +565,13 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             {
                 execute_up(ad, channel, nmessage_sec);
             }
+            
+            /*
             for(uint16_t v : values)
             {
-                printw("%i/", v);
-                refresh();
+                printw("%i/", v); refresh();
             }
+            */
   
             letters_in.pop();
             
@@ -582,6 +584,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
             //refresh();
         }
         
+        // check if loop 
         if (valuesit == values.end())
         {
             valuesit = values.begin();
