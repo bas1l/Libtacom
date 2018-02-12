@@ -517,6 +517,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
     refresh();
     uint16_t current_v = 0;
     std::vector<uint16_t>::iterator valuesit;
+    valuesit = values.begin();
     while(work.load())
     {
         
