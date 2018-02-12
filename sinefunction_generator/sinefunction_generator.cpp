@@ -522,6 +522,16 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     std::queue<char> letters_in;
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     values = alph.getneutral();
+    for(int i = 0; i<values.size(); ++i)
+    {
+        values[i].push_back(2048);
+        values[i].push_back(2048);
+        values[i].push_back(2048);
+        values[i].push_back(2048);
+        values[i].push_back(2048);
+        values[i].push_back(2048);
+        values[i].push_back(2048);
+    }
     
     ad.execute_trajectory(values, dur_message_per_ns);
     
