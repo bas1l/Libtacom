@@ -486,7 +486,7 @@ int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int chann
 int execute_up(AD5383 & ad, int channel, int nsample)
 {
     std::vector<uint16_t> result;
-    itn u = get_up(result, nsample);
+    int u = get_up(result, nsample);
     
     for(int i=0; i<result.size(); i++)
     {
