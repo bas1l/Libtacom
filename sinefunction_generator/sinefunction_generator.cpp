@@ -94,7 +94,7 @@ uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
 	return s;
 }
 
-std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, int phase, int nsample)
+std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, double phase, int nsample)
 {
     std::vector<uint16_t> sinus;
     float incr = 2*M_PI/((float)nsample);
@@ -164,7 +164,7 @@ int get_up(std::vector<uint16_t>& result, int nsample)
 {
     int offset = 2048;
     int freq = 1;
-    int phase = M_PI;
+    double phase = M_PI;
     
     std::vector<uint16_t> s = createsine_vector(freq, amp_get_up, offset, phase, nsample);
     
@@ -293,7 +293,7 @@ void getvalues(std::vector<uint16_t> & result, char c, int nsample)
         printw("a<=0");
     }
     
-    if (((f+fadd) > 0) && ((a+aadd) > 0))
+    if (((f+fadd) > 0) && ((a+aadd) > 0) && (c != 'n') )
     {
         f = f+fadd;
         a = a+aadd;
@@ -555,8 +555,9 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
         {
             std::cout << "[exception caught]\n";
         }
-        //printw(".%i", *valuesit);
-        //refresh();
+        
+        printw(".%i", *valuesit);
+        refresh();
         current_v = *valuesit;
         //printw("4");
         //refresh();
