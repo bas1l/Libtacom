@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <iterator>
 #include <fstream>
 #include <math.h>
 #include <mutex>
@@ -398,18 +399,8 @@ int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int chann
 
 
 
-
-
-
-
-
-void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
+void print_instructions()
 {
-    
-    
-    int ch = ERR;
-    std::string str_used = "qwaszxerdfcvun";
-    
     printw("---------------------------------------\n");
     printw("\tSine function generator\n");
     printw("---------------------------------------\n");
@@ -429,6 +420,16 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
     printw("\tNeutral : 'n'\n");
     
     printw("--- When you are done, press '*' to Exit ---\n");
+}
+
+
+void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
+{
+    
+    int ch = ERR;
+    std::string str_used = "qwaszxerdfcvun";
+    
+    print_instructions();
     
     do
     {
@@ -455,7 +456,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 
-void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, int nmessage_sec)
+int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, int nmessage_sec)
 {
     DEVICE dev;
     dev.configure();
@@ -466,23 +467,70 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
     AD5383 ad;
     ad.spi_open();
     ad.configure();
+    ad.execute_trajectory(alph.getneutral(), dur_message_ns);
+    struct actuator current_actuator = dev.getact('rf2');
     
     //int nmessage_sec = 2000; // message/s
     double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
-    long dur_message_ns = dur_message_ms * ms2ns; // * ns
     
-    int channel = ACT_RINGFINGER2;
+    long dur_message_ns = dur_message_ms * ms2ns; // * ns
+    int channel = current_actuator.chan;
+    std::vector<uint16_t> values(10, current_actuator.vneutral);
     
     std::queue<char> letters_in;
-    ad.execute_trajectory(alph.getneutral(), dur_message_ns);
     
-    std::vector<uint16_t> values;
     
-    printw("dur_message_per_ns=%f", dur_message_ns);
-    refresh();
+    int ret;
+    unsigned long long missed = 0;
+    int overruns = 0;
+    struct timespec ts = {
+        .tv_sec = 0,
+                .tv_nsec = dur_message_ns
+    };
+    struct itimerspec its = {
+        .it_interval = ts,
+                .it_value = ts
+    };
+    int _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
+    if(_timer_fd == -1)
+    {
+        perror("execute_trajectory/timerfd_create");
+        _timer_fd = 0;
+        return overruns;
+    }
+    if(timerfd_settime(_timer_fd, 0, &its, NULL) == -1)
+    {
+        perror("execute_trajectory/timerfd_settime");
+        close(_timer_fd);
+        return overruns;
+    }
     
+    ret = read(_timer_fd, &missed, sizeof(missed));
+    if (ret == -1)
+    {
+        perror("execute_single_channel/read_first");
+        close(_timer_fd);
+        return overruns;
+    }
+    
+    uint16_t current_v = 0;
+    std::vector<int>::iterator valuesit;
     while(work.load())
     {
+        ret = read(_timer_fd, &missed, sizeof(missed));
+        if (ret == -1)
+        {
+            perror("execute_single_channel/read");
+            close(_timer_fd);
+            return overruns;
+        }
+        overruns += missed - 1;
+
+        if (valuesit == value.end())
+        {
+            valuesit = value.begin();
+        }
+        
         try
         {// using a local lock_guard to lock mtx guarantees unlocking on destruction / exception:
             std::lock_guard<std::mutex> lk(mutexLetters);
@@ -499,21 +547,31 @@ void send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic
         
         if (!letters_in.empty()) 
         {
+            current_v = *valuesit;
+            
             values.clear();
             values = getvalues(letters_in.front(), nmessage_sec);
             letters_in.pop();
+            
+            valuesit = find(values.begin(), values.end(), current_v);
+            
             printw("|");
             refresh();
         }
         else
         {
-            execute(std::ref(ad), values, dur_message_ns, channel);
+            ad.execute_single_channel(*valuesit, channel);
             printw(".");
             refresh();
         }
+        
+        std::advance(valuesit, 1);
     }
     
     
+    close(_timer_fd);
+    
+    return 1;
 }
 
 
@@ -531,7 +589,7 @@ int main(int argc, char *argv[])
     } else {
         nmessage_sec = atoi(argv[1]);
     }
-    fprintf(stderr, "%i, %s need the number of message per second\n",argc, argv[1]);
+    fprintf(stderr, "nmessage_sec = %i\n", nmessage_sec);
     
     struct timespec t;
     struct sched_param param;
