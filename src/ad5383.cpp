@@ -11,8 +11,10 @@
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>
 
-AD5383::AD5383() : _spi_fd(0)
-{
+
+
+
+AD5383::AD5383() : _spi_fd(0) {
     for(int i = 0; i < num_channels; ++i)
     {
         _data_neutral[i] = AD5383_DEFAULT_NEUTRAL;
@@ -24,21 +26,20 @@ AD5383::AD5383() : _spi_fd(0)
     _ioc_xfer.rx_buf = (unsigned long)_in_buffer;
 }
 
-AD5383::~AD5383()
-{
+AD5383::~AD5383() {}
 
-}
 
-void AD5383::configure()
-{
+
+
+void AD5383::configure() {
     for(int i = 0; i < num_channels; ++i)
     {
         set_channel_properties(i, _data_neutral[i]);
     }
 }
 
-void AD5383::set_channel_properties(uint8_t channel_id, uint16_t channel_neutral_value)
-{
+
+void AD5383::set_channel_properties(uint8_t channel_id, uint16_t channel_neutral_value) {
     _data_neutral[channel_id] = channel_neutral_value;
 
     spi_xfer(AD5383_REG_A,AD5383_WRITE,channel_id,AD5383_REG_OFFSET,AD5383_DEFAULT_OFFSET);
@@ -46,8 +47,8 @@ void AD5383::set_channel_properties(uint8_t channel_id, uint16_t channel_neutral
     spi_xfer(AD5383_REG_A,AD5383_WRITE,channel_id,AD5383_REG_DATA,channel_neutral_value);
 }
 
-bool AD5383::spi_open(const char *port_name, uint8_t transfer_mode, uint8_t bit_justification, uint8_t bits_per_word, uint32_t max_speed)
-{
+
+bool AD5383::spi_open(const char *port_name, uint8_t transfer_mode, uint8_t bit_justification, uint8_t bits_per_word, uint32_t max_speed) {
     _spi_fd = open(port_name, O_RDWR);
     if(!_spi_fd)
     {
@@ -87,8 +88,8 @@ bool AD5383::spi_open(const char *port_name, uint8_t transfer_mode, uint8_t bit_
     return true;
 }
 
-bool AD5383::spi_close()
-{
+
+bool AD5383::spi_close() {
     if(!_spi_fd || close(_spi_fd) != 0)
     {
         perror("spi_close/close");
@@ -97,8 +98,8 @@ bool AD5383::spi_close()
     return true;
 }
 
-bool AD5383::gpio_open()
-{
+
+bool AD5383::gpio_open() {
     _gpio_fd = open("/sys/class/gpio/export", O_WRONLY);
     if(!_gpio_fd)
     {
@@ -129,8 +130,8 @@ bool AD5383::gpio_open()
     write(_gpio_fd,"1",1);
 }
 
-bool AD5383::gpio_close()
-{
+
+bool AD5383::gpio_close() {
     if(_gpio_fd)
     {
         close(_gpio_fd);
@@ -147,8 +148,8 @@ bool AD5383::gpio_close()
     close(_gpio_fd);
 }
 
-int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values, long period_ns)
-{
+
+int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values, long period_ns) {
     bool keep_running;
     int ret;
     unsigned long long missed = 0;
@@ -210,8 +211,8 @@ int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values
     return overruns;
 }
 
-void AD5383::execute_single_target(const std::vector<uint16_t> values)
-{
+
+void AD5383::execute_single_target(const std::vector<uint16_t> values) {
     if(values.size() > num_channels)
         throw std::runtime_error("Trajectory vector is bigger than number of channels");
 
@@ -221,13 +222,13 @@ void AD5383::execute_single_target(const std::vector<uint16_t> values)
     }
 }
 
-void AD5383::execute_single_channel(uint16_t value, int channel)
-{
+
+void AD5383::execute_single_channel(uint16_t value, int channel) {
     spi_xfer(AD5383_REG_A,AD5383_WRITE, channel ,AD5383_REG_DATA, value);
 }
 
-uint8_t* AD5383::format_msg(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data)
-{
+
+uint8_t* AD5383::format_msg(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data) {
     _out_buffer[0] = (!!reg_b << 7) | (!!reg_read << 6) | (reg_channels & 0x1F);
     _out_buffer[1] = (reg_addr << 6) | ((reg_data >> 6) & 0x3F);
     _out_buffer[2] = reg_data << 2;
@@ -239,14 +240,14 @@ uint8_t* AD5383::format_msg(bool reg_b, bool reg_read, uint8_t reg_channels, uin
     return _out_buffer;
 }
 
-uint16_t AD5383::spi_xfer(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data)
-{
+
+uint16_t AD5383::spi_xfer(bool reg_b, bool reg_read, uint8_t reg_channels, uint8_t reg_addr, uint16_t reg_data) {
     format_msg(reg_b,reg_read,reg_channels,reg_addr,reg_data);
     return spi_xfer();
 }
 
-uint16_t AD5383::spi_xfer()
-{
+
+uint16_t AD5383::spi_xfer() {
     uint16_t ret = 0;
 
     if(!_spi_fd)
@@ -265,8 +266,8 @@ uint16_t AD5383::spi_xfer()
     return ret;
 }
 
-void AD5383::latch()
-{
+
+void AD5383::latch() {
     if(_gpio_fd)
     {
         struct timespec ts_wait, ts_rem;

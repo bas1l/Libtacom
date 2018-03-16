@@ -4,43 +4,76 @@
  *  Created on: 7 apr. 2016
  *      Author: basilou
  */ 
+
 #include "alphabet.h"
 #include<ncurses.h>
 
-//const ;  
 
-ALPHABET::ALPHABET(DEVICE _dev, WAVEFORM _wf) : 
+
+
+ALPHABET::ALPHABET() {}
+
+
+ALPHABET::ALPHABET(DEVICE * _dev, WAVEFORM * _wf) :
         dev(_dev), 
         wf( _wf),
-        list_alphabet("abcdefghijklmnopqrstuvwxyz~")
-{
+        list_alphabet("abcdefghijklmnopqrstuvwxyz~") {}
+
+
+ALPHABET::~ALPHABET() {}
+
+
+
+
+void 
+ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf) {
+    dev = _dev;
+    wf = _wf;
     
-}
-
-ALPHABET::~ALPHABET()
-{
+    appMotionActCovering = 0.25;
+    nbChannel = AD5383::num_channels;
+    defaultNeutral = AD5383_DEFAULT_NEUTRAL;
     
-}
-
-
-void ALPHABET::configure()
-{
     configure_letters();
     configure_neutral();
 }
 
-std::string ALPHABET::getlist_alphabet()
-{
+
+void 
+ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf, double _appMotionActCovering) {
+    dev = _dev;
+    wf = _wf;
+    
+    appMotionActCovering = _appMotionActCovering;
+    nbChannel = AD5383::num_channels;
+    defaultNeutral = AD5383_DEFAULT_NEUTRAL;
+    
+    configure_letters();
+    configure_neutral();
+}
+
+
+void 
+ALPHABET::configure() {
+    configure_letters();
+    configure_neutral();
+}
+
+
+std::string 
+ALPHABET::getlist_alphabet() {
     return list_alphabet;
 }
-    
-std::vector<std::vector<uint16_t>> ALPHABET::getneutral()
-{
+
+
+std::vector<std::vector<uint16_t>> 
+ALPHABET::getneutral() {
     return neutral_statement;
 }
 
-std::vector<std::vector<uint16_t>> ALPHABET::getl(char l)
-{
+
+std::vector<std::vector<uint16_t>> 
+ALPHABET::getl(char l) {
     // searching for the letter l
     it_letter = letters.find(l);
     if (it_letter != letters.end())
@@ -62,14 +95,13 @@ std::vector<std::vector<uint16_t>> ALPHABET::getl(char l)
  * create the adequat tap move for the letter
  */
 std::vector<std::vector<uint16_t>> 
-ALPHABET::make_tap_letter(std::vector<std::string> a_names)
-{
-    std::vector<std::vector<uint16_t>> result(AD5383::num_channels);
-    
+ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
     bool push = false;
+    std::vector<std::vector<uint16_t>>      result(nbChannel);
+    std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
     // For each actuator :
-    for(auto it=dev.actuators.begin() ; it!=dev.actuators.end() ; ++it)
+    for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
         struct actuator curr_act = it->second;
@@ -86,7 +118,7 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names)
         }
         
         // put the corresponding tap move into the result vector
-        wf.create_tap_move(curr_act, push, result);
+        wf->create_tap_move(curr_act, push, result);
         // to make it faster : work on it
         //act_names.erase(std::remove(act_names.begin(), act_names.end(), j), act_names.end());
     }
@@ -94,22 +126,26 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names)
     return result;
 }
 
+
 std::vector<std::vector<uint16_t>> 
-ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names)
-{
+ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     int nb_range = a_names.size();
-    int amsize   = wf.get_app_move_size();
+    int amsize   = wf->get_app_move_size();
     // shift in time/ms/value between 2 actuators in series into the app move
-    int lag_inter_line = amsize*APPARENT_PERCENTAGE_COVERING;
-    int total_time = amsize* (1+ APPARENT_PERCENTAGE_COVERING*(nb_range-1)) +1;//+1 for neutral statement
+    int lag_inter_line = amsize*appMotionActCovering;
+    int total_time = amsize* (1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
     
     std::vector<uint16_t> ttv;
     ttv.reserve(total_time);
-    std::vector<std::vector<uint16_t>> result(AD5383::num_channels, ttv);
     
     bool find = false;
-    for(auto it=dev.actuators.begin() ; it!=dev.actuators.end() ; ++it)
-    {// For each actuator :
+    std::vector<std::vector<uint16_t>>      result(nbChannel, ttv);
+    std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
+    
+    
+    // For each actuator :
+    for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
+    {
         std::string curr_name = it->first;
         struct actuator curr_act = it->second;
         uint16_t vneutral = (uint16_t) ~((unsigned int) curr_act.vneutral);
@@ -124,7 +160,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names)
             if (out != a_names[line].end())
             {// if yes
                 int start_at = lag_inter_line*line;
-                wf.create_app_move(curr_act, start_at, result);
+                wf->create_app_move(curr_act, start_at, result);
                 find = true;
             }
         }
@@ -137,8 +173,9 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names)
     return result;
 }
 
-std::vector<std::vector<uint16_t>> ALPHABET::make_letter(char l)
-{
+
+std::vector<std::vector<uint16_t>> 
+ALPHABET::make_letter(char l) {
     std::vector<std::vector<uint16_t>> result;
     switch (l){
         case 'a' :
@@ -380,12 +417,12 @@ std::vector<std::vector<uint16_t>> ALPHABET::make_letter(char l)
 }
 
 
-bool ALPHABET::configure_letters()
-{
+bool 
+ALPHABET::configure_letters() {
     //std::map<char, std::vector<std::vector<uint16_t>>> letters;
-    if (dev.empty())
+    if (dev->empty())
     {
-        perror("dev.actuators is empty");
+        perror("dev->actuators is empty");
         return false;
     }
     if (!letters.empty())
@@ -407,12 +444,12 @@ bool ALPHABET::configure_letters()
 }
 
 
-void ALPHABET::configure_neutral()
-{
+void 
+ALPHABET::configure_neutral() {
     std::vector<uint16_t> temp; 
-    temp.push_back(AD5383_DEFAULT_NEUTRAL);
+    temp.push_back(defaultNeutral);
     
-    for(int i=0; i<AD5383::num_channels; i++)
+    for(int i=0; i<nbChannel; i++)
     {
         neutral_statement.push_back(temp);
     }

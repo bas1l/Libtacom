@@ -16,11 +16,12 @@
 #include <math.h>
 #include <vector> 
 
+#include "HaptiCommConfiguration.h"
 #include "waveform.h"
 #include "ad5383.h"
 #include "utils.h"
-
 #include "alphabet.h"
+
 using namespace std;
 
 #ifdef _WIN32
@@ -31,9 +32,131 @@ using namespace std;
 #define SYSERROR()  errno
 #endif
 
-    
-    
+static void parseCmdLineArgs(int argc, char ** argv, 
+                             const char *& cfgSource, const char *& scope);
+static void usage();
+uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset);
+void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto);
+std::vector<uint16_t> push_sine_wave_ret(int freq, int ampl, int offset);
+std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value);
+void triple_spike(ALPHABET& alph, int chan_current, 
+                  std::vector<std::vector<uint16_t>>& result);
+void get_sinus(int f, int a, int u, int nos, int chan_current, 
+               ALPHABET& alph, std::vector<std::vector<uint16_t>>& result);
+int get_up(std::vector<std::vector<uint16_t>>& result, int chan_used);
+void get_sinesweep(int fbeg, int fend, int amp1, int amp2, int up, int chan_used,
+                   int number_of_rep, std::vector<std::vector<uint16_t>>& result);
+void getfrequencies(int *fbeg, int *fend);
+std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph);
+void generateSentences(std::queue<char> & sentences, std::condition_variable & cv,
+                       std::mutex & m, std::atomic<bool> & workdone, std::string str_alph);
+void workSymbols(std::queue<char> & sentences, std::condition_variable & cv, 
+                 std::mutex & m, std::atomic<bool> & workdone, ALPHABET& alph);
 
+
+int main(int argc, char ** argv)
+{
+    HaptiCommConfiguration * cfg = new HaptiCommConfiguration();
+    DEVICE *    dev = new DEVICE();
+    WAVEFORM *  wf  = new WAVEFORM();
+    ALPHABET * alph = new ALPHABET();
+    const char * cfgSource;
+    const char * scope;
+    int exitStatus = 0;
+
+    
+    setlocale(LC_ALL, "");
+    parseCmdLineArgs(argc, argv, cfgSource, scope);
+    
+    struct timespec t;
+    struct sched_param param;
+    param.sched_priority = sched_get_priority_max(SCHED_FIFO);
+    if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
+            perror("sched_setscheduler failed");
+            exit(-1);
+    }
+    if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
+            perror("mlockall failed");
+            exit(-2);
+    }
+    
+    cfg->parse(cfgSource, "HaptiComm");
+    cfg->configureDevice(dev);
+    cfg->configureWaveform(wf);
+    alph->configure(dev, wf);
+    
+    std::condition_variable cv;
+    std::mutex m;
+    std::atomic<bool> workdone(false);
+    std::queue<char> sentences;
+    
+    
+    std::thread extract_text;
+    extract_text = std::thread(workSymbols, std::ref(sentences), std::ref(cv), 
+                           std::ref(m), std::ref(workdone), std::ref(*alph));
+    std::thread send_to_dac;
+    send_to_dac = std::thread(generateSentences, std::ref(sentences), std::ref(cv),
+                           std::ref(m), std::ref(workdone), alph->getlist_alphabet());
+    
+    extract_text.join();
+    send_to_dac.join();
+    
+    
+    delete cfg;
+    delete dev;
+    delete wf;
+    delete alph;
+    
+    return exitStatus;
+}
+
+
+static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope)
+{
+	int i;
+
+	cfgSource = "";
+	scope = "";
+
+	for (i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-h") == 0) {
+			usage();
+		} else if (strcmp(argv[i], "-cfg") == 0) {
+			if (i == argc-1) { usage(); }
+			cfgSource = argv[i+1];
+			i++;
+		} else if (strcmp(argv[i], "-scope") == 0) {
+			if (i == argc-1) { usage(); }
+			scope = argv[i+1];
+			i++;
+		} else {
+			fprintf(stderr, "Unrecognised option '%s'\n\n", argv[i]);
+			usage();
+		}
+	}
+}
+
+
+
+static void usage()
+{
+	fprintf(stderr,
+            "\n"
+	    "usage: demo <options>\n"
+            "\n"
+	    "The <options> can be:\n"
+	    "  -h             Print this usage statement\n"
+	    "  -cfg <source>  Parse the specified configuration file\n"
+	    "  -scope <name>  Application scope in the configuration source\n"
+	    "\n"
+	    "A configuration <source> can be one of the following:\n"
+	    "  file.cfg       A configuration file\n"
+	    "  file#file.cfg  A configuration file\n"
+	    "  exec#<command> Output from executing the specified command\n\n");
+	exit(1);
+}
+
+    
 uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
 {
 	uint16_t * s;
@@ -187,18 +310,18 @@ int get_up(std::vector<std::vector<uint16_t>>& result, int chan_used)
     std::vector<uint16_t> waitsinus(go_up_length, 2048);
     
     for(int c=0; c<AD5383::num_channels; c++)
+    {
+        if (c == chan_used)
         {
-            if (c == chan_used)
-            {
-                //result[c].push_back(1000);
-                result[c].insert(result[c].end(), go_up.begin()+2*go_up_length, go_up.begin()+3*go_up_length);
-            }
-            else
-            {
-                //result[c].push_back(2048);
-                result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
-            }
+            //result[c].push_back(1000);
+            result[c].insert(result[c].end(), go_up.begin()+2*go_up_length, go_up.begin()+3*go_up_length);
         }
+        else
+        {
+            //result[c].push_back(2048);
+            result[c].insert(result[c].end(), waitsinus.begin(), waitsinus.end());
+        }
+    }
 
     
     
@@ -340,10 +463,10 @@ std::vector<std::vector<uint16_t> > getvalues(char c, ALPHABET& alph)
     static int upto[] = {2048};
     //static int upto_max = sizeof(upto)/sizeof(int);
     
-    std::vector<std::vector<uint16_t> > result(AD5383::num_channels);
+    std::vector< std::vector< uint16_t>> result(AD5383::num_channels);
     static int up = 2048;
     
-    int chan_used = ACT_RINGFINGER2;
+    int chan_used = 23;// ACT_RINGFINGER2
     switch (c)
     {
         
@@ -683,44 +806,3 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
 
 
 
-int main(int argc, char *argv[])
-{
-    struct timespec t;
-    struct sched_param param;
-    param.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
-            perror("sched_setscheduler failed");
-            exit(-1);
-    }
-    if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
-            perror("mlockall failed");
-            exit(-2);
-    }
-    
-    DEVICE dev;
-    dev.configure();
-    WAVEFORM wf;
-    wf.configure();
-    ALPHABET alph(dev, wf);//, AD5383::num_channels);
-    alph.configure();
-    
-    std::condition_variable cv;
-    std::mutex m;
-    std::atomic<bool> workdone(false);
-    std::queue<char> sentences;
-    
-    
-    std::thread extract_text;
-    extract_text = std::thread(workSymbols, std::ref(sentences), std::ref(cv), 
-                           std::ref(m), std::ref(workdone), std::ref(alph));
-    std::thread send_to_dac;
-    send_to_dac = std::thread(generateSentences, std::ref(sentences), std::ref(cv),
-                           std::ref(m), std::ref(workdone), alph.getlist_alphabet());
-    
-    extract_text.join();
-    send_to_dac.join();
-    
-    
-    
-    return 0;
-}

@@ -16,16 +16,16 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/timerfd.h>
-
 #include <time.h>
 #include <thread>
 #include <vector> 
 
+#include "HaptiCommConfiguration.h"
 #include "waveform.h"
 #include "ad5383.h"
 #include "utils.h"
-
 #include "alphabet.h"
+
 using namespace std;
 using namespace std::chrono;
 
@@ -37,6 +37,91 @@ using namespace std::chrono;
 #define SYSERROR()  errno
 #endif
 
+
+void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto);
+uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset);
+std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, 
+                                        double phase, int nsample);
+std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value);
+void triple_spike(ALPHABET& alph, int chan_current, 
+                  std::vector<std::vector<uint16_t>>& result);
+int get_up(std::vector<uint16_t>& result, int nsample);
+void getvalues(std::vector<uint16_t> & result, char c, int nsample);
+void changeVariables(char c, int * f, int * a, int * u);
+int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int channel);
+void print_fau(int * f, int * a, int * u);
+void print_instructions();
+void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, 
+                  std::atomic<bool> & work);
+int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
+             std::atomic<bool> & work, int nmessage_sec, 
+             ALPHABET* & alph, DEVICE* & dev);
+static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, 
+                             const char *& scope, int & nmessage_sec);
+static void usage();
+
+
+
+int main(int argc, char *argv[])
+{
+    HaptiCommConfiguration * cfg = new HaptiCommConfiguration();
+    DEVICE *    dev = new DEVICE();
+    WAVEFORM *  wf  = new WAVEFORM();
+    ALPHABET * alph = new ALPHABET();
+    const char * cfgSource;
+    const char * scope;
+    int nmessage_sec;
+    int exitStatus = 0;
+
+    
+    setlocale(LC_ALL, "");
+    parseCmdLineArgs(argc, argv, cfgSource, scope, nmessage_sec);
+    
+    struct timespec t;
+    struct sched_param param;
+    param.sched_priority = sched_get_priority_max(SCHED_FIFO);
+    if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
+            perror("sched_setscheduler failed");
+            exit(-1);
+    }
+    if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
+            perror("mlockall failed");
+            exit(-2);
+    }
+    
+    cfg->parse(cfgSource, "HaptiComm");
+    cfg->configureDevice(dev);
+    cfg->configureWaveform(wf);
+    alph->configure(dev, wf);
+    
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
+    
+    // global variable
+    std::queue<char> letters;
+    std::mutex mutexLetters;
+    std::atomic<bool> work(true);
+    //std::condition_variable cv;
+    
+    std::thread thread_readLetters(
+                            read_letters, std::ref(letters), 
+                            std::ref(mutexLetters), std::ref(work));
+    std::thread thread_sendToDAC(
+                            send_DAC, std::ref(letters),
+                            std::ref(mutexLetters), std::ref(work), 
+                            nmessage_sec, std::ref(alph), std::ref(dev));
+    
+    thread_sendToDAC.join();
+    thread_readLetters.join();
+    
+    
+    refresh();
+    endwin();
+    
+    return exitStatus;
+}
     
 
 static int number_of_the_file = 1;
@@ -124,8 +209,7 @@ std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
 
 /***********************************
  *
- *          Creation of 
- *          patterns
+ *          patterns' makers
  * 
  **********************************/
 void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint16_t>>& result)
@@ -561,24 +645,20 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 
-int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, int nmessage_sec)
+int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
+             std::atomic<bool> & work, int nmessage_sec, 
+             ALPHABET* & alph, DEVICE* & dev)
 {   
-    DEVICE dev;
-    dev.configure();
-    WAVEFORM wf;
-    wf.configure();
-    ALPHABET alph(dev, wf);//, AD5383::num_channels);
-    alph.configure();
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    struct actuator current_actuator = dev.getact("rf2");
+    struct actuator current_actuator = dev->getActuator("rf2");
     int channel = current_actuator.chan;
     
     //int nmessage_sec = 2000; // message/s
     double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
     long dur_message_ns = dur_message_ms * ms2ns; // * ns
-    ad.execute_trajectory(alph.getneutral(), dur_message_ns);
+    ad.execute_trajectory(alph->getneutral(), dur_message_ns);
     
     std::queue<char> letters_in;
     float incr = 2*M_PI/((float)nmessage_sec);   
@@ -678,53 +758,59 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<
 
 
 
-int main(int argc, char *argv[])
+
+static void 
+parseCmdLineArgs(
+        int argc, char ** argv, 
+        const char *& cfgSource, const char *& scope, int & nmessage_sec)
 {
-    if ((argc != 1) && (argc != 2)) 
-    {
-        fprintf(stderr, "%s need the number of message per second\n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
-    int nmessage_sec;
-    if (argc == 1) {
-        nmessage_sec = 2000;
-    } else {
-        nmessage_sec = atoi(argv[1]);
-    }
-    fprintf(stderr, "nmessage_sec = %i\n", nmessage_sec);
-    
-    struct timespec t;
-    struct sched_param param;
-    param.sched_priority = sched_get_priority_max(SCHED_FIFO);
-    if(sched_setscheduler(0, SCHED_FIFO, &param) == -1) {
-            perror("sched_setscheduler failed");
-            exit(-1);
-    }
-    if(mlockall(MCL_CURRENT|MCL_FUTURE) == -1) {
-            perror("mlockall failed");
-            exit(-2);
-    }
-    
-    initscr();
-    raw();
-    keypad(stdscr, TRUE);
-    noecho();
+    int i;
 
-    // global variable
-    std::queue<char> letters;
-    std::mutex mutexLetters;
-    std::atomic<bool> work(true);
-    //std::condition_variable cv;
-    
-    std::thread thread_readLetters(read_letters, std::ref(letters), std::ref(mutexLetters), std::ref(work));
-    std::thread thread_sendToDAC(send_DAC, std::ref(letters), std::ref(mutexLetters), std::ref(work), nmessage_sec);
+    cfgSource = "";
+    scope = "";
+    nmessage_sec = 2000;
 
-    thread_sendToDAC.join();
-    thread_readLetters.join();
-    
-    
-    refresh();
-    endwin();
-    
-    return 0;
+    for (i = 1; i < argc; i++) {
+            if (strcmp(argv[i], "-h") == 0) {
+                    usage();
+            } else if (strcmp(argv[i], "-cfg") == 0) {
+                    if (i == argc-1) { usage(); }
+                    cfgSource = argv[i+1];
+                    i++;
+            } else if (strcmp(argv[i], "-scope") == 0) {
+                    if (i == argc-1) { usage(); }
+                    scope = argv[i+1];
+                    i++;
+            } else if (strcmp(argv[i], "-nmessage") == 0) {
+                    if (i == argc-1) { usage(); }
+                    nmessage_sec = atoi(argv[i+1]);
+                    i++;
+            } else {
+                    fprintf(stderr, "Unrecognised option '%s'\n\n", argv[i]);
+                    usage();
+            }
+    }
 }
+
+
+
+static void
+usage()
+{
+    fprintf(stderr,
+        "\n"
+        "usage: demo <options>\n"
+        "\n"
+        "The <options> can be:\n"
+        "  -h             Print this usage statement\n"
+        "  -cfg <source>  Parse the specified configuration file\n"
+        "  -scope <name>  Application scope in the configuration source\n"
+        "\n"
+        "A configuration <source> can be one of the following:\n"
+        "  file.cfg       A configuration file\n"
+        "  file#file.cfg  A configuration file\n"
+        "  exec#<command> Output from executing the specified command\n\n");
+    exit(1);
+}
+
+    
