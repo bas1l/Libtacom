@@ -16,20 +16,20 @@ print_fau(int * f, int * a, int * u)
 void 
 print_instructions()
 {
-    printw("---------------------------------------\n");
-    printw(" Apparent motion: variables controller\n");
-    printw("---------------------------------------\n");
-    printw("(0) When you are done, press '*' to Exit\n");
-    printw("(1) Press [ENTER] to start one apparent motion\n");
-    printw("(2) Press [V] to save the current variables\n");
-    printw("(3) Press [ARROW] to increase or decrease the value of the selected variable:\n");
-    printw("\t [RIGHT]=+1\n");
-    printw("\t [UP]=+100\n");
-    printw("\t [LEFT]=-1\n");
-    printw("\t [DOWN]=-100\n");
+    //printw("---------------------------------------\n");
+    //printw(" Apparent motion: variables controller\n");
+    //printw("---------------------------------------\n");
+    //printw("(0) When you are done, press '*' to Exit\n");
+    //printw("(1) Press [ENTER] to start one apparent motion\n");
+    //printw("(2) Press [V] to save the current variables\n");
+    //printw("(3) Press [ARROW] to increase or decrease the value of the selected variable:\n");
+    printw("\t [RIGHT]=+1");
+    printw("\t [UP]=+100");
+    printw("\t [LEFT]=-1");
+    printw("\t [DOWN]=-100");
     printw("(3) Press [Q],[W],[E],[A],[S],[D],[Z] or [X] to choose a variable:\n");
-    printw("(4) Press [J] to reset the variable\n");
-    printw("(5) Press [L] to reset all the variables\n");
+    //printw("(4) Press [J] to reset the variable\n");
+    //printw("(5) Press [L] to reset all the variables\n");
 
     printw("---------------------------------------\n");
     printw("\n");

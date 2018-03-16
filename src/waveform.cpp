@@ -35,10 +35,7 @@ WAVEFORM::~WAVEFORM() {}
 void 
 WAVEFORM::configure(int _tapDuration, int _appActSuperposed, 
                     int _appRatioCover, int _appAscDuration, 
-                    int _appActionDuration, int _appActionAmplitude)
-{
-
-            
+                    int _appActionDuration, int _appActionAmplitude){
     tapDuration         = _tapDuration;
     
     appActSuperposed    = _appActSuperposed;
@@ -54,14 +51,14 @@ WAVEFORM::configure(int _tapDuration, int _appActSuperposed,
 
 
 void 
-WAVEFORM::configure(struct appMoveCarac _amc)
-{
+WAVEFORM::configure(struct appMoveCarac _amc, int nmessage_sec){
     amc = _amc;
     
     appActSuperposed    = _amc.nbAct.value;
     appRatioCover       = _amc.actCovering.value;
-    appAscDuration      = _amc.asc.duration.value;
-    appActionDuration   = _amc.action.duration.value;
+    appAscDuration      = _amc.asc.duration.value * (nmessage_sec/(double)1000);
+    appAscAmplitude		= _amc.asc.amplitude.value;
+    appActionDuration   = _amc.action.duration.value * (nmessage_sec/(double)1000);
     appActionAmplitude  = _amc.action.amplitude.value;
     
     create_app_move_standard();

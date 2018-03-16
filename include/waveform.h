@@ -67,7 +67,7 @@ public:
     void configure(int _tapDuration, int _appActSuperposed, 
                    int _appRatioCover, int _appAscDuration, 
                    int _appActionDuration, int _appActionAmplitude);
-    void configure(struct appMoveCarac _amc);
+    void configure(struct appMoveCarac _amc, int nmessage_sec);
     void configure();
     
     /**
@@ -118,6 +118,7 @@ private:
     int     appActSuperposed; // 4
     float   appRatioCover; // .25
     int     appAscDuration;// 40 ms
+    int     appAscAmplitude;// 40 ms
     int     appActionDuration;// 80 ms
     int     appActionAmplitude;// 700 unit of voltage (0 < v < 4095)
     

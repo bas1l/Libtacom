@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
     struct variableAppMove * vam = new variableAppMove();
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     
-    
+    int nbAppmove=0;
     const char * cfgSource;
     const char * scope;
     std::string changeVariables = "qweasdzx";
@@ -98,7 +98,8 @@ int main(int argc, char *argv[])
     
     /*** Configuration VARIABLES ***/
     parseCmdLineArgs(argc, argv, cfgSource, scope, nmessage_sec);
-    double timePmessage_ns = (1000/(double)nmessage_sec) * ms2ns; // 2 messages per millisecond
+    int sec2ns = 1000*ms2ns;
+    double timePmessage_ns = sec2ns/(double)nmessage_sec; // 2 messages per millisecond
     cfg->parse(cfgSource, "HaptiComm");
     
     ad->spi_open();
@@ -164,15 +165,20 @@ int main(int argc, char *argv[])
                 initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-                wf->configure(*am);
+                wf->configure(*am, nmessage_sec);
                 alph->configure(dev, wf, am->actCovering.value/(double)100);
-                //values = getAppmove(am, alph);
+                values = getAppmove(am, alph);
                 ad->execute_trajectory(getAppmove(am, alph), timePmessage_ns);
+                nbAppmove++;
             }
         }
         
         draw(am);
         draw_variable(vam);
+        //printw("\n");
+        //printw("ID apparent move :%i\n", nbAppmove);
+		printw("size=%i, tPm_ns=%i", values[0].size(), (int)timePmessage_ns);
+        
     }while((ch = getch()) != '*');
     
     
@@ -188,8 +194,8 @@ int main(int argc, char *argv[])
 
 void draw_variable(struct variableAppMove * vam) {
     printw("\n");
-    printw("%s values:\n", vam->name.c_str());
-    printw("min=<%i> v=<%i> max=<%i>\n", vam->min, vam->value, vam->max);
+    //printw("%s values:\n", vam->name.c_str());
+    //printw("min=<%i> v=<%i> max=<%i>\n", vam->min, vam->value, vam->max);
 }
 
 void 
@@ -218,9 +224,9 @@ getAppmove(struct appMoveCarac * am, ALPHABET* alph)
 {
     //reconfigure the app motion
     std::vector<std::vector<std::string>> names(am->nbAct.max, std::vector<std::string>(1));
-    names[0][0] = "palm12";
+    names[0][0] = "palm32";
     names[1][0] = "palm22";
-    names[2][0] = "palm32";
+	names[2][0] = "palm12";
     names[3][0] = "mf1";
     names[4][0] = "mf2";
     names[5][0] = "mf3";
