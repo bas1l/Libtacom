@@ -47,6 +47,7 @@ add_subdirectory("sinefunction_generator")
 add_subdirectory("apparent_motion_experiment")
 add_subdirectory("tests/read_values")
 add_subdirectory("tests/HaptiCommConfig")
+add_subdirectory("readMp3")
 
 #add_subdirectory("tests/config4cpp/demos/simple-encapsulation")
 #add_subdirectory("tests/test_mergethreadread")
