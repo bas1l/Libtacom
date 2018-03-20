@@ -31,7 +31,7 @@ static void usage();
 int main(int argc, char *argv[])
 {   
     HaptiCommConfiguration * cfg = new HaptiCommConfiguration();
-    DEVICE *   dev = new DEVICE();
+    DEVICE * dev = new DEVICE();
     WAVEFORM * wf  = new WAVEFORM();
     ALPHABET * alph = new ALPHABET();
     const char * cfgSource;
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
     extract_text = std::thread(workSymbols, std::ref(sentences), std::ref(cv), 
                            std::ref(m), std::ref(workdone), std::ref(alph));
     std::thread send_to_dac;
+    printw("alphabet:%s", alph->getlist_alphabet().c_str());
     send_to_dac = std::thread(generateSentences, std::ref(sentences), std::ref(cv),
                            std::ref(m), std::ref(workdone), alph->getlist_alphabet());
     
