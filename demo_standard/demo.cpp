@@ -95,6 +95,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
     noecho();
     
     std::string str_ponc = " .,;:!?-";
+    printw("alphabet:%s", str_alph.c_str());
     
     int ch;
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");
