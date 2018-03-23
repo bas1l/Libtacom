@@ -11,7 +11,8 @@
 
 
 
-ALPHABET::ALPHABET() {}
+ALPHABET::ALPHABET() :
+	list_alphabet("abcdefghijklmnopqrstuvwxyz~") {}
 
 
 ALPHABET::ALPHABET(DEVICE * _dev, WAVEFORM * _wf) :
@@ -122,7 +123,16 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
         // to make it faster : work on it
         //act_names.erase(std::remove(act_names.begin(), act_names.end(), j), act_names.end());
     }
-
+	
+	// inter-letters procrastination
+    for(int i=0; i<nbChannel; i++)
+    {
+		for(int j=0; j<300; j++)
+		{
+			result[i].push_back(2048);
+		}
+	}
+	
     return result;
 }
 
@@ -136,7 +146,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     int total_time = amsize* (1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
     
     std::vector<uint16_t> ttv;
-    ttv.reserve(total_time);
+    ttv.reserve(total_time+50);
     
     bool find = false;
     std::vector<std::vector<uint16_t>>      result(nbChannel, ttv);
@@ -169,6 +179,15 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
             find = false;
         }
     }
+    
+	// inter-letters procrastination
+    for(int i=0; i<nbChannel; i++)
+    {
+		for(int j=0; j<300; j++)
+		{
+			result[i].push_back(2048);
+		}
+	}
     
     return result;
 }

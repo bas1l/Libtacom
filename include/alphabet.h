@@ -19,7 +19,7 @@
 #include "waveform.h"
 #include "device.h"
 
-
+#include <iostream>
 class ALPHABET
 {
 public :

@@ -64,12 +64,10 @@ int main(int argc, char *argv[])
     std::atomic<bool> workdone(false);
     std::queue<char> sentences;
     
-    
     std::thread extract_text;
     extract_text = std::thread(workSymbols, std::ref(sentences), std::ref(cv), 
                            std::ref(m), std::ref(workdone), std::ref(alph));
     std::thread send_to_dac;
-    printw("alphabet:%s", alph->getlist_alphabet().c_str());
     send_to_dac = std::thread(generateSentences, std::ref(sentences), std::ref(cv),
                            std::ref(m), std::ref(workdone), alph->getlist_alphabet());
     
@@ -95,7 +93,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
     keypad(stdscr, TRUE);
     noecho();
     
-    std::string str_ponc = " .,;:!?-";
+    std::string str_ponc = " '.,;:!?-";
     printw("alphabet:%s", str_alph.c_str());
     
     int ch;
@@ -120,7 +118,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
             }
             else
             {
-                printw("\n<Key not implemented> Need to Exit ? Press '*'.\n");
+                //printw("\n<Key not implemented> Need to Exit ? Press '*'.\n");
             }
           }
     }while((ch = getch()) != '*');
