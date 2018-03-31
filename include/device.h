@@ -16,7 +16,6 @@
 #include <utility>
 #include <vector>
 
-#include "device_defines.h"
 
 
 
@@ -59,8 +58,12 @@ public :
     void            setActuator(struct actuator _ac, std::string _idname);
     
     int getnbActuator();
-    int getactMaxValue();
+    void setnbActuator(int nba);
     
+    int getactMaxValue();
+    void setactMaxValue(int actmv);
+    
+
     /*
      * @brief return the map of actuators
      */

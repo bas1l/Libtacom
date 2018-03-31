@@ -87,6 +87,10 @@ ALPHABET::getl(char l) {
     }
 }
 
+int 
+ALPHABET::get_freqRefresh_mHz() {
+    return wf->get_freqRefresh_mHz();
+}
 
 /*
  *  private :
@@ -119,7 +123,7 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
         }
         
         // put the corresponding tap move into the result vector
-        wf->create_tap_move(curr_act, push, result);
+        wf->insert_tap_move(curr_act, push, result);
         // to make it faster : work on it
         //act_names.erase(std::remove(act_names.begin(), act_names.end(), j), act_names.end());
     }
@@ -143,7 +147,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     int amsize   = wf->get_app_move_size();
     // shift in time/ms/value between 2 actuators in series into the app move
     int lag_inter_line = amsize*appMotionActCovering;
-    int total_time = amsize* (1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
+    int total_time = amsize *(1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
     
     std::vector<uint16_t> ttv;
     ttv.reserve(total_time+50);
@@ -170,7 +174,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
             if (out != a_names[line].end())
             {// if yes
                 int start_at = lag_inter_line*line;
-                wf->create_app_move(curr_act, start_at, result);
+                wf->insert_app_move(curr_act, start_at, result);
                 find = true;
             }
         }
@@ -180,7 +184,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
         }
     }
     
-	// inter-letters procrastination
+    // inter-letters procrastination
     for(int i=0; i<nbChannel; i++)
     {
 		for(int j=0; j<300; j++)

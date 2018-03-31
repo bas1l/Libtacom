@@ -21,8 +21,8 @@ DEVICE::~DEVICE(){}
 
 void DEVICE::configure() {
     
-    nbActuator = ACTUATOR_NB;
-    actMaxValue = ACTUATOR_MAXVALUE;
+    //nbActuator = ACTUATOR_NB;
+    //actMaxValue = ACTUATOR_MAXVALUE;
     if (actuators.empty())
     {
         actuators.clear();
@@ -62,9 +62,17 @@ int DEVICE::getnbActuator() {
     return nbActuator;
 }
 
+void DEVICE::setnbActuator(int nba) {
+    nbActuator = nba;
+}
+
 
 int DEVICE::getactMaxValue() {
     return actMaxValue;
+}
+
+void DEVICE::setactMaxValue(int actmv) {
+    actMaxValue = actmv;
 }
 
 

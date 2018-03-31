@@ -110,30 +110,45 @@ throw (HaptiCommConfigurationException)
 void HaptiCommConfiguration::configureWaveform(WAVEFORM * wf)
 throw (HaptiCommConfigurationException)
 {
+    
+    printf("configureWaveform\n");
     StringBuffer __m_scope = m_scope;
     
     StringBuffer scope; 
     Configuration::mergeNames(m_scope.c_str(), "waveform", scope);
     StringBuffer filter;
-    
+
     m_scope = scope;
+    
     try {
+        int freqRefresh = (int) m_cfg->lookupInt(scope.c_str(), "freqRefresh");
+        int useWAV = (int) m_cfg->lookupInt(scope.c_str(), "useWAV");
+        
+        printf("useWAV\n");
         Configuration::mergeNames(scope.c_str(), "tap", filter);
         int tapDuration = (int) m_cfg->lookupInt(filter.c_str(), "duration");
         
+        struct appMove * am = new appMove();
         Configuration::mergeNames(scope.c_str(), "apparent", filter);
-        int appActSuperposed = (int) m_cfg->lookupInt(filter.c_str(), "nb_act_superposed");
-        float appRatioCover = (float) m_cfg->lookupFloat(filter.c_str(), "ratio_covering");
+        am->nbAct.value = (int) m_cfg->lookupInt(filter.c_str(), "nb_act_superposed");
+        am->actCovering.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "ratio_covering"))*100);
         
         Configuration::mergeNames(scope.c_str(), "apparent.asc", filter);
-        int appAscDuration = (int) m_cfg->lookupInt(filter.c_str(), "duration");
+        am->asc.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
+        am->asc.wav = m_cfg->lookupString(filter.c_str(), "wav");
         
         Configuration::mergeNames(scope.c_str(), "apparent.action", filter);
-        int appActionDuration = (int) m_cfg->lookupInt(filter.c_str(), "duration");
-        int appActionAmplitude = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
+        am->action.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
+        am->action.amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
+        am->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
         
-        wf->configure(tapDuration, appActSuperposed, appRatioCover, 
-                      appAscDuration, appActionDuration, appActionAmplitude);
+        printf("wf->configure\n");
+        wf->configure(tapDuration, *am, freqRefresh, useWAV);
+        
+        //wf->configure(freqRefresh, tapDuration, 
+         //             appActSuperposed, appRatioCover, 
+          //            appAscDuration, 
+           //           appActionDuration, appActionAmplitude);
     }
     catch(const ConfigurationException & ex) {
             throw HaptiCommConfigurationException(ex.c_str());
@@ -159,6 +174,11 @@ throw (HaptiCommConfigurationException)
     
     m_scope = scope;
     try {
+        int nbActuator = (int) m_cfg->lookupInt(m_scope.c_str(), "nbActuator");
+        int actMaxValue = (int) m_cfg->lookupInt(m_scope.c_str(), "actuatorMaxValue");
+        dev->setnbActuator(nbActuator);
+        dev->setactMaxValue(actMaxValue);
+        
         Configuration::mergeNames(scope.c_str(), "uid-actuator", filter);
         m_cfg->listFullyScopedNames(m_scope.c_str(), "", Configuration::CFG_SCOPE,
                                     false, filter.c_str(), m_scopeNames);

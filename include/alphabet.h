@@ -46,6 +46,11 @@ public :
      */
     std::vector<std::vector<uint16_t>> getl(char l);
     
+    /*
+     * @brief return the frequency with which the actuators are refreshed (Hz)
+     */
+    int get_freqRefresh_mHz();
+
     std::vector<std::vector<uint16_t>> make_app_letter(std::vector<std::vector<std::string>> a_names);
     
 private:

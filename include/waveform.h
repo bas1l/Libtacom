@@ -9,7 +9,7 @@
 
 
 
-
+#include <algorithm>
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,7 +18,6 @@
 #include <vector>
 
 #include "utils.h"
-#include "waveform_defines.h"
 #include "device.h"
 
 
@@ -34,16 +33,20 @@ struct variableAppMove
     int max;
 };// variableAppMove_default = {' ', -1, -1, -1};
 
-struct caracPartMove
+struct partMove
 {
+    std::string name;
+    std::string wav;
+    
     variableAppMove typeSignal;
     variableAppMove amplitude;
     variableAppMove duration;
 };
-struct appMoveCarac
+
+struct appMove
 {
-    caracPartMove asc;
-    caracPartMove action;
+    partMove asc;
+    partMove action;
     
     variableAppMove nbAct;
     variableAppMove actCovering;
@@ -64,10 +67,12 @@ public:
     /**
      * @brief Initializes waveform properties with default parameters
      */ 
-    void configure(int _tapDuration, int _appActSuperposed, 
-                   int _appRatioCover, int _appAscDuration, 
-                   int _appActionDuration, int _appActionAmplitude);
-    void configure(struct appMoveCarac _amc, int nmessage_sec);
+    void configure( int _freqRefresh, 
+                    int _tapDuration, int _appActSuperposed, 
+                    int _appRatioCover, 
+                    int _appAscDuration, 
+                    int _appActionDuration, int _appActionAmplitude);
+    void configure(int _tapDuration, struct appMove _amc, int nmessage_sec, int useWAV);
     void configure();
     
     /**
@@ -97,15 +102,22 @@ public:
      */
     int get_app_move_size();
     
-    void create_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result);
-    void create_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result);
-    void create_tap_move_bis(actuator a, bool push, std::vector<uint16_t>& result);
+    /**
+     * @brief get the frequency of refresh for all channels (all actuator)
+     */
+    int get_freqRefresh_mHz();
+    
+    void insert_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result);
+    void insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result);
     
 private:
+    void create_appMoveWAV();
     void create_app_move_standard();
     float * create_envelope_sin(int length, int ampl);
-    float * create_envelope_asc();
+    float * create_envelope_asc(int length);
     
+    
+    int freqRefresh_mHz;
     
     std::vector<uint16_t> appMoveVec;
     
@@ -113,7 +125,7 @@ private:
     
     int     tapDuration;// 20 ms
     
-    struct appMoveCarac amc;
+    struct appMove amc;
     int     appDuration; //APPARENT_DURATION (APPARENT_ASC_DURATION+APPARENT_MOVE_DURATION)
     int     appActSuperposed; // 4
     float   appRatioCover; // .25
