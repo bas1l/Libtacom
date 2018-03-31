@@ -165,10 +165,15 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     ad.configure();
     cout << "d..." << endl;
     
-    int durationRefresh_ns = (int) alph->get_freqRefresh_mHz() / ms2ns; // * ns
+    double durationRefresh_ms = 1/(double) alph->get_freqRefresh_mHz();
+    int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     
     cout << "alph->get_freqRefresh_mHz() = " << alph->get_freqRefresh_mHz() << endl;
-    cout << "duration refresh = " << durationRefresh_ns << endl;
+    cout << "durationRefresh_ms = " << durationRefresh_mS << endl;
+    cout << "durationRefresh_ns = " << durationRefresh_ns << endl;
+    
+    //int durationRefresh_ns =0;
+    
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     values = alph->getneutral();
     ad.execute_trajectory(values, durationRefresh_ns);
