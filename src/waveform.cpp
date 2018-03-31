@@ -98,7 +98,7 @@ WAVEFORM::configure()
 void 
 WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result)
 {
-    int nbValue = (int) (freqRefresh_mHz/(double)(tapDuration/(double)1000)); //tapdur=millisec
+    int nbValue = freqRefresh_mHz*tapDuration; //tapdur=millisec
     
     int end = nbValue-3;
     uint16_t vneutral = (uint16_t) ~((unsigned int) a.vneutral);
@@ -199,7 +199,7 @@ WAVEFORM::create_app_move_standard()
     appMoveVec.clear();
  
     // part 1/2 : ascension 
-    int nbValue = (int) (freqRefresh_mHz/(double)(appAscDuration/(double)1000)); //appAscDuration=millisec
+    int nbValue = freqRefresh_mHz*appAscDuration; //appAscDuration=millisec
     float * asc = create_envelope_asc(nbValue);
 
     for (t=0; t<nbValue; t++)
@@ -210,7 +210,7 @@ WAVEFORM::create_app_move_standard()
 
 
     // part 2/2 : pink noise 
-    nbValue = (int) (freqRefresh_mHz/(double)(appActionDuration/(double)1000)); //appAscDuration=millisec
+    nbValue = freqRefresh_mHz*appActionDuration; //appAscDuration=millisec
     float * shape = create_envelope_sin(nbValue, appActionAmplitude);
     float * r = create_random_dots(nbValue, -1, 1);
 

@@ -168,9 +168,9 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     double durationRefresh_ms = 1/(double) alph->get_freqRefresh_mHz();
     int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     
-    cout << "alph->get_freqRefresh_mHz() = " << alph->get_freqRefresh_mHz() << endl;
-    cout << "durationRefresh_ms = " << durationRefresh_ms << endl;
-    cout << "durationRefresh_ns = " << durationRefresh_ns << endl;
+    //cout << "alph->get_freqRefresh_mHz() = " << alph->get_freqRefresh_mHz() << endl;
+    //cout << "durationRefresh_ms = " << durationRefresh_ms << endl;
+    //cout << "durationRefresh_ns = " << durationRefresh_ns << endl;
     
     //int durationRefresh_ns =0;
     
