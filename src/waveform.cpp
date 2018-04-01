@@ -315,6 +315,7 @@ WAVEFORM::printCharacteristics()
 {
     std::cout << "_______________________________________________________\n" 
             << "Waveform characteristics:\n"
+            << "Frequency of Refresh (AD5383)=" << freqRefresh_mHz << "mHz\n\n"
             << "<Tap movement>\n"
                 << "\t-Duration=" << tapDuration << "ms\n"
             << "<Apparent movement>\n"
@@ -323,10 +324,10 @@ WAVEFORM::printCharacteristics()
                 << "\t-Value of covering=" << amc.actCovering.value << "%\n"
                 << "\t[1st part: go up movement]\n"
                     << "\t\t-Duration=" << amc.asc.duration.value << "ms\n"
-                    << "\t\t-Final value=" << amc.asc.amplitude.value << "#Numerical-ADC5383\n"
+                    << "\t\t-Final value=" << amc.asc.amplitude.value << "#Numerical-AD5383\n"
                 << "\t[2nd part: action movement]\n"
                     << "\t\t-Duration=" << amc.action.duration.value << "ms\n"
-                    << "\t\t-Amplitude=" << amc.action.amplitude.value << "#Numerical-ADC5383\n"
+                    << "\t\t-Amplitude=" << amc.action.amplitude.value << "#Numerical-AD5383\n"
     << "_______________________________________________________" << std::endl;
 }
 
