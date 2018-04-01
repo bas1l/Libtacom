@@ -161,7 +161,8 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
                 std::mutex & m, std::atomic<bool> & workdone, ALPHABET *& alph)
 {
     cout << "a..." << endl;
-
+    int overruns;
+    
     // init drive electronics
     AD5383 ad;
     ad.spi_open();
@@ -212,8 +213,8 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         if (letters.front() != ' ')// is part of the alphabet){
         {
             values = alph->getl(letters.front());
-            ad.execute_trajectory(values, durationRefresh_ns);
-            
+            overruns = ad.execute_trajectory(values, durationRefresh_ns);
+            std::cout << "overruns:" << overruns << std::endl;
             // for all channels, clear.
             for (int w=0; w<values.size(); ++w)
             {
