@@ -314,16 +314,16 @@ void
 WAVEFORM::printCharacteristics()
 {
     std::cout << "Waveform characteristics:\n"
-            << "Tap movement:\n"
+            << "<Tap movement>\n"
                 << "\t-Duration=" << tapDuration << "ms\n"
-            << "Apparent movement:\n"
+            << "<Apparent movement>\n"
                 << "\t-Total duration=" << appDuration << "ms\n"
                 << "\t-Number of actuators=" << amc.nbAct.value << "\n"
                 << "\t-Value of covering=" << amc.actCovering.value << "%\n"
-                << "\t1st part: go up movement:\n"
+                << "\t[1st part: go up movement]\n"
                     << "\t\t-Duration=" << amc.asc.duration.value << "ms\n"
                     << "\t\t-Final value=" << amc.asc.amplitude.value << "#Numerical-ADC5383\n"
-                << "\t2nd part: action movement:\n"
+                << "\t[2nd part: action movement]\n"
                     << "\t\t-Duration=" << amc.action.duration.value << "ms\n"
                     << "\t\t-Amplitude=" << amc.action.amplitude.value << "#Numerical-ADC5383\n"
     << std::endl;
