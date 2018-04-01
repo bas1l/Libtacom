@@ -160,6 +160,11 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
 void workSymbols(std::queue<char> & sentences, std::condition_variable & cv, 
                 std::mutex & m, std::atomic<bool> & workdone, ALPHABET *& alph)
 {
+    initscr();
+    raw();
+    
+    
+    
     cout << "a..." << endl;
     int overruns;
     
@@ -208,7 +213,7 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         {
             values = alph->getl(letters.front());
             overruns = ad.execute_trajectory(values, durationRefresh_ns);
-            std::cout << "overruns:" << overruns << std::endl;
+            cout << "overruns:" << overruns << endl;
             // for all channels, clear.
             for (int w=0; w<values.size(); ++w)
             {
@@ -217,6 +222,12 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         }
         letters.pop();
      }
+    
+    
+    
+    
+    refresh();
+    endwin();
 }
 
 static void 
