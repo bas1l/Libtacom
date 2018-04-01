@@ -160,11 +160,6 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
 void workSymbols(std::queue<char> & sentences, std::condition_variable & cv, 
                 std::mutex & m, std::atomic<bool> & workdone, ALPHABET *& alph)
 {
-    initscr();
-    raw();
-    
-    
-    
     cout << "a..." << endl;
     int overruns;
     
@@ -223,11 +218,6 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         letters.pop();
      }
     
-    
-    
-    
-    refresh();
-    endwin();
 }
 
 static void 
