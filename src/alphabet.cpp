@@ -127,8 +127,8 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
         // to make it faster : work on it
         //act_names.erase(std::remove(act_names.begin(), act_names.end(), j), act_names.end());
     }
-	
-	// inter-letters procrastination
+    
+    // inter-letters procrastination
     for(int i=0; i<nbChannel; i++)
     {
 		for(int j=0; j<300; j++)
