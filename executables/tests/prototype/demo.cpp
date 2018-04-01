@@ -80,6 +80,7 @@ int main(int argc, char *argv[])
     std::queue<char> sentences;
     
     cout << "1..." << endl;
+    wf->printCharacteristics();
     
     std::thread extract_text;
     extract_text = std::thread( workSymbols, 

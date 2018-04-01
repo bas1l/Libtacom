@@ -93,6 +93,7 @@ public:
      */
     float * create_random_dots(int nsample, int a, int b);
     
+    void printCharacteristics();
     /**
      * @brief print the values of the apparent movement
      */

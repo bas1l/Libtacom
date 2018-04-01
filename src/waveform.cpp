@@ -311,6 +311,25 @@ WAVEFORM::get_freqRefresh_mHz()
 
 
 void 
+WAVEFORM::printCharacteristics()
+{
+    std::cout << "Waveform characteristics (ms and numeric values):\n"
+            << "Tap movement:\n"
+                << "\tDuration=" << tapDuration << "\n"
+            << "Apparent movement:\n"
+                << "\tTotal duration=" << appDuration << "\n"
+                << "\tNumber of actuators=" << amc.nbAct.value << "\n"
+                << "\tValue of covering=" << amc.actCovering.value << "\n"
+                << "\t1st part: go up movement:\n"
+                    << "\t\Duration=" << amc.asc.duration.value << "\n"
+                    << "\t\tFinal value=" << amc.asc.amplitude.value << "\n"
+                << "\t2nd part: action movement:\n"
+                    << "\t\Duration=" << amc.action.duration.value << "\n"
+                    << "\t\tAmplitude=" << amc.action.amplitude.value << "\n"
+    << std::endl;
+}
+
+void 
 WAVEFORM::print_appmoves()
 {
     for (std::vector<uint16_t>::const_iterator i = appMoveVec.begin(); i != appMoveVec.end(); ++i)
