@@ -98,29 +98,33 @@ WAVEFORM::configure()
 void 
 WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result)
 {
-    int nbValue = freqRefresh_mHz*tapDuration; //tapdur=millisec
-    
-    int end = nbValue-3;
-    uint16_t vneutral = (uint16_t) ~((unsigned int) a.vneutral);
     int ms;
+    int         nbValue     = freqRefresh_mHz*tapDuration; //tapdur=millisec
+    uint16_t    vneutral    = (uint16_t) ~((unsigned int) a.vneutral);
     
     if (push)
     {// if the movement is to push
+        int nbNeutral = 1;
+        int nbBackPush = 2;
+        int nbPush = nbValue-(nbBackPush+nbNeutral);
         uint16_t vpush = (uint16_t) ~((unsigned int) a.vpush);
         uint16_t vpushb = (uint16_t) ~((unsigned int) 4095-a.vpush);//ACTUATOR_MAXVALUE-a.vpush);
         
         // push the actuator
-        for(ms=0; ms<end; ms++)
+        for(ms=0; ms<nbPush; ms++)
         {
             result[a.chan].push_back(vpush);
         }
         // recall the actuator
-        for(; ms<end-1; ms++)
+        for(ms=0; ms<nbBackPush; ms++)
         {
             result[a.chan].push_back(vpushb);
         }
         // put the neutral value at the end
-        result[a.chan].push_back(vneutral);
+        for(ms=0; ms<nbNeutral; ms++)
+        {
+            result[a.chan].push_back(vneutral);
+        }
     }
     else
     {// if the actuator is not a part of the movement
