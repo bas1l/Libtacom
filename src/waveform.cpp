@@ -41,9 +41,9 @@ WAVEFORM::configure(int _freqRefresh_mHz, int _tapDuration, int _appActSuperpose
                     int _appRatioCover, int _appAscDuration, 
                     int _appActionDuration, int _appActionAmplitude)
 {
-    freqRefresh_mHz         = _freqRefresh_mHz;
+    freqRefresh_mHz = _freqRefresh_mHz;
 
-    tapDuration         = _tapDuration;
+    tapDuration = _tapDuration;
     if (tapDuration < 3)
     {
         perror("TAP_MOVE_DURATION < 3 milliseconds is forbidden");

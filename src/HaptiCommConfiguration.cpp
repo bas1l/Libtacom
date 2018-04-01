@@ -121,12 +121,12 @@ throw (HaptiCommConfigurationException)
     m_scope = scope;
     
     try {
-        int freqRefresh = (int) m_cfg->lookupInt(scope.c_str(), "freqRefresh");
+        int freqRefresh_Hz = (int) m_cfg->lookupInt(scope.c_str(), "freqRefresh");
         int useWAV = (int) m_cfg->lookupInt(scope.c_str(), "useWAV");
         
         printf("useWAV\n");
         Configuration::mergeNames(scope.c_str(), "tap", filter);
-        int tapDuration = (int) m_cfg->lookupInt(filter.c_str(), "duration");
+        int tapDuration_ms = (int) m_cfg->lookupInt(filter.c_str(), "duration");
         
         struct appMove * am = new appMove();
         Configuration::mergeNames(scope.c_str(), "apparent", filter);
@@ -143,12 +143,7 @@ throw (HaptiCommConfigurationException)
         am->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
         
         printf("wf->configure\n");
-        wf->configure(tapDuration, *am, freqRefresh, useWAV);
-        
-        //wf->configure(freqRefresh, tapDuration, 
-         //             appActSuperposed, appRatioCover, 
-          //            appAscDuration, 
-           //           appActionDuration, appActionAmplitude);
+        wf->configure(tapDuration_ms, *am, freqRefresh_Hz, useWAV);
     }
     catch(const ConfigurationException & ex) {
             throw HaptiCommConfigurationException(ex.c_str());
