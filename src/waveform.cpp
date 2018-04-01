@@ -321,7 +321,7 @@ WAVEFORM::printCharacteristics()
                 << "\tNumber of actuators=" << amc.nbAct.value << "\n"
                 << "\tValue of covering=" << amc.actCovering.value << "\n"
                 << "\t1st part: go up movement:\n"
-                    << "\t\Duration=" << amc.asc.duration.value << "\n"
+                    << "\t\tDuration=" << amc.asc.duration.value << "\n"
                     << "\t\tFinal value=" << amc.asc.amplitude.value << "\n"
                 << "\t2nd part: action movement:\n"
                     << "\t\tDuration=" << amc.action.duration.value << "\n"
