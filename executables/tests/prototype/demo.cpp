@@ -207,8 +207,12 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         if (letters.front() != ' ')// is part of the alphabet){
         {
             values = alph->getl(letters.front());
-            overruns = ad.execute_trajectory(values, durationRefresh_ns);
-            cout << "overruns:" << overruns << endl;
+            int ovr = ad.execute_trajectory(values, durationRefresh_ns);
+            if (ovr)
+            {
+                overruns += ovr;
+            }
+                    
             // for all channels, clear.
             for (int w=0; w<values.size(); ++w)
             {
@@ -218,6 +222,7 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         letters.pop();
      }
     
+    cout << "overruns:" << overruns << endl;
 }
 
 static void 
