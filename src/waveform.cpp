@@ -313,7 +313,7 @@ WAVEFORM::get_freqRefresh_mHz()
 void 
 WAVEFORM::printCharacteristics()
 {
-    std::cout << "__________________________________________" 
+    std::cout << "_______________________________________________________\n" 
             << "Waveform characteristics:\n"
             << "<Tap movement>\n"
                 << "\t-Duration=" << tapDuration << "ms\n"
@@ -327,7 +327,7 @@ WAVEFORM::printCharacteristics()
                 << "\t[2nd part: action movement]\n"
                     << "\t\t-Duration=" << amc.action.duration.value << "ms\n"
                     << "\t\t-Amplitude=" << amc.action.amplitude.value << "#Numerical-ADC5383\n"
-    << "__________________________________________" << std::endl;
+    << "_______________________________________________________" << std::endl;
 }
 
 void 
