@@ -324,7 +324,7 @@ WAVEFORM::printCharacteristics()
                     << "\t\Duration=" << amc.asc.duration.value << "\n"
                     << "\t\tFinal value=" << amc.asc.amplitude.value << "\n"
                 << "\t2nd part: action movement:\n"
-                    << "\t\Duration=" << amc.action.duration.value << "\n"
+                    << "\t\tDuration=" << amc.action.duration.value << "\n"
                     << "\t\tAmplitude=" << amc.action.amplitude.value << "\n"
     << std::endl;
 }
