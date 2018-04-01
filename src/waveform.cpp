@@ -99,7 +99,7 @@ void
 WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result)
 {
     int ms;
-    int         nbValue     = freqRefresh_mHz*tapDuration; //tapdur=millisec
+    int         nbValue     = 411;//freqRefresh_mHz*tapDuration; //tapdur=millisec
     uint16_t    vneutral    = (uint16_t) ~((unsigned int) a.vneutral);
     
     if (push)
