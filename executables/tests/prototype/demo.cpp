@@ -29,7 +29,7 @@ using namespace std;
 void        generateSentences(  std::queue<char> & sentences, 
                                 std::condition_variable & cv,
                                 std::mutex & m, std::atomic<bool> & workdone, 
-                                std::string str_alph);
+                                std::string str_alph, ALPHABET *& alph);
 void        workSymbols(std::queue<char> & sentences, 
                         std::condition_variable & cv, 
                         std::mutex & m, std::atomic<bool> & workdone, 
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
     send_to_dac = std::thread(  generateSentences, 
                                 std::ref(sentences), std::ref(cv),
                                 std::ref(m), std::ref(workdone), 
-                                alph->getlist_alphabet());
+                                alph->getlist_alphabet(), std::ref(alph));
     
     
     extract_text.join();
@@ -107,8 +107,9 @@ int main(int argc, char *argv[])
 
 
 void generateSentences(std::queue<char> & sentences, std::condition_variable & cv,
-            std::mutex & m, std::atomic<bool> & workdone, std::string str_alph)
+            std::mutex & m, std::atomic<bool> & workdone, std::string str_alph, ALPHABET *& alph)
 {
+    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
 
     initscr();
     raw();
@@ -126,8 +127,9 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
             // if part of the alphabet
             if (str_alph.find(ch) != std::string::npos)
             {
+                values = alph->getl(ch);
                 printw("%c", ch);
-                
+                printw("/size of value:%i/", values[0].size());
                 std::unique_lock<std::mutex> lk(m);
                 sentences.push(ch);
                 
