@@ -313,19 +313,19 @@ WAVEFORM::get_freqRefresh_mHz()
 void 
 WAVEFORM::printCharacteristics()
 {
-    std::cout << "Waveform characteristics (ms and numeric values):\n"
+    std::cout << "Waveform characteristics:\n"
             << "Tap movement:\n"
-                << "\tDuration=" << tapDuration << "\n"
+                << "\t-Duration=" << tapDuration << "ms\n"
             << "Apparent movement:\n"
-                << "\tTotal duration=" << appDuration << "\n"
-                << "\tNumber of actuators=" << amc.nbAct.value << "\n"
-                << "\tValue of covering=" << amc.actCovering.value << "\n"
+                << "\t-Total duration=" << appDuration << "ms\n"
+                << "\t-Number of actuators=" << amc.nbAct.value << "\n"
+                << "\t-Value of covering=" << amc.actCovering.value << "%\n"
                 << "\t1st part: go up movement:\n"
-                    << "\t\tDuration=" << amc.asc.duration.value << "\n"
-                    << "\t\tFinal value=" << amc.asc.amplitude.value << "\n"
+                    << "\t\t-Duration=" << amc.asc.duration.value << "ms\n"
+                    << "\t\t-Final value=" << amc.asc.amplitude.value << "#Numerical-ADC5383\n"
                 << "\t2nd part: action movement:\n"
-                    << "\t\tDuration=" << amc.action.duration.value << "\n"
-                    << "\t\tAmplitude=" << amc.action.amplitude.value << "\n"
+                    << "\t\t-Duration=" << amc.action.duration.value << "ms\n"
+                    << "\t\t-Amplitude=" << amc.action.amplitude.value << "#Numerical-ADC5383\n"
     << std::endl;
 }
 
