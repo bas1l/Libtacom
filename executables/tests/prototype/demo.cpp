@@ -161,7 +161,7 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
                 std::mutex & m, std::atomic<bool> & workdone, ALPHABET *& alph)
 {
     cout << "a..." << endl;
-    int overruns;
+    int overruns = 0;
     
     // init drive electronics
     AD5383 ad;
