@@ -1,5 +1,3 @@
-#include "ad5383.h"
-
 #include <stdio.h>
 #include <time.h>
 #include <iostream>
@@ -11,7 +9,7 @@
 #include <sys/ioctl.h>
 #include <sys/timerfd.h>
 
-
+#include "ad5383.h"
 
 
 AD5383::AD5383() : _spi_fd(0) {
@@ -213,7 +211,7 @@ int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values
 
 
 
-int execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<std::vector<uint16_t> >& idChannels, long period_ns)
+int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<std::vector<uint16_t> >& idChannels, long period_ns)
 {
     bool keep_running;
     int ret;
