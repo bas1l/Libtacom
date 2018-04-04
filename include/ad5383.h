@@ -77,7 +77,7 @@ public:
      * @param period_ns Period between updates (ns)
      * @return The number of overruns (missed timer ticks)
      */
-    int execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<std::vector<uint16_t> >& idChannels, long period_ns);
+    int execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<uint16_t>& idChannels, long period_ns);
 
     
     /**
