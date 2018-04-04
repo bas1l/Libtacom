@@ -78,7 +78,7 @@ ALPHABET::getneutral()
 }
 
 
-std::vector<std::vector<uint16_t>> 
+map<vector<uint8_t>,vector<uint16_t>>
 ALPHABET::getl(char l) 
 {
     // searching for the letter l

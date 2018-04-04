@@ -40,14 +40,14 @@ public :
     void configure(DEVICE * _dev, WAVEFORM * _wf);
     void configure(DEVICE * _dev, WAVEFORM * _wf, double _appMotionActCovering);
     
-    std::string getlist_alphabet();
+    std::string getlistSymbols();
     std::vector<std::vector<uint16_t>> getneutral();
     
     /*
      * @brief return the array according to the letter
      * @param letter letter requested
      */
-    std::vector<std::vector<uint16_t>> getl(char l);
+    map<vector<uint8_t>,vector<uint16_t>> getl(char l);
     
     /*
      * @brief return the frequency with which the actuators are refreshed (Hz)
