@@ -40,15 +40,11 @@ using namespace std::chrono;
 #define SYSERROR()  errno
 #endif
 
-
-void draw(struct appMove * am);
 void draw_variable(struct variableAppMove * vam);
-std::vector<std::vector<uint16_t>> getAppmove(struct appMove * am, ALPHABET* alph);   
+void draw(struct appMove * am);
+std::vector<std::vector<uint16_t>> getAppmove(struct appMove * am, ALPHABET* alph);
 struct variableAppMove * getVariableam(struct appMove *am, char * c);
 bool modifyVariable(struct variableAppMove * vam, int v);
-int actuators_controller(std::queue<char> & letters, std::mutex & mutexLetters,
-             std::atomic<bool> & work, int nmessage_sec, 
-             ALPHABET* & alph, DEVICE* & dev);
 void resetVariable(struct variableAppMove * vam);
 void initAppMoveVariables(struct appMove * am);
 static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
@@ -384,6 +380,38 @@ parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& 
             }
     }
 }
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     
