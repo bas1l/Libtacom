@@ -94,6 +94,37 @@ WAVEFORM::configure()
     create_app_move_standard();
 }
 
+std::vector<uint16_t> WAVEFORM::getTapMove(actuator a)
+{   
+    std::vector<uint16_t> result;
+    int ms;
+    int nbValue = freqRefresh_mHz*tapDuration; //409;//tapdur=millisec
+    
+    int nbNeutral   = 1;
+    int nbBackPush  = 2;
+    int nbPush      = nbValue-(nbBackPush+nbNeutral);
+    
+    uint16_t vpush      = (uint16_t) ~((unsigned int) a.vpush);
+    uint16_t vpushb     = (uint16_t) ~((unsigned int) 4095-a.vpush);//ACTUATOR_MAXVALUE-a.vpush);
+    uint16_t vneutral   = (uint16_t) ~((unsigned int) a.vneutral);
+   
+    
+    // push the actuator
+    for(ms=0; ms<nbPush; ms++)
+    {
+        result.push_back(vpush);
+    }
+    // recall the actuator
+    for(ms=0; ms<nbBackPush; ms++)
+    {
+        result.push_back(vpushb);
+    }
+    // put the neutral value at the end
+    for(ms=0; ms<nbNeutral; ms++)
+    {
+        result.push_back(vneutral);
+    }
+}
 
 void 
 WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result)
@@ -136,8 +167,16 @@ WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_
 }
 
 
-/*
- *  private :
+
+
+
+
+
+/*  PRIVATE:
+ * 
+ * 
+ * 
+ * 
  */
 void 
 WAVEFORM::create_appMoveWAV()

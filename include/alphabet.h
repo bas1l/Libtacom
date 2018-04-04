@@ -23,6 +23,18 @@
 
 using namespace std;
 
+
+/* waveformLetter:
+ * First -> Identification Number for ad5383 channels
+ * Second -> Corresponding waveform values 
+ */
+typedef map<uint8_t, vector<uint16_t>> waveformLetter;
+
+
+/* class ALPHABET:
+ * Regroup the functions to create the tactile deafblind alphabet.
+ * 
+ */
 class ALPHABET
 {
 public :
@@ -47,18 +59,18 @@ public :
      * @brief return the array according to the letter
      * @param letter letter requested
      */
-    map<vector<uint8_t>,vector<uint16_t>> getl(char l);
+    waveformLetter getl(char l);
     
     /*
      * @brief return the frequency with which the actuators are refreshed (Hz)
      */
     int get_freqRefresh_mHz();
 
-    map<vector<uint8_t>,vector<uint16_t>> make_app_letter(std::vector<std::vector<std::string>> a_names);
+    waveformLetter make_app_letter(std::vector<std::vector<std::string>> a_names);
     
 private:
-    map<vector<uint8_t>,vector<uint16_t>> make_tap_letter(std::vector<std::string> a_names);
-    map<vector<uint8_t>,vector<uint16_t>> make_letter(char l);
+    waveformLetter make_tap_letter(std::vector<std::string> a_names);
+    waveformLetter make_letter(char l);
     bool configure_letters();
     void configure_neutral();
     
@@ -67,8 +79,8 @@ private:
     
     string listSymbols;
     vector<vector<uint16_t>> neutral_statement;
-    map<char, map<vector<uint8_t>,vector<uint16_t>> > letters;
-    map<char, map<vector<uint8_t>,vector<uint16_t>> >::iterator it_letter;
+    map<char, waveformLetter> letters;
+    map<char, waveformLetter >::iterator it_letter;
     
     double  appMotionActCovering;
     int     defaultNeutral;

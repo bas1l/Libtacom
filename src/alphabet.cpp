@@ -8,6 +8,8 @@
 #include "alphabet.h"
 #include<ncurses.h>
 
+using namespace std;
+
 
 
 
@@ -78,7 +80,7 @@ ALPHABET::getneutral()
 }
 
 
-map<vector<uint8_t>,vector<uint16_t>>
+waveformLetter
 ALPHABET::getl(char l) 
 {
     // searching for the letter l
@@ -107,45 +109,47 @@ ALPHABET::get_freqRefresh_mHz()
 /*
  * create the adequat tap move for the letter
  */
-map<vector<uint8_t>,vector<uint16_t>>
+waveformLetter
 ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
-    bool push = false;
-    map<vector<uint8_t>,vector<uint16_t>> result;//(a_names.size());
-    std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
-    /*
+    waveformLetter result;//(a_names.size());
+    map<string, actuator>  actuators = dev->getActuatorMap();
+    actuator * curr_act = new actuator();
+    
     // For each actuator :
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
-        struct actuator curr_act = it->second;
-        int curr_chan = curr_act.chan;
+        curr_act = it->second;
+        
         
         // check if the current actuator has to be a part of the move
         if (std::find(a_names.begin(), a_names.end(), curr_name) != a_names.end())
-        {// if yes
+        {
             // put the corresponding tap move into the result vector
-            wf->insert_tap_move(curr_act, true, result);
+            std::vector<uint16_t> tm = wf->getTapMove(curr_act);
+            // inter-letters procrastination
+            for(int j=0; j<300; j++)
+            {
+                    tm.push_back(curr_act.vneutral);
+            }
+           
+            result.insert(waveformLetter::value_type(curr_act.chan, tm));
+            
         }
         
         // to make it faster : work on it
         //act_names.erase(std::remove(act_names.begin(), act_names.end(), j), act_names.end());
     }
     
-    // inter-letters procrastination
-    for(int i=0; i<nbChannel; i++)
-    {
-        for(int j=0; j<300; j++)
-        {
-                result[i].push_back(2048);
-        }
-    }
-    */
+    
+    delete curr_act;
+    
     return result;
 }
 
 
-map<vector<uint8_t>,vector<uint16_t>>
+waveformLetter
 ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     int nb_range = a_names.size();
     int amsize   = wf->get_app_move_size();
@@ -157,7 +161,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     ttv.reserve(total_time+50);
     
     bool find = false;
-    map<vector<uint8_t>,vector<uint16_t>> result;//(nbChannel, ttv);
+    waveformLetter result;//(nbChannel, ttv);
     std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
     /*
@@ -202,9 +206,9 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
 }
 
 
-map<vector<uint8_t>,vector<uint16_t>> 
+waveformLetter 
 ALPHABET::make_letter(char l) {
-    map<vector<uint8_t>,vector<uint16_t>> result;
+    waveformLetter result;
     
     switch (l){
         case 'a' :
