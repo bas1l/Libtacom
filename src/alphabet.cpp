@@ -174,7 +174,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
             auto out = std::find(a_names[line].begin(), a_names[line].end(), curr_name);
             if (out != a_names[line].end())
             {// if yes
-                uint16_t vneutral = (uint16_t) ~((unsigned int) curr_act.vneutral);
+                uint16_t vneutral = (uint16_t) ~((unsigned int) curr_act->vneutral);
                 int start_at = lag_inter_line*line;
                 
                 // (1/3) before the movement:
