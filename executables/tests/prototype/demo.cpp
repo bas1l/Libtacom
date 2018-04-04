@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 void generateSentences(std::queue<char> & sentences, std::condition_variable & cv,
             std::mutex & m, std::atomic<bool> & workdone, std::string str_alph, ALPHABET *& alph)
 {
-    waveformLetter values();
+    waveformLetter values;
 
     initscr();
     raw();
