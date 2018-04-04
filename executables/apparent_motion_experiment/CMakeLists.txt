@@ -4,8 +4,8 @@ project(appmotion_experiment)
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 
-include_directories("include")
-add_library(tools "src/tools.cpp")
+#include_directories("include")
+#add_library(tools "src/tools.cpp")
 
 add_executable(${PROJECT_NAME} "appmotion_experiment.cpp")
 
