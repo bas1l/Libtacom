@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     send_to_dac = std::thread(  generateSentences, 
                                 std::ref(sentences), std::ref(cv),
                                 std::ref(m), std::ref(workdone), 
-                                alph->getlist_alphabet(), std::ref(alph));
+                                alph->getlistSymbols(), std::ref(alph));
     
     
     extract_text.join();

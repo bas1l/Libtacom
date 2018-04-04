@@ -20,6 +20,9 @@
 #include "device.h"
 
 #include <iostream>
+
+using namespace std;
+
 class ALPHABET
 {
 public :
@@ -51,21 +54,21 @@ public :
      */
     int get_freqRefresh_mHz();
 
-    std::vector<std::vector<uint16_t>> make_app_letter(std::vector<std::vector<std::string>> a_names);
+    map<vector<uint8_t>,vector<uint16_t>> make_app_letter(std::vector<std::vector<std::string>> a_names);
     
 private:
-    std::vector<std::vector<uint16_t>> make_tap_letter(std::vector<std::string> a_names);
-    std::vector<std::vector<uint16_t>> make_letter(char l);
+    map<vector<uint8_t>,vector<uint16_t>> make_tap_letter(std::vector<std::string> a_names);
+    map<vector<uint8_t>,vector<uint16_t>> make_letter(char l);
     bool configure_letters();
     void configure_neutral();
     
     DEVICE * dev;
     WAVEFORM * wf;
     
-    std::string list_alphabet;
-    std::vector<std::vector<uint16_t>> neutral_statement;
-    std::map<char, std::vector<std::vector<uint16_t>>> letters;
-    std::map<char, std::vector<std::vector<uint16_t>>>::iterator it_letter;
+    string listSymbols;
+    vector<vector<uint16_t>> neutral_statement;
+    map<char, map<vector<uint8_t>,vector<uint16_t>> > letters;
+    map<char, map<vector<uint8_t>,vector<uint16_t>> >::iterator it_letter;
     
     double  appMotionActCovering;
     int     defaultNeutral;
