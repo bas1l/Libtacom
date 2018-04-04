@@ -155,33 +155,49 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     // shift in time/ms/value between 2 actuators in series into the app move
     int lag_inter_line = amsize*appMotionActCovering;
     int total_time = amsize *(1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
+    actuator * curr_act = new actuator;
+    std::vector<uint16_t> tmp;
     
-    std::vector<uint16_t> ttv;
-    ttv.reserve(total_time+50);
     
     bool find = false;
     waveformLetter result;//(nbChannel, ttv);
     std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
-    /*
+    
     // For each actuator :
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
-        struct actuator curr_act = it->second;
-        uint16_t vneutral = (uint16_t) ~((unsigned int) curr_act.vneutral);
+        curr_act = &(it->second);
 
-        // put vneutral for all the time of the app move
-        result[curr_act.chan].insert(result[curr_act.chan].begin(),
-                                     total_time, vneutral);
-        
         for(int line=0; line<a_names.size() && !find; line++)
         {// check if the current actuator is a part of the movement, for each line
             auto out = std::find(a_names[line].begin(), a_names[line].end(), curr_name);
             if (out != a_names[line].end())
             {// if yes
+                uint16_t vneutral = (uint16_t) ~((unsigned int) curr_act.vneutral);
                 int start_at = lag_inter_line*line;
-                wf->insert_app_move(curr_act, start_at, result);
+                
+                // (1/3) before the movement:
+                tmp.insert(tmp.begin(), start_at, vneutral);
+
+                // (2/3) the movement:
+                std::vector<uint16_t> amvec = wf->getAppMove();
+                tmp.insert(tmp.end(), amvec.begin(), amvec.end());
+                
+                // (3/3) after the movement:
+                tmp.insert(tmp.begin(), total_time-tmp.size(), vneutral);
+                
+                // inter-letters procrastination
+                for(int j=0; j<300; j++)
+                {
+                        tmp.push_back(vneutral);
+                }
+                
+                
+                result[curr_act->chan] = tmp;
+                
+                tmp.clear();
                 find = true;
             }
         }
@@ -191,15 +207,8 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
         }
     }
     
-    // inter-letters procrastination
-    for(int i=0; i<nbChannel; i++)
-    {
-        for(int j=0; j<300; j++)
-        {
-                result[i].push_back(2048);
-        }
-    }
-    */
+    
+    
     
     return result;
 }

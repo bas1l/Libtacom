@@ -168,7 +168,20 @@ WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_
 
 
 
+std::vector<uint16_t>
+WAVEFORM::getAppMove()
+{// actuator a est a utiliser quand on voudra affiner le lever de tige
+    return appMoveVec;
+}
 
+
+
+void 
+WAVEFORM::insert_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result)
+{// actuator a est a utiliser quand on voudra affiner le lever de tige
+    result[a.chan].insert(result[a.chan].begin()+start_at, 
+                          appMoveVec.begin(), appMoveVec.end());
+}
 
 
 
@@ -330,13 +343,6 @@ WAVEFORM::create_random_dots(int nsample, int a, int b)
     return r;
 }
 
-
-void 
-WAVEFORM::insert_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result)
-{// actuator a est a utiliser quand on voudra affiner le lever de tige
-    result[a.chan].insert(result[a.chan].begin()+start_at, 
-                          appMoveVec.begin(), appMoveVec.end());
-}
 
 
 

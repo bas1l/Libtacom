@@ -109,6 +109,7 @@ public:
     int get_freqRefresh_mHz();
     
     std::vector<uint16_t> getTapMove(actuator a);
+    std::vector<uint16_t> getAppMove();
     
     void insert_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result);
     void insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result);
