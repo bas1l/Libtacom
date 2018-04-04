@@ -114,27 +114,27 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
     
     waveformLetter result;//(a_names.size());
     map<string, actuator>  actuators = dev->getActuatorMap();
-    actuator * curr_act = new actuator();
+    actuator * curr_act = new actuator;
     
     // For each actuator :
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
-        curr_act = it->second;
+        curr_act = &(it->second);
         
         
         // check if the current actuator has to be a part of the move
         if (std::find(a_names.begin(), a_names.end(), curr_name) != a_names.end())
         {
             // put the corresponding tap move into the result vector
-            std::vector<uint16_t> tm = wf->getTapMove(curr_act);
+            std::vector<uint16_t> tm = wf->getTapMove(*curr_act);
             // inter-letters procrastination
             for(int j=0; j<300; j++)
             {
-                    tm.push_back(curr_act.vneutral);
+                    tm.push_back(curr_act->vneutral);
             }
            
-            result.insert(waveformLetter::value_type(curr_act.chan, tm));
+            result.insert(waveformLetter::value_type(curr_act->chan, tm));
             
         }
         
