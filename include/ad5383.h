@@ -68,7 +68,18 @@ public:
      * @return The number of overruns (missed timer ticks)
      */
     int execute_trajectory(const std::vector<std::vector<uint16_t> >& values, long period_ns);
+    
+    
+    /**
+     * @brief Starts a timer pushing values to the dac output at a period given by period_ns (ns)
+     * @param values Vector containing values for each channel, its size should be between 0 and num_channels. Each subvector contains output values (between 0 and 4095) for a channel at a given time
+     * @param channels Vector containing idChannel for each vectors of 'Values'
+     * @param period_ns Period between updates (ns)
+     * @return The number of overruns (missed timer ticks)
+     */
+    int execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<std::vector<uint16_t> >& idChannels, long period_ns);
 
+    
     /**
      * @brief Updates the dac outputs for all channels
      * @param values (between 0 and 4095)

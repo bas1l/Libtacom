@@ -212,6 +212,71 @@ int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values
 }
 
 
+
+int execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<std::vector<uint16_t> >& idChannels, long period_ns)
+{
+    bool keep_running;
+    int ret;
+    unsigned long long missed = 0;
+    int overruns = 0;
+    int value_idx = 0;
+
+    struct timespec ts = {
+        .tv_sec = 0,
+                .tv_nsec = period_ns
+    };
+
+    struct itimerspec its = {
+        .it_interval = ts,
+                .it_value = ts
+    };
+
+    if(values.size() > num_channels)
+        throw std::runtime_error("Trajectory vector is bigger than number of channels");
+
+    _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
+    if(_timer_fd == -1)
+    {
+        perror("execute_trajectory/timerfd_create");
+        _timer_fd = 0;
+        return overruns;
+    }
+    if(timerfd_settime(_timer_fd, 0, &its, NULL) == -1)
+    {
+        perror("execute_trajectory/timerfd_settime");
+        close(_timer_fd);
+        return overruns;
+    }
+
+    do
+    {
+        ret = read(_timer_fd, &missed, sizeof (missed));
+        if (ret == -1)
+        {
+            perror("execute_trajectory/read");
+            close(_timer_fd);
+            return overruns;
+        }
+        overruns += missed - 1;
+
+        keep_running = false;
+        for(unsigned int channel = 0; channel < values.size(); ++channel)
+        {
+            if(values[channel].size() > value_idx)
+            {
+                keep_running = true;
+                spi_xfer(AD5383_REG_A,AD5383_WRITE,channel,AD5383_REG_DATA,values[channel][value_idx]);
+            }
+        }
+        ++value_idx;
+
+    } while(keep_running);
+    close(_timer_fd);
+
+    return overruns;
+}
+
+
 void AD5383::execute_single_target(const std::vector<uint16_t> values) {
     if(values.size() > num_channels)
         throw std::runtime_error("Trajectory vector is bigger than number of channels");
