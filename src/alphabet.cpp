@@ -161,7 +161,7 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     
     actuator * curr_act = new actuator;
     std::vector<uint16_t> tmp;
-    waveformLetter result
+    waveformLetter result;
     
     // For each actuator :
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
