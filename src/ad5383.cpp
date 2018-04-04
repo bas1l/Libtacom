@@ -211,8 +211,14 @@ int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values
 
 
 
-int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<std::vector<uint16_t> >& idChannels, long period_ns)
+int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<uint16_t>& idChannels, long period_ns)
 {
+    if (values.size() != idChannels.size())
+    {
+        perror("execute_selective_trajectory/number channel !=s");   
+        return -1;
+    }
+    
     bool keep_running;
     int ret;
     unsigned long long missed = 0;
@@ -263,7 +269,7 @@ int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t>
             if(values[channel].size() > value_idx)
             {
                 keep_running = true;
-                spi_xfer(AD5383_REG_A,AD5383_WRITE,channel,AD5383_REG_DATA,values[channel][value_idx]);
+                spi_xfer(AD5383_REG_A,AD5383_WRITE,idChannels[channel],AD5383_REG_DATA,values[channel][value_idx]);
             }
         }
         ++value_idx;

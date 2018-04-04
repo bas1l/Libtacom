@@ -71,7 +71,7 @@ public:
     
     
     /**
-     * @brief Starts a timer pushing values to the dac output at a period given by period_ns (ns)
+     * @brief Starts a timer pushing values, related to the idChannels, to the dac output at a period given by period_ns (ns)
      * @param values Vector containing values for each channel, its size should be between 0 and num_channels. Each subvector contains output values (between 0 and 4095) for a channel at a given time
      * @param channels Vector containing idChannel for each vectors of 'Values'
      * @param period_ns Period between updates (ns)
