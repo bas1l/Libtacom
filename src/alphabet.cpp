@@ -150,19 +150,18 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
 
 waveformLetter
 ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
-    int nb_range = a_names.size();
-    int amsize   = wf->get_app_move_size();
-    // shift in time/ms/value between 2 actuators in series into the app move
-    int lag_inter_line = amsize*appMotionActCovering;
-    int total_time = amsize *(1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
-    actuator * curr_act = new actuator;
-    std::vector<uint16_t> tmp;
-    
-    
-    bool find = false;
-    waveformLetter result;//(nbChannel, ttv);
     std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
+    bool find           = false;
+    int  amsize         = wf->get_app_move_size();
+    // shift in time/ms/value between 2 actuators in series into the app move
+    int  lag_inter_line = amsize*appMotionActCovering;
+    int  nb_range       = a_names.size();
+    int  total_time     = amsize *(1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
+    
+    actuator * curr_act = new actuator;
+    std::vector<uint16_t> tmp;
+    waveformLetter result
     
     // For each actuator :
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
