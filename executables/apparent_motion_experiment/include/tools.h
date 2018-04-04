@@ -26,12 +26,10 @@
 #include "utils.h"
 #include "alphabet.h"
 
+
 void print_fau(int * f, int * a, int * u);
 void print_instructions();
 void usage();
-
-void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto);
-
 uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset);
-std::vector<uint16_t> 
-createsine_vector(int freq, int ampl, int offset, double phase, int nsample);
+std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, double phase, int nsample);
+std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value);
