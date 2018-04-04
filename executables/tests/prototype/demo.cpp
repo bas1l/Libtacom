@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
 void generateSentences(std::queue<char> & sentences, std::condition_variable & cv,
             std::mutex & m, std::atomic<bool> & workdone, std::string str_alph, ALPHABET *& alph)
 {
-    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
+    waveformLetter values(AD5383::num_channels);
 
     initscr();
     raw();
@@ -130,7 +130,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
             {
                 values = alph->getl(ch);
                 printw("%c", ch);
-                printw("/size of value:%i/", values[0].size());
+                printw("/size of value:%i/", values[0].second.size());
                 std::unique_lock<std::mutex> lk(m);
                 sentences.push(ch);
                 
@@ -172,21 +172,17 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     cout << "d..." <<  durationRefresh_ns <<  endl;
     
-    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    values = alph->getneutral();
-    ad.execute_trajectory(values, durationRefresh_ns);
-    for (int w=0; w<values.size(); ++w)
-    {
-        values[w].clear();
-    }
+    waveformLetter wfLetter(AD5383::num_channels);
     
     std::queue<char> letters;
     
     // Initialisation complete.
     cv.notify_one(); // Notify generator (placed here to avoid waiting for the lock)
     
+    ad.execute_trajectory(alph->getneutral(), durationRefresh_ns);
+
     // The goal of this function is to use the letters putted by the other
-    // thread, one by one, and play them consecutively.
+    // thread, one by one, and play them consecutively.    
     while(!workdone.load() or !sentences.empty())
     {
         std::unique_lock<std::mutex> lk(m);
@@ -206,18 +202,14 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         // if last char is a space, then a word is finished
         if (letters.front() != ' ')// is part of the alphabet){
         {
-            values = alph->getl(letters.front());
-            int ovr = ad.execute_trajectory(values, durationRefresh_ns);
+            wfLetter = alph->getl(letters.front());
+            int ovr = ad.execute_selective_trajectory(wfLetter, durationRefresh_ns);
             if (ovr)
             {
                 overruns += ovr;
             }
-                    
-            // for all channels, clear.
-            for (int w=0; w<values.size(); ++w)
-            {
-                values[w].clear();
-            }
+            
+            wfLetter.clear();
         }
         letters.pop();
      }

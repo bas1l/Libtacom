@@ -10,6 +10,7 @@
 #include <sys/timerfd.h>
 
 #include "ad5383.h"
+using namespace std;
 
 
 AD5383::AD5383() : _spi_fd(0) {
@@ -211,20 +212,18 @@ int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values
 
 
 
-int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t> >& values, const std::vector<uint16_t>& idChannels, long period_ns)
-{
-    if (values.size() != idChannels.size())
-    {
-        perror("execute_selective_trajectory/number channel !=s");   
-        return -1;
-    }
+int AD5383::execute_selective_trajectory(const map<uint8_t,vector<uint16_t>> wfLetter, long period_ns)
+{   
+    if(wfLetter.size() > num_channels)
+        throw std::runtime_error("Trajectory vector is bigger than number of channels");
     
+    std::map<uint8_t, vector<uint16_t>>::iterator it;
     bool keep_running;
     int ret;
     unsigned long long missed = 0;
     int overruns = 0;
     int value_idx = 0;
-
+    
     struct timespec ts = {
         .tv_sec = 0,
                 .tv_nsec = period_ns
@@ -234,10 +233,8 @@ int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t>
         .it_interval = ts,
                 .it_value = ts
     };
-
-    if(values.size() > num_channels)
-        throw std::runtime_error("Trajectory vector is bigger than number of channels");
-
+    
+    
     _timer_fd = timerfd_create(CLOCK_REALTIME, 0);
     if(_timer_fd == -1)
     {
@@ -264,12 +261,13 @@ int AD5383::execute_selective_trajectory(const std::vector<std::vector<uint16_t>
         overruns += missed - 1;
 
         keep_running = false;
-        for(unsigned int channel = 0; channel < values.size(); ++channel)
+        
+        for (it=wfLetter.begin(); it!=wfLetter.end(); ++it)
         {
-            if(values[channel].size() > value_idx)
+            if(it->second.size() > value_idx)
             {
                 keep_running = true;
-                spi_xfer(AD5383_REG_A,AD5383_WRITE,idChannels[channel],AD5383_REG_DATA,values[channel][value_idx]);
+                spi_xfer(AD5383_REG_A,AD5383_WRITE,it->first,AD5383_REG_DATA,it->second[value_idx]);
             }
         }
         ++value_idx;

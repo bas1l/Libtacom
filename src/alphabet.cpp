@@ -134,8 +134,7 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
                     tm.push_back(curr_act->vneutral);
             }
            
-            result.insert(waveformLetter::value_type(curr_act->chan, tm));
-            
+            result[curr_act->chan] = tm;
         }
         
         // to make it faster : work on it
