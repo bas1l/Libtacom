@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(appmotion_experiment)
+project(appmotionExperiment)
 
 set(CMAKE_BUILD_TYPE RelWithDebInfo)
 add_executable(${PROJECT_NAME} "demo.cpp")
