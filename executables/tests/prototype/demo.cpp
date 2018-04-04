@@ -129,8 +129,9 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
             if (str_alph.find(ch) != std::string::npos)
             {
                 values = alph->getl(ch);
+                
                 printw("%c", ch);
-                printw("/size of value:%i/", values[0].second.size());
+                printw("/size of value:%i/", values.begin()->second.size());
                 std::unique_lock<std::mutex> lk(m);
                 sentences.push(ch);
                 
@@ -172,7 +173,7 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     cout << "d..." <<  durationRefresh_ns <<  endl;
     
-    waveformLetter wfLetter(AD5383::num_channels);
+    waveformLetter wfLetter;
     
     std::queue<char> letters;
     
