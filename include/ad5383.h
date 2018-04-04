@@ -2,7 +2,7 @@
 #ifndef AD5383_H_
 #define AD5383_H_
 
-
+#include <map>
 #include <stdint.h>
 #include <vector>
 #include <linux/spi/spidev.h>
