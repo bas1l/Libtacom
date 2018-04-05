@@ -15,6 +15,7 @@ using namespace std;
 
 ALPHABET::ALPHABET() :
 	listSymbols("abcdefghijklmnopqrstuvwxyz~") {}
+	//listSymbols("abcdefghijklmnopqrstuvwxyz~") {}
 
 
 ALPHABET::ALPHABET(DEVICE * _dev, WAVEFORM * _wf) :
@@ -48,7 +49,6 @@ ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf, double _appMotionActCovering)
 {
     dev = _dev;
     wf = _wf;
-    
     appMotionActCovering = _appMotionActCovering;
     nbChannel = AD5383::num_channels;
     defaultNeutral = AD5383_DEFAULT_NEUTRAL;
@@ -113,36 +113,35 @@ waveformLetter
 ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
     
     waveformLetter result;//(a_names.size());
-    map<string, actuator>  actuators = dev->getActuatorMap();
-    actuator * curr_act = new actuator;
+    actuatorsMap  actuators = dev->getActuatorMap();
     
     // For each actuator :
+    //cout << "\tFor each actuator: " << endl;
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
-        curr_act = &(it->second);
-        
         
         // check if the current actuator has to be a part of the move
         if (std::find(a_names.begin(), a_names.end(), curr_name) != a_names.end())
         {
+//            cout << "\tcurr_name= " << curr_name << endl; 
+            actuator * act = &(it->second);
+
             // put the corresponding tap move into the result vector
-            std::vector<uint16_t> tm = wf->getTapMove(*curr_act);
-            // inter-letters procrastination
-            for(int j=0; j<300; j++)
-            {
-                    tm.push_back(curr_act->vneutral);
-            }
-           
-            result[curr_act->chan] = tm;
+            std::vector<uint16_t> tapmove = wf->getTapMove(*act);
+            
+            std::vector<uint16_t> tm;
+            tm.reserve(tapmove.size()+300);
+            tm.insert(tm.end(), tapmove.begin(), tapmove.end());
+            tm.insert(tm.end(), 300, act->vneutral); // inter-letters procrastination
+            
+            result.insert(std::pair<uint8_t,std::vector<uint16_t>>(act->chan,tm));
         }
         
         // to make it faster : work on it
         //act_names.erase(std::remove(act_names.begin(), act_names.end(), j), act_names.end());
     }
     
-    
-    delete curr_act;
     
     return result;
 }
@@ -159,42 +158,37 @@ ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
     int  nb_range       = a_names.size();
     int  total_time     = amsize *(1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
     
-    actuator * curr_act = new actuator;
     std::vector<uint16_t> tmp;
     waveformLetter result;
+    
     
     // For each actuator :
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
-        curr_act = &(it->second);
 
         for(int line=0; line<a_names.size() && !find; line++)
         {// check if the current actuator is a part of the movement, for each line
             auto out = std::find(a_names[line].begin(), a_names[line].end(), curr_name);
             if (out != a_names[line].end())
             {// if yes
-                uint16_t vneutral = (uint16_t) ~((unsigned int) curr_act->vneutral);
-                int start_at = lag_inter_line*line;
-                
-                // (1/3) before the movement:
-                tmp.insert(tmp.begin(), start_at, vneutral);
+                actuator *  act      = &(it->second);
+                int         start_at = lag_inter_line*line;
+                uint16_t    vneutral = (uint16_t) ~((unsigned int) act->vneutral);
 
+                std::vector<uint16_t> tmp;
+                tmp.reserve(total_time+300);
+                // (1/3) before the movement:
+                tmp.insert(tmp.end(), start_at, vneutral);
                 // (2/3) the movement:
                 std::vector<uint16_t> amvec = wf->getAppMove();
                 tmp.insert(tmp.end(), amvec.begin(), amvec.end());
-                
-                // (3/3) after the movement:
-                tmp.insert(tmp.begin(), total_time-tmp.size(), vneutral);
-                
-                // inter-letters procrastination
-                for(int j=0; j<300; j++)
-                {
-                        tmp.push_back(vneutral);
-                }
+                // (3/3) after the movement + inter-letters procrastination:
+                tmp.insert(tmp.end(), total_time-tmp.size(), vneutral);
+                tmp.insert(tmp.end(), 300, vneutral);
                 
                 
-                result[curr_act->chan] = tmp;
+                result.insert(std::pair<uint8_t,std::vector<uint16_t>>(act->chan,tmp));
                 
                 tmp.clear();
                 find = true;
@@ -474,9 +468,10 @@ ALPHABET::configure_letters() {
     char l;
     for(std::string::size_type i = 0; i < listSymbols.length(); ++i)
     {
-        //std::cout << "l = " << alph[i] << std::endl;
         l = listSymbols[i];
+        //std::cout << "l = " << l << "::begin " <<  std::endl;
         letters[l] = make_letter(l);
+        //std::cout << "l = " << l << "::end " << std::endl;
     }
     
     //std::cout << "configure_letters().end" << std::endl;
@@ -487,6 +482,7 @@ ALPHABET::configure_letters() {
 void 
 ALPHABET::configure_neutral() {
     std::vector<uint16_t> temp; 
+    temp.push_back(defaultNeutral);
     temp.push_back(defaultNeutral);
     
     for(int i=0; i<nbChannel; i++)

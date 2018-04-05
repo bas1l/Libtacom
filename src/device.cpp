@@ -50,8 +50,8 @@ struct actuator DEVICE::getActuator(std::string n)
 
 void DEVICE::setActuator(struct actuator _ac, std::string _idname)
 {
-    std::pair<std::map<std::string, struct actuator>::iterator, bool> ret;
-    ret = actuators.insert(std::make_pair(_idname, _ac));
+    std::pair<actuatorsMap::iterator, bool> ret;
+    ret = actuators.insert(std::pair<std::string,actuator>(_idname, _ac));
     if (ret.second==false) {
         std::cerr <<    "element '" << _idname << "' already existed"  << '\n';
     }
@@ -76,7 +76,7 @@ void DEVICE::setactMaxValue(int actmv) {
 }
 
 
-std::map<std::string, struct actuator> DEVICE::getActuatorMap()
+actuatorsMap DEVICE::getActuatorMap()
 {
     return actuators;
 }

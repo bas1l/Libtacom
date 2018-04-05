@@ -96,7 +96,6 @@ WAVEFORM::configure()
 
 std::vector<uint16_t> WAVEFORM::getTapMove(actuator a)
 {   
-    std::vector<uint16_t> result;
     int ms;
     int nbValue = freqRefresh_mHz*tapDuration; //409;//tapdur=millisec
     
@@ -109,6 +108,8 @@ std::vector<uint16_t> WAVEFORM::getTapMove(actuator a)
     uint16_t vneutral   = (uint16_t) ~((unsigned int) a.vneutral);
    
     
+    std::vector<uint16_t> result;
+    result.reserve(nbValue);
     // push the actuator
     for(ms=0; ms<nbPush; ms++)
     {
@@ -124,6 +125,9 @@ std::vector<uint16_t> WAVEFORM::getTapMove(actuator a)
     {
         result.push_back(vneutral);
     }
+    
+    
+    return result;
 }
 
 void 

@@ -19,7 +19,6 @@
 
 
 
-
 struct actuator
 {
     std::string name;
@@ -32,6 +31,7 @@ struct actuator
     uint16_t vpush;
 };
 
+typedef std::map<std::string, actuator> actuatorsMap;
 
 
 
@@ -67,7 +67,7 @@ public :
     /*
      * @brief return the map of actuators
      */
-    std::map<std::string, struct actuator> getActuatorMap();
+    actuatorsMap getActuatorMap();
     
     
     /*
@@ -86,7 +86,7 @@ private:
     actuator make_actuator(std::string n, uint8_t _chan, uint16_t _vup, 
                            uint16_t _vneutral, uint16_t _vpush);
     
-    std::map<std::string, struct actuator> actuators;
+    actuatorsMap actuators;
     std::map<std::string, struct actuator>::iterator it_act;
     int nbActuator;
     int actMaxValue;

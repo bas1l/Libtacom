@@ -72,9 +72,10 @@ int main(int argc, char *argv[])
     cfg->parse(cfgSource, "HaptiComm");
     cfg->configureDevice(dev);
     cfg->configureWaveform(wf);
-    cout << "0a..." << endl;
     alph->configure(dev, wf);
     cout << "0b..." << endl;
+    
+    
     
     std::condition_variable cv;
     std::mutex m;
