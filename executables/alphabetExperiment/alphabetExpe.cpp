@@ -27,7 +27,7 @@
 #include "alphabet.h"
 
 // personal tools
-#include "tools.h"
+#include "toolsAlphaExpe.h"
 
 using namespace std;
 using namespace std::chrono;
