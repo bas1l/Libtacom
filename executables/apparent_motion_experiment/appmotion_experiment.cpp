@@ -41,12 +41,12 @@ using namespace std::chrono;
 #endif
 
 
-void draw_variable(struct variableAppMove * vam);
+void draw_variable(struct variableMove * vam);
 void draw(struct appMove * am);
-std::vector<std::vector<uint16_t>> getAppmove(struct appMove * am, ALPHABET* alph);
-struct variableAppMove * getVariableam(struct appMove *am, char * c);
-bool modifyVariable(struct variableAppMove * vam, int v);
-void resetVariable(struct variableAppMove * vam);
+waveformLetter getAppmove(struct appMove * am, ALPHABET* alph);
+struct variableMove * getVariableam(struct appMove *am, char * c);
+bool modifyVariable(struct variableMove * vam, int v);
+void resetVariable(struct variableMove * vam);
 void initAppMoveVariables(struct appMove * am);
 static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
 
@@ -61,8 +61,9 @@ int main(int argc, char *argv[])
     WAVEFORM *  wf  = new WAVEFORM();
     ALPHABET * alph = new ALPHABET();
     struct appMove * am = new appMove();
-    struct variableAppMove * vam = new variableAppMove();
+    struct variableMove * vam = new variableMove();
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
+    waveformLetter wfLetter;
     
     int nbAppmove=0;
     const char * cfgSource;
@@ -72,7 +73,7 @@ int main(int argc, char *argv[])
     int ch = ERR;
     int nmessage_sec;
     int exitStatus = 0;
-    
+    int overruns = 0;
     
     /*** Initialisation ENVIRONMENT ***/
     setlocale(LC_ALL, "");
@@ -106,9 +107,12 @@ int main(int argc, char *argv[])
     alph->configure(dev, wf);
     initAppMoveVariables(am);
     (*vam) = {"null", ' ', -1, -1, -1, -1};
+    double durationRefresh_ms = 1/(double) alph->get_freqRefresh_mHz();
+    int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     
     
     /*** work ***/
+    wf->printCharacteristics();
     print_instructions();
     //values = alph->getneutral();
     ad->execute_trajectory(alph->getneutral(), timePmessage_ns);
@@ -162,10 +166,18 @@ int main(int argc, char *argv[])
                 initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-                wf->configure(20, *am, nmessage_sec, 0);
+				moveWF tapmc = wf->getTapMoveC();
+                wf->configure(tapmc, *am, alph->get_freqRefresh_mHz()*1000, 0);
                 alph->configure(dev, wf, am->actCovering.value/(double)100);
-                values = getAppmove(am, alph);
-                ad->execute_trajectory(getAppmove(am, alph), timePmessage_ns);
+                
+                wfLetter = getAppmove(am, alph);
+                int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
+				if (ovr)
+				{
+					overruns += ovr;
+				}
+				
+				wfLetter.clear();
                 nbAppmove++;
             }
         }
@@ -174,7 +186,7 @@ int main(int argc, char *argv[])
         draw_variable(vam);
         //printw("\n");
         //printw("ID apparent move :%i\n", nbAppmove);
-		printw("size=%i, tPm_ns=%i", values[0].size(), (int)timePmessage_ns);
+		printw("transferFrequency=%iHz, overruns=%iBits", (int)alph->get_freqRefresh_mHz()*1000, overruns);
         
     }while((ch = getch()) != '*');
     
@@ -189,7 +201,7 @@ int main(int argc, char *argv[])
     return exitStatus;
 }
 
-void draw_variable(struct variableAppMove * vam) {
+void draw_variable(struct variableMove * vam) {
     printw("\n");
     //printw("%s values:\n", vam->name.c_str());
     //printw("min=<%i> v=<%i> max=<%i>\n", vam->min, vam->value, vam->max);
@@ -216,7 +228,7 @@ draw(struct appMove * am) {
     printw("(%c) Duration = <%i>\n", am->action.duration.key, am->action.duration.value);
 }
 
-std::vector<std::vector<uint16_t>> 
+waveformLetter 
 getAppmove(struct appMove * am, ALPHABET* alph)
 {
     //reconfigure the app motion
@@ -240,7 +252,7 @@ getAppmove(struct appMove * am, ALPHABET* alph)
 }   
 
 
-struct variableAppMove * getVariableam(struct appMove *am, char * c)
+struct variableMove * getVariableam(struct appMove *am, char * c)
 {
     if (*c == am->asc.typeSignal.key){
         return &(am->asc.typeSignal);
@@ -272,7 +284,7 @@ struct variableAppMove * getVariableam(struct appMove *am, char * c)
 }
 
 
-bool modifyVariable(struct variableAppMove * vam, int v) {
+bool modifyVariable(struct variableMove * vam, int v) {
     bool modified = false;
     int tmp = vam->value + v;
     
@@ -285,7 +297,7 @@ bool modifyVariable(struct variableAppMove * vam, int v) {
     return modified;
 }
 
-void resetVariable(struct variableAppMove * vam) {
+void resetVariable(struct variableMove * vam) {
     vam->value =  vam->valueDefault;
 }
 

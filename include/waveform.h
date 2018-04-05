@@ -23,7 +23,7 @@
 
 
 
-struct variableAppMove
+struct variableMove
 {
     std::string name;
     char key;
@@ -33,23 +33,23 @@ struct variableAppMove
     int max;
 };// variableAppMove_default = {' ', -1, -1, -1};
 
-struct partMove
+struct moveWF
 {
     std::string name;
     std::string wav;
     
-    variableAppMove typeSignal;
-    variableAppMove amplitude;
-    variableAppMove duration;
+    variableMove typeSignal;
+    variableMove amplitude;
+    variableMove duration;
 };
 
 struct appMove
 {
-    partMove asc;
-    partMove action;
+    moveWF asc;
+    moveWF action;
     
-    variableAppMove nbAct;
-    variableAppMove actCovering;
+    variableMove nbAct;
+    variableMove actCovering;
 };
 
 
@@ -72,7 +72,7 @@ public:
                     int _appRatioCover, 
                     int _appAscDuration, 
                     int _appActionDuration, int _appActionAmplitude);
-    void configure(int _tapDuration, struct appMove _amc, int nmessage_sec, int useWAV);
+    void configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_sec, int useWAV);
     void configure();
     
     /**
@@ -102,6 +102,7 @@ public:
      * @brief get the apparent movement pointer
      */
     int get_app_move_size();
+    moveWF getTapMoveC();
     
     /**
      * @brief get the frequency of refresh for all channels (all actuator)
@@ -115,6 +116,7 @@ public:
     void insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result);
     
 private:
+    void create_tapMoveWAV();
     void create_appMoveWAV();
     void create_app_move_standard();
     float * create_envelope_sin(int length, int ampl);
@@ -123,13 +125,13 @@ private:
     
     int freqRefresh_mHz;
     
+    std::vector<uint16_t> tapMoveVec;
     std::vector<uint16_t> appMoveVec;
     
-    //float deg2rad = 3.14159265/180;
-    
+    struct 	moveWF tapmc;
     int     tapDuration;// 20 ms
     
-    struct appMove amc;
+    struct 	appMove amc;
     int     appDuration; //APPARENT_DURATION (APPARENT_ASC_DURATION+APPARENT_MOVE_DURATION)
     int     appActSuperposed; // 4
     float   appRatioCover; // .25

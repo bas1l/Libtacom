@@ -61,26 +61,29 @@ WAVEFORM::configure(int _freqRefresh_mHz, int _tapDuration, int _appActSuperpose
 
 
 void 
-WAVEFORM::configure(int _tapDuration, struct appMove _amc, int nmessage_Hz, int useWAV)
+WAVEFORM::configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_Hz, int useWAV)
 {
     freqRefresh_mHz = nmessage_Hz * (1/(double)sec2ms);
-
-    tapDuration = _tapDuration;
-    if (tapDuration < 3)
+    
+    if (_tapmc.duration.value < 3)
     {
         perror("TAP_MOVE_DURATION < 3 milliseconds is forbidden");
     }
+    tapDuration = _tapmc.duration.value;
     
     appActSuperposed    = _amc.nbAct.value;
     appRatioCover       = _amc.actCovering.value/(float)100; //integer ratio to double
     appAscDuration      = _amc.asc.duration.value;
-    appAscAmplitude	= _amc.asc.amplitude.value;
+    appAscAmplitude		= _amc.asc.amplitude.value;
     appActionDuration   = _amc.action.duration.value;
     appActionAmplitude  = _amc.action.amplitude.value;
+    
+    tapmc = _tapmc;
     amc = _amc;
     
     if (useWAV){
         create_appMoveWAV();
+        create_tapMoveWAV();
     }
     else{
         create_app_move_standard();
@@ -195,6 +198,45 @@ WAVEFORM::insert_app_move(actuator a, int start_at, std::vector<std::vector<uint
  * 
  * 
  */
+void 
+WAVEFORM::create_tapMoveWAV()
+{
+    int t = 0;
+    WavFile* pObjWavFile = new WavFile();
+    tapMoveVec.clear();
+    
+    
+    // Extract the WAV
+    char *cstr = new char[tapmc.wav.length() + 1];
+    strcpy(cstr, tapmc.wav.c_str());
+    // open the corresponding file
+    if (EXIT_SUCCESS != pObjWavFile->openWavFile(cstr))
+    {
+        std::cout<<"\nCan't load wav file.";
+        exit(-1);
+    }
+    // Compensate the difference between WAV and DAC frequencies
+    double* samplesWAV  = pObjWavFile->getData();
+    int     nbSamples   = pObjWavFile->getNumSamples();
+    int     fs_mHz      = (int)(pObjWavFile->getSampleRateHz()*(1/(double)sec2ms));
+    double  incr        = fs_mHz / (double) freqRefresh_mHz;
+    int 	nbValue 	= (int) (nbSamples/incr);
+    
+    // Compensate the difference between WAV and DAC amplitudes
+    int amplitude   = tapmc.amplitude.value;
+    double min      = abs(*std::min_element(samplesWAV, samplesWAV+nbSamples));
+    double max      = *std::max_element(samplesWAV, samplesWAV+nbSamples);
+    double ratio    = amplitude/ (min>max?min:max);
+    
+    // write the movement:
+    for (t=0; t<nbValue; t++){
+        tapMoveVec.push_back((uint16_t) (ratio*samplesWAV[(int)(t*incr)]));
+    }
+    
+    free(cstr);
+}
+
+
 void 
 WAVEFORM::create_appMoveWAV()
 {
@@ -348,7 +390,10 @@ WAVEFORM::create_random_dots(int nsample, int a, int b)
 }
 
 
-
+moveWF WAVEFORM::getTapMoveC()
+{
+	return tapmc;	
+}
 
 int 
 WAVEFORM::get_app_move_size()
