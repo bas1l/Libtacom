@@ -9,6 +9,8 @@ add_subdirectory("neutral")
 add_subdirectory("caracterise2018")
 add_subdirectory("sinefunction_generator")
 add_subdirectory("apparent_motion_experiment")
+add_subdirectory("alphabetExpe")
+
 add_subdirectory("tests/read_values")
 add_subdirectory("tests/HaptiCommConfig")
 add_subdirectory("tests/sound_master")
