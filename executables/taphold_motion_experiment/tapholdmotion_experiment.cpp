@@ -42,7 +42,7 @@ using namespace std::chrono;
 
 
 void draw_variable(struct variableMove * vam);
-void draw(struct moveWF * mwf);
+void draw(struct appMove * am);
 
 waveformLetter getTapHoldmove(struct appMove * am, ALPHABET* alph);
 waveformLetter getAppmove(struct appMove * am, ALPHABET* alph);
@@ -78,12 +78,13 @@ int main(int argc, char *argv[])
     int nbAppmove=0;
     const char * cfgSource;
     const char * scope;
-    std::string changeVariables = "";
+    std::string changeVariables = "szx";
     char cCurrentVariable = ' ';
     int ch = ERR;
     int nmessage_sec;
     int exitStatus = 0;
     int overruns = 0;
+    int ovr = 0;
     
     /*** Initialisation ENVIRONMENT ***/
     setlocale(LC_ALL, "");
@@ -137,45 +138,23 @@ int main(int argc, char *argv[])
                 cCurrentVariable = ch;
                 vam = getVariableam(am, &cCurrentVariable);
             }
-            else if (KEY_RIGHT == ch) {   
-                // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    modifyVariable(vam, 1 + am->asc.amplitude.value);
-                }
-                else {    
-                    modifyVariable(vam, +1);
-                }
+            else if (KEY_RIGHT == ch) {
+				modifyVariable(vam, +1);
             }
             else if (KEY_UP == ch) {
-                // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    if (modifyVariable(vam, 100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
-                    }
-                }
-                else {    
-                    modifyVariable(vam, +100);
-                }
+				modifyVariable(vam, +100);
             }
             else if (KEY_LEFT == ch) {
-                modifyVariable(vam, -1);
+				modifyVariable(vam, -1);
             }
             else if (KEY_DOWN == ch) {
-                // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    if (modifyVariable(vam, -100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
-                    }
-                }
-                else {    
-                    modifyVariable(vam, -100);
-                }
+				modifyVariable(vam, -100);
             }
             else if ('v' == ch) {
                 //write_file(am);
             }
             else if ('j' == ch) {
-                resetVariable(&tapmc->amplitude);
+                //resetVariable(&vam->amplitude);
             }
             else if ('l' == ch) {
                 //initAppMoveVariables(am);
@@ -188,7 +167,7 @@ int main(int argc, char *argv[])
                 alph->configure(dev, wf);
                 
                 wfLetter = getTapHoldmove(am, alph);
-                int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
+                ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
 				if (ovr)
 				{
 					overruns += ovr;
@@ -199,11 +178,11 @@ int main(int argc, char *argv[])
             }
         }
         
-        draw(tapmc);
+        draw(am);
         //draw_variable(tapvm);
         printw("\n");
         //printw("ID apparent move :%i\n", nbAppmove);
-		printw("transferFrequency=%iHz, overruns=%iBits", (int)alph->getFreqRefresh_mHz()*1000, overruns);
+		printw("transferFrequency=%iHz, overruns=%iBits, Totaloverruns=%iBits", (int)alph->getFreqRefresh_mHz()*1000, ovr, overruns);
         
     }while((ch = getch()) != '*');
     
@@ -225,23 +204,23 @@ void draw_variable(struct variableMove * vam) {
 }
 
 void 
-draw(struct moveWF * mwf) {    
+draw(struct appMove * am) {    
     clear();
     print_instructions();
     printw("Global variables:\n");
-    //printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
-    //printw("(%c) Overlap between actuators = <%i%>\n", am->actOverlap.key, am->actOverlap.value);
+    printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
+    printw("(%c) Overlap between actuators = <%i%>\n", am->actOverlap.key, am->actOverlap.value);
     
     //printw("\n");
     //printw("Ascension :\n");
     //printw("(%c) Type of signal = <%i>\n", am->asc.typeSignal.key, am->asc.typeSignal.value);
-    printw("(%c) Amplitude = <%i>\n", mwf->amplitude.key, mwf->amplitude.value);
+    //printw("(%c) Amplitude = <%i>\n", am->asc.amplitude.key, am->asc.amplitude.value);
     //printw("(%c) Duration = <%i>\n", am->asc.duration.key, am->asc.duration.value);
     
     //printw("\n");
     //printw("Action :\n");
     //printw("(%c) Type of signal = <%i>\n", am->action.typeSignal.key, am->action.typeSignal.value);
-    //printw("(%c) Amplitude = <%i>\n", am->action.amplitude.key, am->action.amplitude.value);
+    printw("(%c) Amplitude = <%i>\n", am->action.amplitude.key, am->action.amplitude.value);
     //printw("(%c) Duration = <%i>\n", am->action.duration.key, am->action.duration.value);
 }
 

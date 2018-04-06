@@ -127,7 +127,9 @@ int main(int argc, char *argv[])
             else if (KEY_RIGHT == ch) {   
                 // special case for the action.amplitude 
                 if (vam->key == 's') {
-                    modifyVariable(vam, 1 + am->asc.amplitude.value);
+                    if ((vam->value+am->asc.amplitude.value+1 >= vam->min) && (vam->value+am->asc.amplitude.value+1 <= vam->max)) {
+						modifyVariable(vam, +1);
+					}
                 }
                 else {    
                     modifyVariable(vam, +1);
@@ -136,8 +138,8 @@ int main(int argc, char *argv[])
             else if (KEY_UP == ch) {
                 // special case for the action.amplitude 
                 if (vam->key == 's') {
-                    if (modifyVariable(vam, 100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
+                    if ((vam->value+am->asc.amplitude.value+100 >= vam->min) && (vam->value+am->asc.amplitude.value+100 <= vam->max)) {
+                    modifyVariable(vam, +100);
                     }
                 }
                 else {    
@@ -145,13 +147,20 @@ int main(int argc, char *argv[])
                 }
             }
             else if (KEY_LEFT == ch) {
-                modifyVariable(vam, -1);
+				if (vam->key == 's') {
+                    if ((vam->value+am->asc.amplitude.value-1 >= vam->min) && (vam->value+am->asc.amplitude.value-1	 <= vam->max)) {
+						modifyVariable(vam, -1);
+                    }
+                }
+                else {    
+					modifyVariable(vam, -1);
+                }
             }
             else if (KEY_DOWN == ch) {
                 // special case for the action.amplitude 
                 if (vam->key == 's') {
-                    if (modifyVariable(vam, -100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
+                    if ((vam->value+am->asc.amplitude.value-100 >= vam->min) && (vam->value+am->asc.amplitude.value-100 <= vam->max)) {
+                        modifyVariable(vam, -100);
                     }
                 }
                 else {    
