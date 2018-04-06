@@ -35,7 +35,7 @@ ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf)
     dev = _dev;
     wf = _wf;
     
-    appMotionActCovering = 0.25;
+    appMotionActCovering = wf->getAppRatioCover()/(double)100; //0.25
     nbChannel = AD5383::num_channels;
     defaultNeutral = AD5383_DEFAULT_NEUTRAL;
     
@@ -128,7 +128,7 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
             actuator * act = &(it->second);
 
             // put the corresponding tap move into the result vector
-            std::vector<uint16_t> tapmove = wf->getTapMove(*act);
+            std::vector<uint16_t> tapmove = wf->getTapMove();
             
             std::vector<uint16_t> tm;
             tm.reserve(tapmove.size()+300);

@@ -9,6 +9,7 @@ add_subdirectory("neutral")
 add_subdirectory("caracterise2018")
 add_subdirectory("sinefunction_generator")
 add_subdirectory("apparent_motion_experiment")
+add_subdirectory("tap_motion_experiment")
 add_subdirectory("alphabetExperiment")
 
 add_subdirectory("tests/read_values")

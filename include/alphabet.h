@@ -67,9 +67,9 @@ public :
     int get_freqRefresh_mHz();
 
     waveformLetter make_app_letter(std::vector<std::vector<std::string>> a_names);
+    waveformLetter make_tap_letter(std::vector<std::string> a_names);
     
 private:
-    waveformLetter make_tap_letter(std::vector<std::string> a_names);
     waveformLetter make_letter(char l);
     bool configure_letters();
     void configure_neutral();

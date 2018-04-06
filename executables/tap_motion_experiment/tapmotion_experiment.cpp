@@ -27,7 +27,7 @@
 #include "alphabet.h"
 
 // personal tools
-#include "tools.h"
+#include "toolstap.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -42,12 +42,14 @@ using namespace std::chrono;
 
 
 void draw_variable(struct variableMove * vam);
-void draw(struct appMove * am);
+void draw(struct moveWF * mwf);
 waveformLetter getAppmove(struct appMove * am, ALPHABET* alph);
+waveformLetter getTapmove(struct appMove * am, ALPHABET* alph);
 struct variableMove * getVariableam(struct appMove *am, char * c);
 bool modifyVariable(struct variableMove * vam, int v);
 void resetVariable(struct variableMove * vam);
 void initAppMoveVariables(struct appMove * am);
+void initTapMoveVariables(struct moveWF * am);
 static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
 
 
@@ -61,14 +63,15 @@ int main(int argc, char *argv[])
     WAVEFORM *  wf  = new WAVEFORM();
     ALPHABET * alph = new ALPHABET();
     struct appMove * am = new appMove();
-    struct variableMove * vam = new variableMove();
+    struct moveWF * tapmc = new moveWF();
+    struct variableMove * tapvm = new variableMove();
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     waveformLetter wfLetter;
     
     int nbAppmove=0;
     const char * cfgSource;
     const char * scope;
-    std::string changeVariables = "qweasdzx";
+    std::string changeVariables = "";
     char cCurrentVariable = ' ';
     int ch = ERR;
     int nmessage_sec;
@@ -88,6 +91,10 @@ int main(int argc, char *argv[])
             perror("mlockall failed");
             exit(-2);
     }
+    initscr();
+    raw();
+    keypad(stdscr, TRUE);
+    noecho();
     
     
     /*** Configuration VARIABLES ***/
@@ -102,76 +109,51 @@ int main(int argc, char *argv[])
     cfg->configureWaveform(wf);
     alph->configure(dev, wf);
     initAppMoveVariables(am);
-    (*vam) = {"null", ' ', -1, -1, -1, -1};
+    initTapMoveVariables(tapmc);
+    (*tapvm) = {"null", ' ', -1, -1, -1, -1};
     double durationRefresh_ms = 1/(double) alph->get_freqRefresh_mHz();
     int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     
     
     /*** work ***/
-    
-    initscr();
-    raw();
-    keypad(stdscr, TRUE);
-    noecho();
     wf->printCharacteristics();
     print_instructions();
     //values = alph->getneutral();
     ad->execute_trajectory(alph->getneutral(), timePmessage_ns);
+    
     do {
         if (ERR != ch) {
             if (std::string::npos != changeVariables.find(ch)) {
-                cCurrentVariable = ch;
-                vam = getVariableam(am, &cCurrentVariable);
+                //cCurrentVariable = ch;
+                //tapvm = getVariableam(am, &cCurrentVariable);
             }
-            else if (KEY_RIGHT == ch) {   
-                // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    modifyVariable(vam, 1 + am->asc.amplitude.value);
-                }
-                else {    
-                    modifyVariable(vam, +1);
-                }
+            else if (KEY_RIGHT == ch) {  
+				modifyVariable(&tapmc->amplitude, +1);
             }
             else if (KEY_UP == ch) {
-                // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    if (modifyVariable(vam, 100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
-                    }
-                }
-                else {    
-                    modifyVariable(vam, +100);
-                }
+				modifyVariable(&tapmc->amplitude, +100);
             }
             else if (KEY_LEFT == ch) {
-                modifyVariable(vam, -1);
+                modifyVariable(&tapmc->amplitude, -1);
             }
             else if (KEY_DOWN == ch) {
-                // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    if (modifyVariable(vam, -100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
-                    }
-                }
-                else {    
-                    modifyVariable(vam, -100);
-                }
+				modifyVariable(&tapmc->amplitude, -100);
             }
             else if ('v' == ch) {
                 //write_file(am);
             }
             else if ('j' == ch) {
-                //resetVariable(vam);
+                resetVariable(&tapmc->amplitude);
             }
             else if ('l' == ch) {
                 //initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-				moveWF tapmc = wf->getTapMoveC();
-                wf->configure(tapmc, *am, alph->get_freqRefresh_mHz()*1000, 1);
+				//*tapmc = wf->getTapMoveC();
+                wf->configure(*tapmc, *am, alph->get_freqRefresh_mHz()*1000, 1);
                 alph->configure(dev, wf, am->actCovering.value/(double)100);
                 
-                wfLetter = getAppmove(am, alph);
+                wfLetter = getTapmove(am, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
 				if (ovr)
 				{
@@ -183,9 +165,9 @@ int main(int argc, char *argv[])
             }
         }
         
-        draw(am);
-        draw_variable(vam);
-        //printw("\n");
+        draw(tapmc);
+        //draw_variable(tapvm);
+        printw("\n");
         //printw("ID apparent move :%i\n", nbAppmove);
 		printw("transferFrequency=%iHz, overruns=%iBits", (int)alph->get_freqRefresh_mHz()*1000, overruns);
         
@@ -209,24 +191,24 @@ void draw_variable(struct variableMove * vam) {
 }
 
 void 
-draw(struct appMove * am) {    
+draw(struct moveWF * mwf) {    
     clear();
     print_instructions();
     printw("Global variables:\n");
-    printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
-    printw("(%c) Covering between actuators = <%i%>\n", am->actCovering.key, am->actCovering.value);
+    //printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
+    //printw("(%c) Covering between actuators = <%i%>\n", am->actCovering.key, am->actCovering.value);
     
-    printw("\n");
-    printw("Ascension :\n");
-    printw("(%c) Type of signal = <%i>\n", am->asc.typeSignal.key, am->asc.typeSignal.value);
-    printw("(%c) Amplitude = <%i>\n", am->asc.amplitude.key, am->asc.amplitude.value);
-    printw("(%c) Duration = <%i>\n", am->asc.duration.key, am->asc.duration.value);
+    //printw("\n");
+    //printw("Ascension :\n");
+    //printw("(%c) Type of signal = <%i>\n", am->asc.typeSignal.key, am->asc.typeSignal.value);
+    printw("(%c) Amplitude = <%i>\n", mwf->amplitude.key, mwf->amplitude.value);
+    //printw("(%c) Duration = <%i>\n", am->asc.duration.key, am->asc.duration.value);
     
-    printw("\n");
-    printw("Action :\n");
-    printw("(%c) Type of signal = <%i>\n", am->action.typeSignal.key, am->action.typeSignal.value);
-    printw("(%c) Amplitude = <%i>\n", am->action.amplitude.key, am->action.amplitude.value);
-    printw("(%c) Duration = <%i>\n", am->action.duration.key, am->action.duration.value);
+    //printw("\n");
+    //printw("Action :\n");
+    //printw("(%c) Type of signal = <%i>\n", am->action.typeSignal.key, am->action.typeSignal.value);
+    //printw("(%c) Amplitude = <%i>\n", am->action.amplitude.key, am->action.amplitude.value);
+    //printw("(%c) Duration = <%i>\n", am->action.duration.key, am->action.duration.value);
 }
 
 waveformLetter 
@@ -250,6 +232,31 @@ getAppmove(struct appMove * am, ALPHABET* alph)
     //std::vector<std::vector<uint16_t>> result = ;
     
     return alph->make_app_letter(actIDs);
+}   
+
+
+
+waveformLetter 
+getTapmove(struct appMove * am, ALPHABET* alph)
+{
+    //reconfigure the app motion
+    std::vector<std::string> names(am->nbAct.max);
+    names[0] = "palm32";
+    names[1] = "palm22";
+	names[2] = "palm12";
+    names[3] = "mf1";
+    names[4] = "mf2";
+    names[5] = "mf3";
+    
+    
+    std::vector<std::string> actIDs(am->nbAct.value);
+    for(int i=0; i<am->nbAct.value; i++)
+    {
+        actIDs[i] = names[(am->nbAct.max-am->nbAct.value)+i];
+    }
+    //std::vector<std::vector<uint16_t>> result = ;
+    
+    return alph->make_tap_letter(actIDs);
 }   
 
 
@@ -304,8 +311,7 @@ void resetVariable(struct variableMove * vam) {
 
 
 void initAppMoveVariables(struct appMove * am) {
-	
-    am->asc.name = "Apparent Asc";
+	am->asc.name = "Apparent Asc";
     am->asc.wav = "apparentAsc.wav";
     
     am->asc.typeSignal.key = 'q';
@@ -370,6 +376,17 @@ void initAppMoveVariables(struct appMove * am) {
     am->actCovering.max = 100;//ms
 }
 
+void initTapMoveVariables(struct moveWF * am) {
+    am->name = "Tap motion";
+    am->wav = "../libtacom/Tap.wav";
+    
+    am->amplitude.key = 's';
+    am->amplitude.name = "Tap amplitude";
+    am->amplitude.value = 2048;
+    am->amplitude.valueDefault = 2048;
+    am->amplitude.min = 0;
+    am->amplitude.max = 4095;
+}
 
 static void 
 parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec)

@@ -117,15 +117,22 @@ int main(int argc, char *argv[])
     //values = alph->getneutral();
     ad->execute_trajectory(alph->getneutral(), timePmessage_ns);
     do {
-        if (ERR != ch) {
+        if (ERR != ch) 
+        {
             if (std::string::npos != changeVariables.find(ch)) {
                 cCurrentVariable = ch;
                 vam = getVariableam(am, &cCurrentVariable);
             }
-            else if (KEY_RIGHT == ch) {   
+            
+            else if (KEY_RIGHT == ch) {
                 // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    modifyVariable(vam, 1 + am->asc.amplitude.value);
+				if (vam->key == 's') 
+                {
+					int tmp = vam->value+am->asc.amplitude.value+1;
+					if (tmp<=vam->max && tmp>=vam->min)
+					{
+                        modifyVariable(vam, +1);
+                    }
                 }
                 else {    
                     modifyVariable(vam, +1);
@@ -133,9 +140,12 @@ int main(int argc, char *argv[])
             }
             else if (KEY_UP == ch) {
                 // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    if (modifyVariable(vam, 100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
+                if (vam->key == 's') 
+                {
+					int tmp = vam->value+am->asc.amplitude.value+100;
+					if (tmp<=vam->max && tmp>=vam->min)
+					{
+                        modifyVariable(vam, +100);
                     }
                 }
                 else {    
@@ -143,19 +153,34 @@ int main(int argc, char *argv[])
                 }
             }
             else if (KEY_LEFT == ch) {
-                modifyVariable(vam, -1);
-            }
-            else if (KEY_DOWN == ch) {
                 // special case for the action.amplitude 
-                if (vam->key == 's') {
-                    if (modifyVariable(vam, -100 + am->asc.amplitude.value)) {
-                        modifyVariable(vam, -am->asc.amplitude.value);
+                 if (vam->key == 's') 
+                {
+					int tmp = vam->value+am->asc.amplitude.value-1;
+					if (tmp<=vam->max && tmp>=vam->min)
+					{
+                        modifyVariable(vam, -1);
                     }
                 }
                 else {    
+                    modifyVariable(vam, -1);
+                }
+            }
+            else if (KEY_DOWN == ch) {
+                // special case for the action.amplitude 
+				if (vam->key == 's') 
+                {
+					int tmp = vam->value+am->asc.amplitude.value-100;
+					if (tmp<=vam->max && tmp>=vam->min)
+					{
+                        modifyVariable(vam, -100);
+                    }
+                }
+                else {
                     modifyVariable(vam, -100);
                 }
             }
+            
             else if ('v' == ch) {
                 //write_file(am);
             }
@@ -168,7 +193,7 @@ int main(int argc, char *argv[])
             else if ('\n' == ch) {
 				moveWF tapmc = wf->getTapMoveC();
                 wf->configure(tapmc, *am, alph->get_freqRefresh_mHz()*1000, 0);
-                alph->configure(dev, wf, am->actCovering.value/(double)100);
+                alph->configure(dev, wf);
                 
                 wfLetter = getAppmove(am, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);

@@ -102,6 +102,8 @@ public:
      * @brief get the apparent movement pointer
      */
     int get_app_move_size();
+    int getAppRatioCover();
+    
     moveWF getTapMoveC();
     
     /**
@@ -109,6 +111,7 @@ public:
      */
     int get_freqRefresh_mHz();
     
+	std::vector<uint16_t> getTapMove();
     std::vector<uint16_t> getTapMove(actuator a);
     std::vector<uint16_t> getAppMove();
     
@@ -128,8 +131,8 @@ private:
     std::vector<uint16_t> tapMoveVec;
     std::vector<uint16_t> appMoveVec;
     
-    struct 	moveWF tapmc;
-    int     tapDuration;// 20 ms
+    struct 	moveWF tapmc;//Duration= 20 ms
+    struct 	moveWF tapHoldmc;
     
     struct 	appMove amc;
     int     appDuration; //APPARENT_DURATION (APPARENT_ASC_DURATION+APPARENT_MOVE_DURATION)
