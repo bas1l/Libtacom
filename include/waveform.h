@@ -17,7 +17,7 @@
 #include <math.h>
 #include <vector>
 
-#include  "wav_file.h"
+#include "wav_file.h"
 
 #include "utils.h"
 #include "device.h"
@@ -93,7 +93,7 @@ public:
     /**********************************************/
     /***            @brief Configurations       ***/
     /**********************************************/
-    void configure( struct moveWF _tapHoldmc,
+    void configure( struct tapHoldMove _tapHoldmc,
                     struct moveWF _tapmc, 
                     struct appMove _amc, 
                     int nmessage_sec, int useWAV);
@@ -117,9 +117,11 @@ public:
     /***            @brief Getters              ***/
     /**********************************************/
     int                     getFreqRefresh_mHz();
-    int                     getAppMoveSize();
-    int                     getAppOverlap();
-    moveWF                  getTapHoldMoveC();
+    int                     getTapHoldMoveSize();
+    int                     getAppMoveSize();    
+    int                     getTapHoldOverlap();
+    int                     getAppOverlap();    
+    tapHoldMove             getTapHoldMoveC();
     moveWF                  getTapMoveC();
     
     std::vector<uint16_t>   getTapHoldMove();
@@ -135,9 +137,9 @@ private:
     // refresh rate bits/milliseconds (SPI, RPI3 to AD5383)
     int freqRefresh_mHz;
     // Caracteristics of the motions
-    struct moveWF  tapHoldmc;
-    struct moveWF  tapmc;
-    struct appMove amc;
+    struct tapHoldMove  tapHoldmc;
+    struct moveWF       tapmc;
+    struct appMove      amc;
     // Normalised values of the motions
     std::vector<uint16_t> tapHoldMoveVec;
     std::vector<uint16_t> tapMoveVec;

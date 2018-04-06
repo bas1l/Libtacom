@@ -132,12 +132,13 @@ throw (HaptiCommConfigurationException)
         tapm->amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
         tapm->wav = m_cfg->lookupString(filter.c_str(), "wav");
         
-        struct moveWF * tapHoldm = new moveWF();
+        struct tapHoldMove * tapHoldm = new tapHoldMove();
         //struct appMove * tapm = new appMove();
         Configuration::mergeNames(scope.c_str(), "tapHold", filter);
-        tapHoldm->duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
-        tapHoldm->amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
-        tapHoldm->wav = m_cfg->lookupString(filter.c_str(), "wav");
+        tapHoldm->actOverlap.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "actuator_overlapping"))*100);
+        tapHoldm->action.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
+        tapHoldm->action.amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
+        tapHoldm->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
         
         struct appMove * am = new appMove();
         Configuration::mergeNames(scope.c_str(), "apparent", filter);

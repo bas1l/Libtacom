@@ -94,13 +94,13 @@ ALPHABET::make_tapHoldLetter(std::vector<std::vector<std::string>> a_names)
 {
     std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
-    double actOverlap   = wf->getAppOverlap()/(double)100; //0.25
+    double actOverlap   = wf->getTapHoldOverlap()/(double)100; //0.25
     bool find           = false;
-    int  amsize         = wf->getAppMoveSize();
+    int  tapholdsize    = wf->getTapHoldMoveSize();
     // shift in time/ms/value between 2 actuators in series into the app move
-    int  lag_inter_line = amsize*actOverlap;
+    int  lag_inter_line = tapholdsize*actOverlap;
     int  nb_range       = a_names.size();
-    int  total_time     = amsize *(1+ actOverlap*(nb_range-1)) +1;//+1 for neutral statement
+    int  total_time     = tapholdsize *(1+ actOverlap*(nb_range-1)) +1;//+1 for neutral statement
     
     std::vector<uint16_t> tmp;
     waveformLetter result;
@@ -281,14 +281,18 @@ ALPHABET::make_letter(char l) {
             names[5][0] = "ff2";
             names[6][0] = "ff3";
             
-            result = make_appLetter(names);
+            result = make_tapHoldLetter(names);
+            //result = make_appLetter(names);
             break;
         }
         case 'd' :
         {
-            std::vector<std::string> names {"ff3",
-                                            "ff2"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(2));
+            names[0][0] = "ff3";
+            names[0][1] = "ff2";
+            
+            result = make_tapHoldLetter(names);
+            //result = make_tapLetter(names);
             break;
         }
         case 'e' :
@@ -299,16 +303,24 @@ ALPHABET::make_letter(char l) {
         }
         case 'f' :
         {
-            std::vector<std::string> names {"mf3", "ff3", 
-                                            "mf2", "ff2"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(4));
+            names[0][0] = "mf3";
+            names[0][1] = "mf2";
+            names[0][2] = "ff3";
+            names[0][3] = "ff2";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'g' :
         {
-            std::vector<std::string> names {"palm12", "palm13", 
-                                            "palm22", "palm23"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(4));
+            names[0][0] = "palm12";
+            names[0][1] = "palm13";
+            names[0][2] = "palm22";
+            names[0][3] = "palm23";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'h' :
@@ -366,35 +378,56 @@ ALPHABET::make_letter(char l) {
             names[6][0] = "palm33";
             names[7][0] = "t1";
             names[8][0] = "t2";
-            result = make_appLetter(names);
+            result = make_tapHoldLetter(names);
+            //result = make_appLetter(names);
             break;
         }
         case 'k' :
         {
-            std::vector<std::string> names {"ff2",
-                                            "ff1"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(2));
+            names[0][0] = "ff2";
+            names[0][1] = "ff1";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'l' :
         {
-            std::vector<std::string> names {"palm21", "palm22", "palm23"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(3));
+            names[0][0] = "palm21";
+            names[0][1] = "palm22";
+            names[0][2] = "palm23";
+            
+            result = make_tapHoldLetter(names);   
             break;
         }
         case 'm' :
         {
-            std::vector<std::string> names {"palm11", "palm12", "palm13",
-                                            "palm21", "palm22", "palm23",
-                                            "palm31", "palm32", "palm33"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(9));
+            names[0][0] = "palm11";
+            names[0][1] = "palm12";
+            names[0][2] = "palm13";
+            names[0][3] = "palm21";
+            names[0][4] = "palm22";
+            names[0][5] = "palm23";
+            names[0][6] = "palm31";
+            names[0][7] = "palm32";
+            names[0][8] = "palm33";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'n' :
         {
-            std::vector<std::string> names {"palm21", "palm22", "palm23",
-                                            "palm31", "palm32", "palm33"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(6));
+            names[0][0] = "palm21";
+            names[0][1] = "palm22";
+            names[0][2] = "palm23";
+            names[0][3] = "palm31";
+            names[0][4] = "palm32";
+            names[0][5] = "palm33";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'o' :
@@ -407,7 +440,8 @@ ALPHABET::make_letter(char l) {
         {
             std::vector<std::vector<std::string>> names(1,std::vector<std::string>(1));
             names[0][0] = "ff3";
-            result = make_appLetter(names);
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'q' :
@@ -444,18 +478,31 @@ ALPHABET::make_letter(char l) {
         }
         case 'v' :
         {
-            std::vector<std::string> names {            "palm11","palm12",
-                                            "palmleft",
-                                                        "palm31","palm32",};
-            result = make_tapLetter(names);
+            
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(5));
+            names[0][0] = "palmleft";
+            names[0][1] = "palm11";
+            names[0][2] = "palm12";
+            names[0][3] = "palm31";
+            names[0][4] = "palm32";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'w' :
         {
-            std::vector<std::string> names {"rf3", "mf3", "ff3", 
-                                            "rf2", "mf2", "ff2" 
-                                            "rf1", "mf1", "ff1"};
-            result = make_tapLetter(names);
+            std::vector<std::vector<std::string>> names(1,std::vector<std::string>(9));
+            names[0][0] = "rf3";
+            names[0][1] = "rf2";
+            names[0][2] = "rf1";
+            names[0][3] = "mf3";
+            names[0][4] = "mf2";
+            names[0][5] = "mf1";
+            names[0][6] = "ff3";
+            names[0][7] = "ff2";
+            names[0][8] = "ff1";
+            
+            result = make_tapHoldLetter(names);
             break;
         }
         case 'x' :
@@ -470,7 +517,8 @@ ALPHABET::make_letter(char l) {
             names[0][0] = "palm13";
             names[1][0] = "palm22";
             names[2][0] = "palm31";
-            result = make_appLetter(names);
+            result = make_tapHoldLetter(names);
+            //result = make_appLetter(names);
             break;
         }
         case 'z' :
@@ -483,7 +531,8 @@ ALPHABET::make_letter(char l) {
             names[4][0] = "palm33";
             names[5][0] = "palm32";
             names[6][0] = "palm31";
-            result = make_appLetter(names);
+            result = make_tapHoldLetter(names);
+            //result = make_appLetter(names);
             break;
         }
 

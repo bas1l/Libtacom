@@ -21,7 +21,7 @@ WAVEFORM::configure()
 }
 
 void 
-WAVEFORM::configure(struct moveWF _tapHoldmc, struct moveWF _tapmc, struct appMove _amc, 
+WAVEFORM::configure(struct tapHoldMove _tapHoldmc, struct moveWF _tapmc, struct appMove _amc, 
                     int nmessage_Hz, int useWAV)
 {
     if (_tapmc.duration.value < 3)
@@ -37,9 +37,9 @@ WAVEFORM::configure(struct moveWF _tapHoldmc, struct moveWF _tapmc, struct appMo
     
     if (useWAV){
         extractWAV();
-        create_appMoveWAV();
-        create_tapMoveWAV();
         create_tapHoldMoveWAV();
+        create_tapMoveWAV();
+        create_appMoveWAV();
     }
     else{
         create_appMoveDefault();
@@ -131,7 +131,7 @@ WAVEFORM::create_tapHoldMoveWAV()
     int      nbValue 	= (int) (nbSamples/incr);
     
     // Compensate the difference between WAV and DAC amplitudes
-    int amplitude   = tapHoldmc.amplitude.value;
+    int amplitude   = tapHoldmc.action.amplitude.value;
     double minAbs   = abs(*std::min_element(datas, datas+nbSamples));
     double max      = *std::max_element(datas, datas+nbSamples);
     double ratio    = amplitude/ (minAbs>max?minAbs:max);
@@ -305,7 +305,7 @@ WAVEFORM::create_random_dots(int nsample, int a, int b)
 }
 
 
-moveWF 
+tapHoldMove
 WAVEFORM::getTapHoldMoveC()
 {
 	return tapHoldmc;	
@@ -318,12 +318,28 @@ WAVEFORM::getTapMoveC()
 	return tapmc;	
 }
 
+
+int 
+WAVEFORM::getTapHoldOverlap()
+{
+	return tapHoldmc.actOverlap.value; // value in pourcent (-> INTEGER)
+}
+
+
 int 
 WAVEFORM::getAppOverlap()
 {
 	return amc.actOverlap.value; // value in pourcent (-> INTEGER)
 }
+
+
     
+int 
+WAVEFORM::getTapHoldMoveSize()
+{
+    return tapHoldMoveVec.size();
+}
+
 int 
 WAVEFORM::getAppMoveSize()
 {
@@ -376,13 +392,13 @@ WAVEFORM::extractWAV()
      */
     tapHoldMoveWAV = new WavFile();
     // Extract the WAV
-    char *cstr = new char[tapHoldmc.wav.length() + 1];
-    strcpy(cstr, tapHoldmc.wav.c_str());
+    char *cstr = new char[tapHoldmc.action.wav.length() + 1];
+    strcpy(cstr, tapHoldmc.action.wav.c_str());
     // open the corresponding file
-	//std::cout<<"\nfile:"<< tapHoldmc.wav << std::endl;
+	//std::cout<<"\nfile:"<< tapHoldmc.action.wav << std::endl;
     if (EXIT_SUCCESS != tapHoldMoveWAV->openWavFile(cstr))
     {
-        std::cout<<"\nCan't load wav file:"<< tapHoldmc.wav << endl;
+        std::cout<<"\nCan't load wav file:"<< tapHoldmc.action.wav << endl;
         exit(-1);
     }
     free(cstr);

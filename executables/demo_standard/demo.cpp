@@ -165,14 +165,9 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     // un peu bizarre. Mais on souhaite faire 2 envoies de messages par millisec
     double timePmessage_ns = hz_max/freq_message * ms2ns; // * ns
     
-    std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
-    values = alph->getneutral();
-    ad.execute_trajectory(values, timePmessage_ns);
-    for (int w=0; w<values.size(); ++w)
-    {
-        values[w].clear();
-    }
+    ad.execute_trajectory(alph->getneutral(), timePmessage_ns);
     
+    waveformLetter values;
     std::queue<char> letters;
     
     // Initialisation complete.
@@ -200,13 +195,8 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         if (letters.front() != ' ')// is part of the alphabet){
         {
             values = alph->getl(letters.front());
-            ad.execute_trajectory(values, timePmessage_ns);
-            
-            // for all channels, clear.
-            for (int w=0; w<values.size(); ++w)
-            {
-                values[w].clear();
-            }
+            ad.execute_selective_trajectory(values, timePmessage_ns);
+            values.clear();
         }
         letters.pop();
      }

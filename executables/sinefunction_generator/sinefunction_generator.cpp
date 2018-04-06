@@ -23,6 +23,7 @@
 #include "HaptiCommConfiguration.h"
 #include "waveform.h"
 #include "ad5383.h"
+#include "device.h"
 #include "utils.h"
 #include "alphabet.h"
 

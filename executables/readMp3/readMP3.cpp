@@ -17,7 +17,7 @@ int main()
                 
                 getline(myfile,line);
                 cout << line << endl;
-                i++
+                i++;
             }
             
             myfile.close();

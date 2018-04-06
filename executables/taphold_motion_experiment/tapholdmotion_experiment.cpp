@@ -52,9 +52,9 @@ variableMove *  getVariableam(struct appMove *am, char * c);
 bool            modifyVariable(struct variableMove * vam, int v);
 void            resetVariable(struct variableMove * vam);
 
-void initAppMoveVariables(struct appMove * am);
-void initTapMoveVariables(struct moveWF * am);
-void initTapHoldVariables(struct moveWF * am);
+void initTapHoldVariables(struct tapHoldMove * am);
+void initTapMoveVariables(struct moveWF      * am);
+void initAppMoveVariables(struct appMove     * am);
 
 static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
     DEVICE *    dev = new DEVICE();
     WAVEFORM *  wf  = new WAVEFORM();
     ALPHABET * alph = new ALPHABET();
-    struct moveWF * tapHoldmc = new moveWF();
+    struct tapHoldMove * tapHoldmc = new tapHoldMove();
     struct moveWF * tapmc = new moveWF();
     struct appMove * am = new appMove();
     struct variableMove * vam = new variableMove();
@@ -139,16 +139,16 @@ int main(int argc, char *argv[])
                 vam = getVariableam(am, &cCurrentVariable);
             }
             else if (KEY_RIGHT == ch) {
-				modifyVariable(vam, +1);
+                modifyVariable(vam, +1);
             }
             else if (KEY_UP == ch) {
-				modifyVariable(vam, +100);
+                modifyVariable(vam, +100);
             }
             else if (KEY_LEFT == ch) {
-				modifyVariable(vam, -1);
+                modifyVariable(vam, -1);
             }
             else if (KEY_DOWN == ch) {
-				modifyVariable(vam, -100);
+                modifyVariable(vam, -100);
             }
             else if ('v' == ch) {
                 //write_file(am);
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
                 //initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-                tapHoldmc->amplitude.value = am->action.amplitude.value;
+                tapHoldmc->action.amplitude.value = am->action.amplitude.value;
                 wf->configure(*tapHoldmc, *tapmc, *am, refreshRate_Hz, 1);
                 
                 //wf->configure(*tapmc, *am, alph->getFreqRefresh_mHz()*1000, 1);
@@ -427,18 +427,18 @@ void initTapMoveVariables(struct moveWF * am) {
     am->duration.value = 15;
 }
 
-void initTapHoldVariables(struct moveWF * am) {
-    am->name = "TapHold motion";
-    am->wav = "../libtacom/TapHold.wav";
+void initTapHoldVariables(struct tapHoldMove * am) {
+    am->action.name = "TapHold motion";
+    am->action.wav = "../libtacom/TapHold.wav";
     
-    am->amplitude.key = 's';
-    am->amplitude.name = "TapHold amplitude";
-    am->amplitude.value = 2748;
-    am->amplitude.valueDefault = 2048;
-    am->amplitude.min = 0;
-    am->amplitude.max = 4095;
+    am->action.amplitude.key = 's';
+    am->action.amplitude.name = "TapHold amplitude";
+    am->action.amplitude.value = 2748;
+    am->action.amplitude.valueDefault = 2048;
+    am->action.amplitude.min = 0;
+    am->action.amplitude.max = 4095;
     
-    am->duration.value = 15;
+    am->action.duration.value = 15;
 }
 
 static void 

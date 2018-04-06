@@ -178,7 +178,7 @@ int main(int argc, char *argv[])
             }
             else if ('\n' == ch) {
                 moveWF tapmc = wf->getTapMoveC();
-                moveWF tapholdmc = wf->getTapHoldMoveC();
+                tapHoldMove tapholdmc = wf->getTapHoldMoveC();
                 wf->configure(tapholdmc, tapmc, *am, refreshRate_Hz, 1);
                 alph->configure(dev, wf);
                 
