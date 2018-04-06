@@ -63,6 +63,16 @@ struct appMove
     variableMove nbAct;
     variableMove actOverlap;
 };
+/* @struct tapHoldMove
+ * @brief specific structure defining the tapHold motion
+ */
+struct tapHoldMove
+{
+    moveWF action;
+    
+    variableMove nbAct;
+    variableMove actOverlap;
+};
 
 
 
@@ -83,7 +93,10 @@ public:
     /**********************************************/
     /***            @brief Configurations       ***/
     /**********************************************/
-    void configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_sec, int useWAV);
+    void configure( struct moveWF _tapHoldmc,
+                    struct moveWF _tapmc, 
+                    struct appMove _amc, 
+                    int nmessage_sec, int useWAV);
     void configure();
     
     
@@ -106,7 +119,10 @@ public:
     int                     getFreqRefresh_mHz();
     int                     getAppMoveSize();
     int                     getAppOverlap();
+    moveWF                  getTapHoldMoveC();
     moveWF                  getTapMoveC();
+    
+    std::vector<uint16_t>   getTapHoldMove();
     std::vector<uint16_t>   getTapMove();
     std::vector<uint16_t>   getAppMove();
     
@@ -136,8 +152,10 @@ private:
     /***            @brief Private functions    ***/
     /**********************************************/
     bool extractWAV();
+    void create_tapHoldMoveWAV();
     void create_tapMoveWAV();
     void create_appMoveWAV();
+    
     void create_appMoveDefault();
     float * create_envelope_sin(int length, int ampl);
     float * create_envelope_asc(int length);

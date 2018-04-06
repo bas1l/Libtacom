@@ -104,7 +104,8 @@ int main(int argc, char *argv[])
     initAppMoveVariables(am);
     (*vam) = {"null", ' ', -1, -1, -1, -1};
     double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
-    int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
+    int durationRefresh_ns  = durationRefresh_ms * ms2ns; // * ns
+    int refreshRate_Hz      = alph->getFreqRefresh_mHz()*1000;
     
     
     /*** work ***/
@@ -168,7 +169,8 @@ int main(int argc, char *argv[])
             }
             else if ('\n' == ch) {
                 moveWF tapmc = wf->getTapMoveC();
-                wf->configure(tapmc, *am, alph->getFreqRefresh_mHz()*1000, 1);
+                moveWF tapholdmc = wf->getTapHoldMoveC();
+                wf->configure(tapholdmc, tapmc, *am, refreshRate_Hz, 1);
                 alph->configure(dev, wf);
                 
                 wfLetter = getAppmove(am, alph);
@@ -236,7 +238,7 @@ getAppmove(struct appMove * am, ALPHABET* alph)
     std::vector<std::vector<std::string>> names(am->nbAct.max, std::vector<std::string>(1));
     names[0][0] = "palm32";
     names[1][0] = "palm22";
-	names[2][0] = "palm12";
+    names[2][0] = "palm12";
     names[3][0] = "mf1";
     names[4][0] = "mf2";
     names[5][0] = "mf3";
@@ -249,7 +251,7 @@ getAppmove(struct appMove * am, ALPHABET* alph)
     }
     //std::vector<std::vector<uint16_t>> result = ;
     
-    return alph->make_app_letter(actIDs);
+    return alph->make_appLetter(actIDs);
 }   
 
 

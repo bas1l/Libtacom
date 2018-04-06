@@ -132,6 +132,13 @@ throw (HaptiCommConfigurationException)
         tapm->amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
         tapm->wav = m_cfg->lookupString(filter.c_str(), "wav");
         
+        struct moveWF * tapHoldm = new moveWF();
+        //struct appMove * tapm = new appMove();
+        Configuration::mergeNames(scope.c_str(), "tapHold", filter);
+        tapHoldm->duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
+        tapHoldm->amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
+        tapHoldm->wav = m_cfg->lookupString(filter.c_str(), "wav");
+        
         struct appMove * am = new appMove();
         Configuration::mergeNames(scope.c_str(), "apparent", filter);
         am->nbAct.value = (int) m_cfg->lookupInt(filter.c_str(), "nb_act_superposed");
@@ -147,7 +154,7 @@ throw (HaptiCommConfigurationException)
         am->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
         
         printf("wf->configure::begin\n");
-        wf->configure(*tapm, *am, freqRefresh_Hz, useWAV);
+        wf->configure(*tapHoldm, *tapm, *am, freqRefresh_Hz, useWAV);
         printf("wf->configure::end\n");
     }
     catch(const ConfigurationException & ex) {

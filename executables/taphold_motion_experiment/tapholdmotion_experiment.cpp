@@ -27,7 +27,7 @@
 #include "alphabet.h"
 
 // personal tools
-#include "toolstap.h"
+#include "toolstaphold.h"
 
 using namespace std;
 using namespace std::chrono;
@@ -43,13 +43,19 @@ using namespace std::chrono;
 
 void draw_variable(struct variableMove * vam);
 void draw(struct moveWF * mwf);
+
+waveformLetter getTapHoldmove(struct appMove * am, ALPHABET* alph);
 waveformLetter getAppmove(struct appMove * am, ALPHABET* alph);
 waveformLetter getTapmove(struct appMove * am, ALPHABET* alph);
-struct variableMove * getVariableam(struct appMove *am, char * c);
-bool modifyVariable(struct variableMove * vam, int v);
-void resetVariable(struct variableMove * vam);
+
+variableMove *  getVariableam(struct appMove *am, char * c);
+bool            modifyVariable(struct variableMove * vam, int v);
+void            resetVariable(struct variableMove * vam);
+
 void initAppMoveVariables(struct appMove * am);
 void initTapMoveVariables(struct moveWF * am);
+void initTapHoldVariables(struct moveWF * am);
+
 static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
 
 
@@ -62,9 +68,10 @@ int main(int argc, char *argv[])
     DEVICE *    dev = new DEVICE();
     WAVEFORM *  wf  = new WAVEFORM();
     ALPHABET * alph = new ALPHABET();
-    struct appMove * am = new appMove();
+    struct moveWF * tapHoldmc = new moveWF();
     struct moveWF * tapmc = new moveWF();
-    struct variableMove * tapvm = new variableMove();
+    struct appMove * am = new appMove();
+    struct variableMove * vam = new variableMove();
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     waveformLetter wfLetter;
     
@@ -108,9 +115,11 @@ int main(int argc, char *argv[])
     cfg->configureDevice(dev);
     cfg->configureWaveform(wf);
     alph->configure(dev, wf);
-    initAppMoveVariables(am);
+    
+    initTapHoldVariables(tapHoldmc);
     initTapMoveVariables(tapmc);
-    (*tapvm) = {"null", ' ', -1, -1, -1, -1};
+    initAppMoveVariables(am);
+    
     double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
     int durationRefresh_ns  = durationRefresh_ms * ms2ns; // * ns
     int refreshRate_Hz      = alph->getFreqRefresh_mHz()*1000;
@@ -125,20 +134,42 @@ int main(int argc, char *argv[])
     do {
         if (ERR != ch) {
             if (std::string::npos != changeVariables.find(ch)) {
-                //cCurrentVariable = ch;
-                //tapvm = getVariableam(am, &cCurrentVariable);
+                cCurrentVariable = ch;
+                vam = getVariableam(am, &cCurrentVariable);
             }
-            else if (KEY_RIGHT == ch) {  
-                modifyVariable(&tapmc->amplitude, +1);
+            else if (KEY_RIGHT == ch) {   
+                // special case for the action.amplitude 
+                if (vam->key == 's') {
+                    modifyVariable(vam, 1 + am->asc.amplitude.value);
+                }
+                else {    
+                    modifyVariable(vam, +1);
+                }
             }
             else if (KEY_UP == ch) {
-                modifyVariable(&tapmc->amplitude, +100);
+                // special case for the action.amplitude 
+                if (vam->key == 's') {
+                    if (modifyVariable(vam, 100 + am->asc.amplitude.value)) {
+                        modifyVariable(vam, -am->asc.amplitude.value);
+                    }
+                }
+                else {    
+                    modifyVariable(vam, +100);
+                }
             }
             else if (KEY_LEFT == ch) {
-                modifyVariable(&tapmc->amplitude, -1);
+                modifyVariable(vam, -1);
             }
             else if (KEY_DOWN == ch) {
-				modifyVariable(&tapmc->amplitude, -100);
+                // special case for the action.amplitude 
+                if (vam->key == 's') {
+                    if (modifyVariable(vam, -100 + am->asc.amplitude.value)) {
+                        modifyVariable(vam, -am->asc.amplitude.value);
+                    }
+                }
+                else {    
+                    modifyVariable(vam, -100);
+                }
             }
             else if ('v' == ch) {
                 //write_file(am);
@@ -150,14 +181,13 @@ int main(int argc, char *argv[])
                 //initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-                
-                moveWF tapholdmc = wf->getTapHoldMoveC();
-                wf->configure(tapholdmc, *tapmc, *am, refreshRate_Hz, 1);
+                tapHoldmc->amplitude.value = am->action.amplitude.value;
+                wf->configure(*tapHoldmc, *tapmc, *am, refreshRate_Hz, 1);
                 
                 //wf->configure(*tapmc, *am, alph->getFreqRefresh_mHz()*1000, 1);
                 alph->configure(dev, wf);
                 
-                wfLetter = getTapmove(am, alph);
+                wfLetter = getTapHoldmove(am, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
 				if (ovr)
 				{
@@ -216,7 +246,7 @@ draw(struct moveWF * mwf) {
 }
 
 waveformLetter 
-getAppmove(struct appMove * am, ALPHABET* alph)
+getTapHoldmove(struct appMove * am, ALPHABET* alph)
 {
     //reconfigure the app motion
     std::vector<std::vector<std::string>> names(am->nbAct.max, std::vector<std::string>(1));
@@ -235,8 +265,9 @@ getAppmove(struct appMove * am, ALPHABET* alph)
     }
     //std::vector<std::vector<uint16_t>> result = ;
     
-    return alph->make_appLetter(actIDs);
+    return alph->make_tapHoldLetter(actIDs);
 }   
+
 
 
 
@@ -261,6 +292,29 @@ getTapmove(struct appMove * am, ALPHABET* alph)
     //std::vector<std::vector<uint16_t>> result = ;
     
     return alph->make_tapLetter(actIDs);
+}   
+
+waveformLetter 
+getAppmove(struct appMove * am, ALPHABET* alph)
+{
+    //reconfigure the app motion
+    std::vector<std::vector<std::string>> names(am->nbAct.max, std::vector<std::string>(1));
+    names[0][0] = "palm32";
+    names[1][0] = "palm22";
+    names[2][0] = "palm12";
+    names[3][0] = "mf1";
+    names[4][0] = "mf2";
+    names[5][0] = "mf3";
+    
+    
+    std::vector<std::vector<std::string>> actIDs(am->nbAct.value, std::vector<std::string>(1));
+    for(int i=0; i<am->nbAct.value; i++)
+    {
+        actIDs[i][0] = names[(am->nbAct.max-am->nbAct.value)+i][0];
+    }
+    //std::vector<std::vector<uint16_t>> result = ;
+    
+    return alph->make_appLetter(actIDs);
 }   
 
 
@@ -315,7 +369,7 @@ void resetVariable(struct variableMove * vam) {
 
 
 void initAppMoveVariables(struct appMove * am) {
-	am->asc.name = "Apparent Asc";
+    am->asc.name = "Apparent Asc";
     am->asc.wav = "apparentAsc.wav";
     
     am->asc.typeSignal.key = 'q';
@@ -387,6 +441,20 @@ void initTapMoveVariables(struct moveWF * am) {
     am->amplitude.key = 's';
     am->amplitude.name = "Tap amplitude";
     am->amplitude.value = 2048;
+    am->amplitude.valueDefault = 2048;
+    am->amplitude.min = 0;
+    am->amplitude.max = 4095;
+    
+    am->duration.value = 15;
+}
+
+void initTapHoldVariables(struct moveWF * am) {
+    am->name = "TapHold motion";
+    am->wav = "../libtacom/TapHold.wav";
+    
+    am->amplitude.key = 's';
+    am->amplitude.name = "TapHold amplitude";
+    am->amplitude.value = 2748;
     am->amplitude.valueDefault = 2048;
     am->amplitude.min = 0;
     am->amplitude.max = 4095;
