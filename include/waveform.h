@@ -17,12 +17,20 @@
 #include <math.h>
 #include <vector>
 
+#include  "wav_file.h"
+
 #include "utils.h"
 #include "device.h"
 
 
 
 
+/**********************************************/
+/***            @struct motions             ***/
+/**********************************************/
+/* @struct VariableMove
+ * @brief Informations of motion's variable
+ */
 struct variableMove
 {
     std::string name;
@@ -31,8 +39,10 @@ struct variableMove
     int valueDefault;
     int min;
     int max;
-};// variableAppMove_default = {' ', -1, -1, -1};
-
+};
+/* @struct moveWF
+ * @brief Group of variables defining a motion
+ */
 struct moveWF
 {
     std::string name;
@@ -42,7 +52,9 @@ struct moveWF
     variableMove amplitude;
     variableMove duration;
 };
-
+/* @struct appMove
+ * @brief specific structure defining the apparent motion
+ */
 struct appMove
 {
     moveWF asc;
@@ -55,19 +67,80 @@ struct appMove
 
 
 
+/**********************************************/
+/***            @class WAVEFORM             ***/
+/**********************************************/
 class WAVEFORM
 {
 public:
+    /**********************************************/
+    /***            @brief (Cons/Des)tructor    ***/
+    /**********************************************/
     WAVEFORM();
     ~WAVEFORM();
-
     
-    /**
-     * @brief Initializes waveform properties with default parameters
-     */ 
+    
+    /**********************************************/
+    /***            @brief Configurations       ***/
+    /**********************************************/
     void configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_sec, int useWAV);
     void configure();
     
+    
+    /**********************************************/
+    /***            @brief Tools                ***/
+    /**********************************************/
+    std::vector<uint16_t> getTapMove(actuator a);
+    
+    
+    /**********************************************/
+    /***            @brief Printers             ***/
+    /**********************************************/
+    void printCharacteristics();
+    void print_appmoves();
+    
+    
+    /**********************************************/
+    /***            @brief Getters              ***/
+    /**********************************************/
+    int                     getFreqRefresh_mHz();
+    int                     getAppMoveSize();
+    int                     getAppOverlap();
+    moveWF                  getTapMoveC();
+    std::vector<uint16_t>   getTapMove();
+    std::vector<uint16_t>   getAppMove();
+    
+    
+    
+private:
+    /**********************************************/
+    /***            @brief Private variables    ***/
+    /**********************************************/
+    // refresh rate bits/milliseconds (SPI, RPI3 to AD5383)
+    int freqRefresh_mHz;
+    // Caracteristics of the motions
+    struct moveWF  tapHoldmc;
+    struct moveWF  tapmc;
+    struct appMove amc;
+    // Normalised values of the motions
+    std::vector<uint16_t> tapHoldMoveVec;
+    std::vector<uint16_t> tapMoveVec;
+    std::vector<uint16_t> appMoveVec;
+    // if WAV files exist: wav containers of the motions
+    WavFile * tapHoldMoveWAV;
+    WavFile * tapMoveWAV;
+    WavFile * appMoveWAV;
+    
+    
+    /**********************************************/
+    /***            @brief Private functions    ***/
+    /**********************************************/
+    bool extractWAV();
+    void create_tapMoveWAV();
+    void create_appMoveWAV();
+    void create_appMoveDefault();
+    float * create_envelope_sin(int length, int ampl);
+    float * create_envelope_asc(int length);
     /**
      * @brief create a sin with all the needed parameters
      * @param freq frequency of the sine
@@ -77,7 +150,6 @@ public:
      * @param offset offset of the sine
      */
     uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset);
-    
     /**
      * @brief create an array of nsample random values between a and b
      * @param nsample number of sample requiered
@@ -85,50 +157,6 @@ public:
      * @param b maximal value
      */
     float * create_random_dots(int nsample, int a, int b);
-    
-    void printCharacteristics();
-    /**
-     * @brief print the values of the apparent movement
-     */
-    void print_appmoves();
-    /**
-     * @brief get the apparent movement pointer
-     */
-    int get_app_move_size();
-    int getAppOverlap();
-    
-    moveWF getTapMoveC();
-    
-    /**
-     * @brief get the frequency of refresh for all channels (all actuator)
-     */
-    int get_freqRefresh_mHz();
-    
-    std::vector<uint16_t> getTapMove();
-    std::vector<uint16_t> getTapMove(actuator a);
-    std::vector<uint16_t> getAppMove();
-    
-    void insert_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result);
-    void insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result);
-    
-private:
-    void create_tapMoveWAV();
-    void create_appMoveWAV();
-    void create_app_move_default();
-    float * create_envelope_sin(int length, int ampl);
-    float * create_envelope_asc(int length);
-    
-    
-    int freqRefresh_mHz;
-    
-    struct 	moveWF  tapmc;//Duration= 20 ms
-    struct 	moveWF  tapHoldmc;
-    struct 	appMove amc;
-    
-    std::vector<uint16_t> tapMoveVec;
-    std::vector<uint16_t> appMoveVec;
-    double * tapMoveWAV;
-    double * appMoveWAV;
 };
 #endif // WAVEFORM_H_
 

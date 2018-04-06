@@ -185,7 +185,7 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     ad.spi_open();
     ad.configure();
     
-    double durationRefresh_ms = 1/(double) alph->get_freqRefresh_mHz();
+    double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
     int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     cout << "d..." <<  durationRefresh_ns <<  endl;
     

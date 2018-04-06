@@ -7,7 +7,6 @@
  */
 
 #include "waveform.h"
-#include  "wav_file.h"
 
 
 WAVEFORM::WAVEFORM() {}
@@ -18,14 +17,12 @@ WAVEFORM::~WAVEFORM() {}
 void 
 WAVEFORM::configure()
 {
-    create_app_move_default();
+    create_appMoveDefault();
 }
 
 void 
 WAVEFORM::configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_Hz, int useWAV)
 {
-    freqRefresh_mHz = nmessage_Hz * (1/(double)sec2ms);
-    
     if (_tapmc.duration.value < 3)
     {
         perror("TAP_MOVE_DURATION < 3 milliseconds is forbidden");
@@ -34,13 +31,15 @@ WAVEFORM::configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_Hz, 
     tapmc = _tapmc;
     amc = _amc;
     
+    freqRefresh_mHz = nmessage_Hz * (1/(double)sec2ms);
     
     if (useWAV){
+        extractWAV();
         create_appMoveWAV();
         create_tapMoveWAV();
     }
     else{
-        create_app_move_default();
+        create_appMoveDefault();
     }
 }
 
@@ -61,24 +60,24 @@ std::vector<uint16_t> WAVEFORM::getTapMove(actuator a)
     int ms;
     int nbValue = freqRefresh_mHz*tapmc.duration.value; //409;//tapdur=millisec
     
-    int nbNeutral   = 1;
-    int nbBackPush  = 2;
-    int nbPush      = nbValue-(nbBackPush+nbNeutral);
+    int nbNeutral = 1;
+    int nbBack    = 2;
+    int nbPush    = nbValue-(nbNeutral+nbBack);
     
     uint16_t vpush      = (uint16_t) ~((unsigned int) a.vpush);
     uint16_t vpushb     = (uint16_t) ~((unsigned int) 4095-a.vpush);//ACTUATOR_MAXVALUE-a.vpush);
     uint16_t vneutral   = (uint16_t) ~((unsigned int) a.vneutral);
    
-    
     std::vector<uint16_t> result;
     result.reserve(nbValue);
+   
     // push the actuator
     for(ms=0; ms<nbPush; ms++)
     {
         result.push_back(vpush);
     }
     // recall the actuator
-    for(ms=0; ms<nbBackPush; ms++)
+    for(ms=0; ms<nbBack; ms++)
     {
         result.push_back(vpushb);
     }
@@ -88,49 +87,9 @@ std::vector<uint16_t> WAVEFORM::getTapMove(actuator a)
         result.push_back(vneutral);
     }
     
-    
     return result;
 }
 
-void 
-WAVEFORM::insert_tap_move(actuator a, bool push, std::vector<std::vector<uint16_t>>& result)
-{
-    int ms;
-    int         nbValue     = freqRefresh_mHz*tapmc.duration.value; //409;//tapdur=millisec
-    uint16_t    vneutral    = (uint16_t) ~((unsigned int) a.vneutral);
-    
-    if (push)
-    {// if the movement is to push
-        int nbNeutral = 1;
-        int nbBackPush = 2;
-        int nbPush = nbValue-(nbBackPush+nbNeutral);
-        uint16_t vpush = (uint16_t) ~((unsigned int) a.vpush);
-        uint16_t vpushb = (uint16_t) ~((unsigned int) 4095-a.vpush);//ACTUATOR_MAXVALUE-a.vpush);
-        
-        // push the actuator
-        for(ms=0; ms<nbPush; ms++)
-        {
-            result[a.chan].push_back(vpush);
-        }
-        // recall the actuator
-        for(ms=0; ms<nbBackPush; ms++)
-        {
-            result[a.chan].push_back(vpushb);
-        }
-        // put the neutral value at the end
-        for(ms=0; ms<nbNeutral; ms++)
-        {
-            result[a.chan].push_back(vneutral);
-        }
-    }
-    else
-    {// if the actuator is not a part of the movement
-        for(ms=0; ms<nbValue; ms++)
-        {
-            result[a.chan].push_back(vneutral);
-        }
-    }
-}
 
 
 
@@ -138,15 +97,6 @@ std::vector<uint16_t>
 WAVEFORM::getAppMove()
 {// actuator a est a utiliser quand on voudra affiner le lever de tige
     return appMoveVec;
-}
-
-
-
-void 
-WAVEFORM::insert_app_move(actuator a, int start_at, std::vector<std::vector<uint16_t>>& result)
-{// actuator a est a utiliser quand on voudra affiner le lever de tige
-    result[a.chan].insert(result[a.chan].begin()+start_at, 
-                          appMoveVec.begin(), appMoveVec.end());
 }
 
 
@@ -161,39 +111,26 @@ void
 WAVEFORM::create_tapMoveWAV()
 {
     int t = 0;
-    WavFile* pObjWavFile = new WavFile();
     tapMoveVec.clear();
     
-    
-    // Extract the WAV
-    char *cstr = new char[tapmc.wav.length() + 1];
-    strcpy(cstr, tapmc.wav.c_str());
-    // open the corresponding file
-	//std::cout<<"\nfile:"<< tapmc.wav << std::endl;
-    if (EXIT_SUCCESS != pObjWavFile->openWavFile(cstr))
-    {
-        std::cout<<"\nCan't load wav file:"<< cstr << endl;
-        exit(-1);
-    }
     // Compensate the difference between WAV and DAC frequencies
-    double* samplesWAV  = pObjWavFile->getData();
-    int     nbSamples   = pObjWavFile->getNumSamples();
-    int     fs_mHz      = (int)(pObjWavFile->getSampleRateHz()*(1/(double)sec2ms));
-    double  incr        = fs_mHz / (double) freqRefresh_mHz;
-    int 	nbValue 	= (int) (nbSamples/incr);
+    double * datas      = tapMoveWAV->getData();
+    int      nbSamples  = tapMoveWAV->getNumSamples();
+    int      fs_mHz     = (int)(tapMoveWAV->getSampleRateHz()*(1/(double)sec2ms));
+    double   incr       = fs_mHz / (double) freqRefresh_mHz;
+    int      nbValue 	= (int) (nbSamples/incr);
     
     // Compensate the difference between WAV and DAC amplitudes
     int amplitude   = tapmc.amplitude.value;
-    double minAbs   = abs(*std::min_element(samplesWAV, samplesWAV+nbSamples));
-    double max      = *std::max_element(samplesWAV, samplesWAV+nbSamples);
+    double minAbs   = abs(*std::min_element(datas, datas+nbSamples));
+    double max      = *std::max_element(datas, datas+nbSamples);
     double ratio    = amplitude/ (minAbs>max?minAbs:max);
     
     // write the movement:
     for (t=0; t<nbValue; t++){
-        tapMoveVec.push_back((uint16_t) (4095 - ratio*samplesWAV[(int)(t*incr)]));
+        tapMoveVec.push_back((uint16_t) (4095 - ratio*datas[(int)(t*incr)]));
     }
     
-    free(cstr);
 }
 
 
@@ -201,18 +138,14 @@ void
 WAVEFORM::create_appMoveWAV()
 {
     int         t           = 0;
-    //uint16_t    inv         = 4095;
-    WavFile*    pObjWavFile = new WavFile();
+    uint16_t    inv         = 4095;
     
     appMoveVec.clear();
-    
     
     // part 1/2 : ascension 
     int     offset  = amc.asc.amplitude.value;
     int     nbValue = freqRefresh_mHz * amc.asc.duration.value; //appAscDuration=millisec
     float*  asc     = create_envelope_asc(nbValue);
-    
-    
     int vup = offset - 2048;
     for (t=0; t<nbValue; t++)
     {
@@ -222,41 +155,27 @@ WAVEFORM::create_appMoveWAV()
 
     
     // part 2/2 : pink noise 
-    // Extract the WAV
-    char *cstr = new char[amc.action.wav.length() + 1];
-    strcpy(cstr, amc.action.wav.c_str());
-    // open the corresponding file
-	//std::cout<<"\nfile:"<< amc.action.wav << std::endl;
-    if (EXIT_SUCCESS != pObjWavFile->openWavFile(cstr))
-    {
-        std::cout<<"\nCan't load wav file:" << cstr << endl;
-        exit(-1);
-    }
-    
-    // Compensate the difference between WAV and DAC frequencies
-    double* samplesWAV  = pObjWavFile->getData();
-    int     nbSamples   = pObjWavFile->getNumSamples();
-    int     fs_mHz      = (int)(pObjWavFile->getSampleRateHz()*(1/(double)sec2ms));
-    double  incr        = fs_mHz / (double) freqRefresh_mHz;
+    double * datas      = appMoveWAV->getData();
+    int      nbSamples  = appMoveWAV->getNumSamples();
+    int      fs_mHz     = (int)(appMoveWAV->getSampleRateHz()*(1/(double)sec2ms));
+    double   incr       = fs_mHz / (double) freqRefresh_mHz;
     nbValue = (int) (nbSamples/incr);
-    
     // Compensate the difference between WAV and DAC amplitudes
     int amplitude   = amc.action.amplitude.value;
-    double min      = abs(*std::min_element(samplesWAV, samplesWAV+nbSamples));
-    double max      = *std::max_element(samplesWAV, samplesWAV+nbSamples);
+    double min      = abs(*std::min_element(datas, datas+nbSamples));
+    double max      = *std::max_element(datas, datas+nbSamples);
     double ratio    = amplitude/ (min>max?min:max);
     
     // write the movement:
     for (t=0; t<nbValue; t++){
-        appMoveVec.push_back((uint16_t) (4095 - offset+ ratio*samplesWAV[(int)(t*incr)]));
+        appMoveVec.push_back((uint16_t) (inv - offset+ ratio*datas[(int)(t*incr)]));
     }
     
-    free(cstr);
 }
 
 
 void 
-WAVEFORM::create_app_move_default()
+WAVEFORM::create_appMoveDefault()
 {
     int t;
     uint16_t inv = 4095;
@@ -265,22 +184,17 @@ WAVEFORM::create_app_move_default()
     // part 1/2 : ascension 
     int nbValue = freqRefresh_mHz*amc.asc.duration.value; //appAscDuration=millisec
     float * asc = create_envelope_asc(nbValue);
-
     for (t=0; t<nbValue; t++)
     {
             appMoveVec.push_back(inv - (uint16_t) (2000+1000*asc[t]));
-            //printw("asc=%.f", asc[t]);
     }
-
-
+    
     // part 2/2 : pink noise 
-    nbValue = freqRefresh_mHz*amc.action.duration.value; //appAscDuration=millisec
-    float * shape = create_envelope_sin(nbValue, amc.action.amplitude.value);
-    float * r = create_random_dots(nbValue, -1, 1);
-
+    nbValue         = freqRefresh_mHz*amc.action.duration.value; //appAscDuration=millisec
+    float * shape   = create_envelope_sin(nbValue, amc.action.amplitude.value);
+    float * r       = create_random_dots(nbValue, -1, 1);
     for (t=0; t<nbValue; t++){
-            appMoveVec.push_back(inv - (uint16_t)(3200+ shape[t] * r[t]));
-            //printw("move=%f", shape[t] * r[t]);
+        appMoveVec.push_back(inv - (uint16_t)(3200+ shape[t] * r[t]));
     }
 
     free(asc);
@@ -364,13 +278,13 @@ WAVEFORM::getAppOverlap()
 }
     
 int 
-WAVEFORM::get_app_move_size()
+WAVEFORM::getAppMoveSize()
 {
     return appMoveVec.size();
 }
 
 int 
-WAVEFORM::get_freqRefresh_mHz()
+WAVEFORM::getFreqRefresh_mHz()
 {
     return freqRefresh_mHz;
 }
@@ -404,4 +318,44 @@ WAVEFORM::print_appmoves()
     {
         std::cout << "app_move : " << *i << std::endl;
     }
+}
+
+
+bool 
+WAVEFORM::extractWAV()
+{   
+    /* APPARENT ACTION MOTION
+     * 
+     */
+    appMoveWAV = new WavFile();
+    char *cstr = new char[amc.action.wav.length() + 1];
+    strcpy(cstr, amc.action.wav.c_str());
+    // open the corresponding file
+	//std::cout<<"\nfile:"<< amc.action.wav << std::endl;
+    if (EXIT_SUCCESS != appMoveWAV->openWavFile(cstr))
+    {
+        std::cout<<"\nCan't load wav file:" << amc.action.wav << endl;
+        exit(-1);
+    }
+    free(cstr);
+    
+    
+    /* APPARENT MOTION
+     * 
+     */
+    tapMoveWAV = new WavFile();
+    // Extract the WAV
+    cstr = new char[tapmc.wav.length() + 1];
+    strcpy(cstr, tapmc.wav.c_str());
+    // open the corresponding file
+	//std::cout<<"\nfile:"<< tapmc.wav << std::endl;
+    if (EXIT_SUCCESS != tapMoveWAV->openWavFile(cstr))
+    {
+        std::cout<<"\nCan't load wav file:"<< tapmc.wav << endl;
+        exit(-1);
+    }
+    free(cstr);
+    
+    
+    return true;
 }

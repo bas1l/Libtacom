@@ -13,49 +13,15 @@ using namespace std;
 
 
 
-ALPHABET::ALPHABET() :
-	listSymbols("abcdefghijklmnopqrstuvwxyz~") {}
-	//listSymbols("abcdefghijklmnopqrstuvwxyz~") {}
-
+ALPHABET::ALPHABET() : listSymbols("abcdefghijklmnopqrstuvwxyz~") {}
 
 ALPHABET::ALPHABET(DEVICE * _dev, WAVEFORM * _wf) :
         dev(_dev), 
         wf( _wf),
         listSymbols("abcdefghijklmnopqrstuvwxyz~") {}
 
-
 ALPHABET::~ALPHABET() {}
 
-
-
-
-void 
-ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf) 
-{
-    dev = _dev;
-    wf = _wf;
-    
-    appMotionActCovering = wf->getAppOverlap()/(double)100; //0.25
-    nbChannel = AD5383::num_channels;
-    defaultNeutral = AD5383_DEFAULT_NEUTRAL;
-    
-    configure_letters();
-    configure_neutral();
-}
-
-
-void 
-ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf, double _appMotionActCovering) 
-{
-    dev = _dev;
-    wf = _wf;
-    appMotionActCovering = _appMotionActCovering;
-    nbChannel = AD5383::num_channels;
-    defaultNeutral = AD5383_DEFAULT_NEUTRAL;
-    
-    configure_letters();
-    configure_neutral();
-}
 
 
 void 
@@ -65,13 +31,26 @@ ALPHABET::configure()
     configure_neutral();
 }
 
+void 
+ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf) 
+{
+    dev = _dev;
+    wf = _wf;
+    
+    configure_letters();
+    configure_neutral();
+}
+
+
+
+
+
 
 std::string 
 ALPHABET::getlistSymbols() 
 {
     return listSymbols;
 }
-
 
 std::vector<std::vector<uint16_t>> 
 ALPHABET::getneutral() 
@@ -97,9 +76,9 @@ ALPHABET::getl(char l)
 
 
 int 
-ALPHABET::get_freqRefresh_mHz() 
+ALPHABET::getFreqRefresh_mHz() 
 {
-    return wf->get_freqRefresh_mHz();
+    return wf->getFreqRefresh_mHz();
 }
 
 /*
@@ -148,15 +127,17 @@ ALPHABET::make_tap_letter(std::vector<std::string> a_names) {
 
 
 waveformLetter
-ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) {
+ALPHABET::make_app_letter(std::vector<std::vector<std::string>> a_names) 
+{
     std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
+    double appMotionActOverlap = wf->getAppOverlap()/(double)100; //0.25
     bool find           = false;
-    int  amsize         = wf->get_app_move_size();
+    int  amsize         = wf->getAppMoveSize();
     // shift in time/ms/value between 2 actuators in series into the app move
-    int  lag_inter_line = amsize*appMotionActCovering;
+    int  lag_inter_line = amsize*appMotionActOverlap;
     int  nb_range       = a_names.size();
-    int  total_time     = amsize *(1+ appMotionActCovering*(nb_range-1)) +1;//+1 for neutral statement
+    int  total_time     = amsize *(1+ appMotionActOverlap*(nb_range-1)) +1;//+1 for neutral statement
     
     std::vector<uint16_t> tmp;
     waveformLetter result;
@@ -482,10 +463,10 @@ ALPHABET::configure_letters() {
 void 
 ALPHABET::configure_neutral() {
     std::vector<uint16_t> temp; 
-    temp.push_back(defaultNeutral);
-    temp.push_back(defaultNeutral);
+    temp.push_back(AD5383_DEFAULT_NEUTRAL);
+    temp.push_back(AD5383_DEFAULT_NEUTRAL);
     
-    for(int i=0; i<nbChannel; i++)
+    for(int i=0; i<AD5383::num_channels; i++)
     {
         neutral_statement.push_back(temp);
     }

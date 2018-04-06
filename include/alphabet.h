@@ -50,7 +50,6 @@ public :
      */
     void configure();
     void configure(DEVICE * _dev, WAVEFORM * _wf);
-    void configure(DEVICE * _dev, WAVEFORM * _wf, double _appMotionActCovering);
     
     std::string getlistSymbols();
     std::vector<std::vector<uint16_t>> getneutral();
@@ -64,7 +63,7 @@ public :
     /*
      * @brief return the frequency with which the actuators are refreshed (Hz)
      */
-    int get_freqRefresh_mHz();
+    int getFreqRefresh_mHz();
 
     waveformLetter make_app_letter(std::vector<std::vector<std::string>> a_names);
     waveformLetter make_tap_letter(std::vector<std::string> a_names);
@@ -81,11 +80,6 @@ private:
     vector<vector<uint16_t>> neutral_statement;
     map<char, waveformLetter> letters;
     map<char, waveformLetter >::iterator it_letter;
-    
-    double  appMotionActCovering;
-    int     defaultNeutral;
-    int     nbChannel;
-    
 };
 #endif //H_ALPHABET_H
 

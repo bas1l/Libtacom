@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
     alph->configure(dev, wf);
     initAppMoveVariables(am);
     (*vam) = {"null", ' ', -1, -1, -1, -1};
-    double durationRefresh_ms = 1/(double) alph->get_freqRefresh_mHz();
+    double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
     int durationRefresh_ns = durationRefresh_ms * ms2ns; // * ns
     
     
@@ -167,9 +167,9 @@ int main(int argc, char *argv[])
                 //initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-				moveWF tapmc = wf->getTapMoveC();
-                wf->configure(tapmc, *am, alph->get_freqRefresh_mHz()*1000, 1);
-                alph->configure(dev, wf, am->actOverlap.value/(double)100);
+                moveWF tapmc = wf->getTapMoveC();
+                wf->configure(tapmc, *am, alph->getFreqRefresh_mHz()*1000, 1);
+                alph->configure(dev, wf);
                 
                 wfLetter = getAppmove(am, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
@@ -187,7 +187,7 @@ int main(int argc, char *argv[])
         draw_variable(vam);
         //printw("\n");
         //printw("ID apparent move :%i\n", nbAppmove);
-		printw("transferFrequency=%iHz, overruns=%iBits", (int)alph->get_freqRefresh_mHz()*1000, overruns);
+		printw("transferFrequency=%iHz, overruns=%iBits", (int)alph->getFreqRefresh_mHz()*1000, overruns);
         
     }while((ch = getch()) != '*');
     
@@ -214,7 +214,7 @@ draw(struct appMove * am) {
     print_instructions();
     printw("Global variables:\n");
     printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
-    printw("(%c) Covering between actuators = <%i%>\n", am->actOverlap.key, am->actOverlap.value);
+    printw("(%c) Overlap between actuators = <%i%>\n", am->actOverlap.key, am->actOverlap.value);
     
     printw("\n");
     printw("Ascension :\n");
@@ -363,7 +363,7 @@ void initAppMoveVariables(struct appMove * am) {
     am->nbAct.max = 6;//ms
     
     am->actOverlap.key = 'x';
-    am->actOverlap.name = "Covering between actuators";
+    am->actOverlap.name = "Overlap between actuators";
     am->actOverlap.value = 0;
     am->actOverlap.valueDefault = 0;
     am->actOverlap.min = 0;
