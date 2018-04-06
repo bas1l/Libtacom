@@ -49,7 +49,7 @@ struct appMove
     moveWF action;
     
     variableMove nbAct;
-    variableMove actCovering;
+    variableMove actOverlap;
 };
 
 
@@ -59,19 +59,12 @@ class WAVEFORM
 {
 public:
     WAVEFORM();
-    WAVEFORM(int _tapmove_dur, int _appAscDuration, int _appActionDuration,
-                int _appActionAmplitude, int _app_nb_act_simult);
     ~WAVEFORM();
 
     
     /**
      * @brief Initializes waveform properties with default parameters
      */ 
-    void configure( int _freqRefresh, 
-                    int _tapDuration, int _appActSuperposed, 
-                    int _appRatioCover, 
-                    int _appAscDuration, 
-                    int _appActionDuration, int _appActionAmplitude);
     void configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_sec, int useWAV);
     void configure();
     
@@ -102,7 +95,7 @@ public:
      * @brief get the apparent movement pointer
      */
     int get_app_move_size();
-    int getAppRatioCover();
+    int getAppOverlap();
     
     moveWF getTapMoveC();
     
@@ -111,7 +104,7 @@ public:
      */
     int get_freqRefresh_mHz();
     
-	std::vector<uint16_t> getTapMove();
+    std::vector<uint16_t> getTapMove();
     std::vector<uint16_t> getTapMove(actuator a);
     std::vector<uint16_t> getAppMove();
     
@@ -121,28 +114,21 @@ public:
 private:
     void create_tapMoveWAV();
     void create_appMoveWAV();
-    void create_app_move_standard();
+    void create_app_move_default();
     float * create_envelope_sin(int length, int ampl);
     float * create_envelope_asc(int length);
     
     
     int freqRefresh_mHz;
     
+    struct 	moveWF  tapmc;//Duration= 20 ms
+    struct 	moveWF  tapHoldmc;
+    struct 	appMove amc;
+    
     std::vector<uint16_t> tapMoveVec;
     std::vector<uint16_t> appMoveVec;
-    
-    struct 	moveWF tapmc;//Duration= 20 ms
-    struct 	moveWF tapHoldmc;
-    
-    struct 	appMove amc;
-    int     appDuration; //APPARENT_DURATION (APPARENT_ASC_DURATION+APPARENT_MOVE_DURATION)
-    int     appActSuperposed; // 4
-    float   appRatioCover; // .25
-    int     appAscDuration;// 40 ms
-    int     appAscAmplitude;// 40 ms
-    int     appActionDuration;// 80 ms
-    int     appActionAmplitude;// 700 unit of voltage (0 < v < 4095)
-    
+    double * tapMoveWAV;
+    double * appMoveWAV;
 };
 #endif // WAVEFORM_H_
 

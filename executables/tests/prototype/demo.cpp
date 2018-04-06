@@ -45,6 +45,10 @@ static void usage();
 
 int main(int argc, char *argv[])
 {   
+    
+    /*
+     * VARIABLES
+     */
     HaptiCommConfiguration * cfg = new HaptiCommConfiguration();
     DEVICE * dev = new DEVICE();
     WAVEFORM * wf  = new WAVEFORM();
@@ -54,9 +58,9 @@ int main(int argc, char *argv[])
     int exitStatus = 0;
 
     
-    setlocale(LC_ALL, "");
-    parseCmdLineArgs(argc, argv, cfgSource, scope);
-    
+    /*
+     * TIME CONSTRAINT
+     */
     struct timespec t;
     struct sched_param param;
     param.sched_priority = sched_get_priority_max(SCHED_FIFO);
@@ -69,14 +73,23 @@ int main(int argc, char *argv[])
             exit(-2);
     }
     
+    
+    
+    /*
+     * CONFIGURATION
+     */
+    setlocale(LC_ALL, "");
+    parseCmdLineArgs(argc, argv, cfgSource, scope);
+    
     cfg->parse(cfgSource, "HaptiComm");
     cfg->configureDevice(dev);
     cfg->configureWaveform(wf);
     alph->configure(dev, wf);
-    cout << "0b..." << endl;
     
     
-    
+    /*
+     * WORK
+     */
     std::condition_variable cv;
     std::mutex m;
     std::atomic<bool> workdone(false);

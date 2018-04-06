@@ -135,7 +135,7 @@ throw (HaptiCommConfigurationException)
         struct appMove * am = new appMove();
         Configuration::mergeNames(scope.c_str(), "apparent", filter);
         am->nbAct.value = (int) m_cfg->lookupInt(filter.c_str(), "nb_act_superposed");
-        am->actCovering.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "ratio_covering"))*100);
+        am->actOverlap.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "actuator_overlapping"))*100);
         
         Configuration::mergeNames(scope.c_str(), "apparent.asc", filter);
         am->asc.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");

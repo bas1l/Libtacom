@@ -10,53 +10,16 @@
 #include  "wav_file.h"
 
 
-
-
-WAVEFORM::WAVEFORM(
-            int _tapDuration, int _appAscDuration, int _appActionDuration,
-            int _appActionAmplitude, int _appActSuperposed) :
-    appAscDuration(_appAscDuration),
-    appActionDuration(_appActionDuration),
-    appActionAmplitude(_appActionAmplitude),
-    appActSuperposed(_appActSuperposed) {
-    if (_tapDuration < 3)
-    {
-        perror("TAP_MOVE_DURATION < 3 milliseconds is forbidden");
-    }
-    appDuration = appAscDuration + appActionDuration;
-}
-
-
 WAVEFORM::WAVEFORM() {}
-
 
 WAVEFORM::~WAVEFORM() {}
 
 
-
-
 void 
-WAVEFORM::configure(int _freqRefresh_mHz, int _tapDuration, int _appActSuperposed, 
-                    int _appRatioCover, int _appAscDuration, 
-                    int _appActionDuration, int _appActionAmplitude)
+WAVEFORM::configure()
 {
-    freqRefresh_mHz = _freqRefresh_mHz;
-
-    if (_tapDuration < 3)
-    {
-        perror("TAP_MOVE_DURATION < 3 milliseconds is forbidden");
-    }
-    
-    appActSuperposed    = _appActSuperposed;
-    appRatioCover       = _appRatioCover/(float)100; //integer ratio to double
-    appAscDuration      = _appAscDuration;
-    appActionDuration   = _appActionDuration;
-    appActionAmplitude  = _appActionAmplitude;
-    appDuration         = appAscDuration + appActionDuration;
-    
-    create_app_move_standard();
+    create_app_move_default();
 }
-
 
 void 
 WAVEFORM::configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_Hz, int useWAV)
@@ -68,31 +31,17 @@ WAVEFORM::configure(struct moveWF _tapmc, struct appMove _amc, int nmessage_Hz, 
         perror("TAP_MOVE_DURATION < 3 milliseconds is forbidden");
     }
     
-    appAscDuration      = _amc.asc.duration.value;
-    appAscAmplitude		= _amc.asc.amplitude.value;
-    appActionDuration   = _amc.action.duration.value;
-    appActionAmplitude  = _amc.action.amplitude.value;
-    
     tapmc = _tapmc;
     amc = _amc;
     
-    //std::cout<<"\nfile APPMOTION:"<< amc.action.wav << std::endl;
-    //std::cout<<"\nfile TAP MOTION:"<< tapmc.wav << std::endl;
     
     if (useWAV){
         create_appMoveWAV();
         create_tapMoveWAV();
     }
     else{
-        create_app_move_standard();
+        create_app_move_default();
     }
-}
-
-
-void 
-WAVEFORM::configure()
-{
-    create_app_move_standard();
 }
 
 
@@ -260,7 +209,7 @@ WAVEFORM::create_appMoveWAV()
     
     // part 1/2 : ascension 
     int     offset  = amc.asc.amplitude.value;
-    int     nbValue = freqRefresh_mHz * appAscDuration; //appAscDuration=millisec
+    int     nbValue = freqRefresh_mHz * amc.asc.duration.value; //appAscDuration=millisec
     float*  asc     = create_envelope_asc(nbValue);
     
     
@@ -307,14 +256,14 @@ WAVEFORM::create_appMoveWAV()
 
 
 void 
-WAVEFORM::create_app_move_standard()
+WAVEFORM::create_app_move_default()
 {
     int t;
     uint16_t inv = 4095;
     appMoveVec.clear();
  
     // part 1/2 : ascension 
-    int nbValue = freqRefresh_mHz*appAscDuration; //appAscDuration=millisec
+    int nbValue = freqRefresh_mHz*amc.asc.duration.value; //appAscDuration=millisec
     float * asc = create_envelope_asc(nbValue);
 
     for (t=0; t<nbValue; t++)
@@ -325,8 +274,8 @@ WAVEFORM::create_app_move_standard()
 
 
     // part 2/2 : pink noise 
-    nbValue = freqRefresh_mHz*appActionDuration; //appAscDuration=millisec
-    float * shape = create_envelope_sin(nbValue, appActionAmplitude);
+    nbValue = freqRefresh_mHz*amc.action.duration.value; //appAscDuration=millisec
+    float * shape = create_envelope_sin(nbValue, amc.action.amplitude.value);
     float * r = create_random_dots(nbValue, -1, 1);
 
     for (t=0; t<nbValue; t++){
@@ -409,9 +358,9 @@ moveWF WAVEFORM::getTapMoveC()
 }
 
 int 
-WAVEFORM::getAppRatioCover()
+WAVEFORM::getAppOverlap()
 {
-	return amc.actCovering.value; // value in pourcent (-> INTEGER)
+	return amc.actOverlap.value; // value in pourcent (-> INTEGER)
 }
     
 int 
@@ -438,7 +387,7 @@ WAVEFORM::printCharacteristics()
             << "<Apparent movement>\n"
                 << "\t-Total duration=" << amc.asc.duration.value+amc.action.duration.value << "ms\n"
                 << "\t-Number of actuators=" << amc.nbAct.value << "\n"
-                << "\t-Value of covering=" << amc.actCovering.value << "%\n"
+                << "\t-Value of covering=" << amc.actOverlap.value << "%\n"
                 << "\t[1st part: go up movement]\n"
                     << "\t\t-Duration=" << amc.asc.duration.value << "ms\n"
                     << "\t\t-Final value=" << amc.asc.amplitude.value << "#Numerical-AD5383\n"

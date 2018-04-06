@@ -169,7 +169,7 @@ int main(int argc, char *argv[])
             else if ('\n' == ch) {
 				moveWF tapmc = wf->getTapMoveC();
                 wf->configure(tapmc, *am, alph->get_freqRefresh_mHz()*1000, 1);
-                alph->configure(dev, wf, am->actCovering.value/(double)100);
+                alph->configure(dev, wf, am->actOverlap.value/(double)100);
                 
                 wfLetter = getAppmove(am, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
@@ -214,7 +214,7 @@ draw(struct appMove * am) {
     print_instructions();
     printw("Global variables:\n");
     printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
-    printw("(%c) Covering between actuators = <%i%>\n", am->actCovering.key, am->actCovering.value);
+    printw("(%c) Covering between actuators = <%i%>\n", am->actOverlap.key, am->actOverlap.value);
     
     printw("\n");
     printw("Ascension :\n");
@@ -276,8 +276,8 @@ struct variableMove * getVariableam(struct appMove *am, char * c)
     else if (*c == am->nbAct.key){
         return &(am->nbAct);
     }
-    else if (*c == am->actCovering.key){
-        return &(am->actCovering);
+    else if (*c == am->actOverlap.key){
+        return &(am->actOverlap);
     }
     else{
         return &(am->asc.typeSignal);
@@ -362,12 +362,12 @@ void initAppMoveVariables(struct appMove * am) {
     am->nbAct.min = 1;
     am->nbAct.max = 6;//ms
     
-    am->actCovering.key = 'x';
-    am->actCovering.name = "Covering between actuators";
-    am->actCovering.value = 0;
-    am->actCovering.valueDefault = 0;
-    am->actCovering.min = 0;
-    am->actCovering.max = 100;//ms
+    am->actOverlap.key = 'x';
+    am->actOverlap.name = "Covering between actuators";
+    am->actOverlap.value = 0;
+    am->actOverlap.valueDefault = 0;
+    am->actOverlap.min = 0;
+    am->actOverlap.max = 100;//ms
 }
 
 

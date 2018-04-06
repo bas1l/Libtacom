@@ -35,7 +35,7 @@ ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf)
     dev = _dev;
     wf = _wf;
     
-    appMotionActCovering = wf->getAppRatioCover()/(double)100; //0.25
+    appMotionActCovering = wf->getAppOverlap()/(double)100; //0.25
     nbChannel = AD5383::num_channels;
     defaultNeutral = AD5383_DEFAULT_NEUTRAL;
     
