@@ -141,6 +141,7 @@ WAVEFORM::create_tapHoldMoveWAV()
         tapHoldMoveVec.push_back((uint16_t) (4095 - ratio*datas[(int)(t*incr)]));
     }
     
+    tapHoldMoveVec.push_back((uint16_t) 2048);
 }
 
 
@@ -169,6 +170,8 @@ WAVEFORM::create_tapMoveWAV()
         tapMoveVec.push_back((uint16_t) (4095 - ratio*datas[(int)(t*incr)]));
     }
     
+    
+    tapMoveVec.push_back((uint16_t) 2048);
 }
 
 
@@ -206,7 +209,7 @@ WAVEFORM::create_appMoveWAV()
     
     // write the movement:
     for (t=0; t<nbValue; t++){
-        appMoveVec.push_back((uint16_t) (inv - offset+ ratio*datas[(int)(t*incr)]));
+        appMoveVec.push_back((uint16_t) (inv - (offset+ ratio*datas[(int)(t*incr)])));
     }
     
     appMoveVec.push_back((uint16_t) 2048);

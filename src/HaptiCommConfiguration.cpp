@@ -141,6 +141,7 @@ throw (HaptiCommConfigurationException)
         tapHoldm->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
         
         struct appMove * am = new appMove();
+		initAppMoveVariables(am);
         Configuration::mergeNames(scope.c_str(), "apparent", filter);
         am->nbAct.value = (int) m_cfg->lookupInt(filter.c_str(), "nb_act_superposed");
         am->actOverlap.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "actuator_overlapping"))*100);
@@ -210,6 +211,77 @@ throw (HaptiCommConfigurationException)
 
 
 
+
+//--------  
+// PRIVATE functions.
+//--------
+
+void HaptiCommConfiguration::initAppMoveVariables(struct appMove * am) {
+	
+    am->asc.name = "Apparent Asc";
+    am->asc.wav = "apparentAsc.wav";
+    
+    am->asc.typeSignal.key = 'q';
+    am->asc.typeSignal.name = "ascension type";
+    am->asc.typeSignal.value = 1;
+    am->asc.typeSignal.valueDefault = 1;
+    am->asc.typeSignal.min = 1;
+    am->asc.typeSignal.max = 3;
+    
+    am->asc.amplitude.key = 'w';
+    am->asc.amplitude.name = "ascension amplitude";
+    am->asc.amplitude.value = 2300;
+    am->asc.amplitude.valueDefault = 2700;
+    am->asc.amplitude.min = 0;
+    am->asc.amplitude.max = 4095;
+    
+    am->asc.duration.key = 'e';
+    am->asc.duration.name = "ascension duration";
+    am->asc.duration.value = 50;
+    am->asc.duration.valueDefault = 100;
+    am->asc.duration.min = 0;
+    am->asc.duration.max = 2000;//ms
+    
+    
+    am->action.name = "Apparent Action";
+    am->action.wav = "../libtacom/Movement.wav";
+    
+    am->action.typeSignal.key = 'a';
+    am->action.typeSignal.name = "action type";
+    am->action.typeSignal.value = 1;
+    am->action.typeSignal.valueDefault = 1;
+    am->action.typeSignal.min = 1;
+    am->action.typeSignal.max = 3;
+    
+    am->action.amplitude.key = 's';
+    am->action.amplitude.name = "action amplitude";
+    am->action.amplitude.value = 300;
+    am->action.amplitude.valueDefault = 700;
+    am->action.amplitude.min = 0;
+    am->action.amplitude.max = 4095;
+    
+    am->action.duration.key = 'd';
+    am->action.duration.name = "action duration";
+    am->action.duration.value = 100;
+    am->action.duration.valueDefault = 400;
+    am->action.duration.min = 0;
+    am->action.duration.max = 2000;//ms
+    
+    
+    am->nbAct.key = 'z';
+    am->nbAct.name = "Number of actuators";
+    am->nbAct.value = 1;
+    am->nbAct.valueDefault = 1;
+    am->nbAct.min = 1;
+    am->nbAct.max = 6;//ms
+    
+    am->actOverlap.key = 'x';
+    am->actOverlap.name = "Overlap between actuators";
+    am->actOverlap.value = 30;
+    am->actOverlap.valueDefault = 0;
+    am->actOverlap.min = 0;
+    am->actOverlap.max = 100;//ms
+}
 
 //--------  
 // Lookup-style functions.

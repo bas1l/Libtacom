@@ -192,7 +192,7 @@ ALPHABET::make_tapLetter(std::vector<std::string> a_names) {
 waveformLetter
 ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names) 
 {
-    std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
+    std::map<std::string, struct actuator> actuators = dev->getActuatorMap();
     
     double appMotionActOverlap = wf->getAppOverlap()/(double)100; //0.25
     bool find           = false;
@@ -210,7 +210,7 @@ ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names)
     for(auto it=actuators.begin() ; it!=actuators.end() ; ++it)
     {
         std::string curr_name = it->first;
-
+		
         for(int line=0; line<a_names.size() && !find; line++)
         {// check if the current actuator is a part of the movement, for each line
             auto out = std::find(a_names[line].begin(), a_names[line].end(), curr_name);
@@ -221,7 +221,7 @@ ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names)
                 uint16_t    vneutral = (uint16_t) ~((unsigned int) act->vneutral);
 
                 std::vector<uint16_t> tmp;
-                tmp.reserve(total_time+300);
+                tmp.reserve(total_time);
                 // (1/3) before the movement:
                 tmp.insert(tmp.end(), start_at, vneutral);
                 // (2/3) the movement:
@@ -229,7 +229,7 @@ ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names)
                 tmp.insert(tmp.end(), amvec.begin(), amvec.end());
                 // (3/3) after the movement + inter-letters procrastination:
                 tmp.insert(tmp.end(), total_time-tmp.size(), vneutral);
-                tmp.insert(tmp.end(), 300, vneutral);
+                //tmp.insert(tmp.end(), 300, vneutral);
                 
                 
                 result.insert(std::pair<uint8_t,std::vector<uint16_t>>(act->chan,tmp));
@@ -272,14 +272,14 @@ ALPHABET::make_letter(char l) {
         case 'c' :
         {
             
-            std::vector<std::vector<std::string>> names(7,std::vector<std::string>(1));
-            names[0][0] = "t1";
-            names[1][0] = "t2";
-            names[2][0] = "palm23";
-            names[3][0] = "palm13";
-            names[4][0] = "ff1";
-            names[5][0] = "ff2";
-            names[6][0] = "ff3";
+            std::vector<std::vector<std::string>> names(4,std::vector<std::string>(1));
+            names[0][0] = "t2";
+            //names[1][0] = "t1";
+            names[1][0] = "palm33";
+            names[2][0] = "palm13";
+            //names[4][0] = "ff1";
+            //names[5][0] = "ff2";
+            names[3][0] = "ff3";
             
             result = make_tapHoldLetter(names);
             //result = make_appLetter(names);
@@ -289,7 +289,7 @@ ALPHABET::make_letter(char l) {
         {
             std::vector<std::vector<std::string>> names(1,std::vector<std::string>(2));
             names[0][0] = "ff3";
-            names[0][1] = "ff2";
+            names[0][1] = "ff1";
             
             result = make_tapHoldLetter(names);
             //result = make_tapLetter(names);
@@ -368,16 +368,16 @@ ALPHABET::make_letter(char l) {
         }
         case 'j' :
         {
-            std::vector<std::vector<std::string>> names(9,std::vector<std::string>(1));
+            std::vector<std::vector<std::string>> names(4,std::vector<std::string>(1));
             names[0][0] = "mf3";
-            names[1][0] = "mf2";
-            names[2][0] = "mf1";
-            names[3][0] = "palm12";
-            names[4][0] = "palm22";
-            names[5][0] = "palm32";
-            names[6][0] = "palm33";
-            names[7][0] = "t1";
-            names[8][0] = "t2";
+            //names[1][0] = "mf2";
+            names[1][0] = "mf1";
+            //names[3][0] = "palm12";
+            //names[4][0] = "palm22";
+            names[2][0] = "palm32";
+            //names[6][0] = "palm33";
+            //names[7][0] = "t1";
+            names[3][0] = "t2";
             result = make_tapHoldLetter(names);
             //result = make_appLetter(names);
             break;
@@ -394,9 +394,9 @@ ALPHABET::make_letter(char l) {
         case 'l' :
         {
             std::vector<std::vector<std::string>> names(1,std::vector<std::string>(3));
-            names[0][0] = "palm21";
-            names[0][1] = "palm22";
-            names[0][2] = "palm23";
+            names[0][0] = "palm11";
+            names[0][1] = "palm12";
+            names[0][2] = "palm13";
             
             result = make_tapHoldLetter(names);   
             break;
@@ -440,14 +440,14 @@ ALPHABET::make_letter(char l) {
         {
             std::vector<std::vector<std::string>> names(1,std::vector<std::string>(1));
             names[0][0] = "ff3";
-            
-            result = make_tapHoldLetter(names);
+            //waveformLetter r = make_tapHoldLetter(names);
+            result = make_appLetter(names);
+            //result.begin()->second.insert(result.begin()->second.begin(), r.begin()->second.begin(),r.begin()->second.end());
             break;
         }
         case 'q' :
         {
-            std::vector<std::string> names {         "palm23", 
-                                            "palm32"};
+            std::vector<std::string> names {"palm23"};
             result = make_tapLetter(names);
             break;
         }

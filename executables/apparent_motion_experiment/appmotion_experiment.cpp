@@ -177,10 +177,10 @@ int main(int argc, char *argv[])
                 //initAppMoveVariables(am);
             }
             else if ('\n' == ch) {
-                moveWF tapmc = wf->getTapMoveC();
-                tapHoldMove tapholdmc = wf->getTapHoldMoveC();
-                wf->configure(tapholdmc, tapmc, *am, refreshRate_Hz, 1);
-                alph->configure(dev, wf);
+                //moveWF tapmc = wf->getTapMoveC();
+                //tapHoldMove tapholdmc = wf->getTapHoldMoveC();
+                //wf->configure(tapholdmc, tapmc, *am, refreshRate_Hz, 1);
+                //alph->configure(dev, wf);
                 
                 wfLetter = getAppmove(am, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
@@ -244,6 +244,7 @@ waveformLetter
 getAppmove(struct appMove * am, ALPHABET* alph)
 {
     //reconfigure the app motion
+    /*
     std::vector<std::vector<std::string>> names(am->nbAct.max, std::vector<std::string>(1));
     names[0][0] = "palm32";
     names[1][0] = "palm22";
@@ -258,9 +259,40 @@ getAppmove(struct appMove * am, ALPHABET* alph)
     {
         actIDs[i][0] = names[(am->nbAct.max-am->nbAct.value)+i][0];
     }
+    */
     //std::vector<std::vector<uint16_t>> result = ;
-    
-    return alph->make_appLetter(actIDs);
+    std::vector<std::vector<std::string>> names(6,std::vector<std::string>(4));
+	// first line.
+	names[0][0] = "~";
+	names[0][1] = "palm31";
+	names[0][2] = "palm32";
+	names[0][3] = "palm33";
+	// second line..
+	names[1][0] = "palmleft";
+	names[1][1] = "palm21";
+	names[1][2] = "palm22";
+	names[1][3] = "palm23";
+	// third line...
+	names[2][0] = "~";
+	names[2][1] = "palm11";
+	names[2][2] = "palm12";
+	names[2][3] = "palm13";
+	
+	names[3][0] = "p1";
+	names[3][1] = "rf1";
+	names[3][2] = "mf1";
+	names[3][3] = "ff1";
+	
+	names[4][0] = "p2";
+	names[4][1] = "rf2";
+	names[4][2] = "mf2";
+	names[4][3] = "ff2";
+	
+	names[5][0] = "~";
+	names[5][1] = "rf3";
+	names[5][2] = "mf3";
+	names[5][3] = "ff3";
+    return alph->make_appLetter(names);
 }   
 
 

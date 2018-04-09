@@ -78,6 +78,8 @@ public:
         throw (HaptiCommConfigurationException);
    
 private: 
+	void initAppMoveVariables(struct appMove * am);
+	
     //--------
     // Lookup-style functions.
     //--------

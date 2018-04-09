@@ -158,17 +158,15 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     AD5383 ad;
     ad.spi_open();
     ad.configure();
-    // fréquence maximale pour les sinus utilisées
-    double hz_max = 1000; //Hz=1/s
-    // th. de Nyquist implique au minimum :
-    double freq_message = hz_max*2; // 2000 message / secondes (par chan)
-    // un peu bizarre. Mais on souhaite faire 2 envoies de messages par millisec
-    double timePmessage_ns = hz_max/freq_message * ms2ns; // * ns
     
-    ad.execute_trajectory(alph->getneutral(), timePmessage_ns);
+    double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
+    int durationRefresh_ns  = durationRefresh_ms * ms2ns; // * ns
+    
+    ad.execute_trajectory(alph->getneutral(), durationRefresh_ns);
     
     waveformLetter values;
     std::queue<char> letters;
+    int overruns = 0;
     
     // Initialisation complete.
     cv.notify_one(); // Notify generator (placed here to avoid waiting for the lock)
@@ -195,7 +193,12 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         if (letters.front() != ' ')// is part of the alphabet){
         {
             values = alph->getl(letters.front());
-            ad.execute_selective_trajectory(values, timePmessage_ns);
+            int ovr = ad.execute_selective_trajectory(values, durationRefresh_ns);
+			if (ovr)
+			{
+				overruns += ovr;
+				//cout << "Overruns: " << overruns << endl;
+			}
             values.clear();
         }
         letters.pop();
