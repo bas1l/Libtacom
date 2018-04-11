@@ -26,7 +26,7 @@
 #include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <string.h>
+
 using CONFIG4CPP_NAMESPACE::Configuration;
 using CONFIG4CPP_NAMESPACE::ConfigurationException;
 
@@ -107,67 +107,24 @@ throw (HaptiCommConfigurationException)
     }
 }
 
-void HaptiCommConfiguration::configureWaveform(WAVEFORM * wf)
-throw (HaptiCommConfigurationException)
-{
-    
-    printf("configureWaveform\n");
-    StringBuffer __m_scope = m_scope;
-    
-    StringBuffer scope; 
-    Configuration::mergeNames(m_scope.c_str(), "waveform", scope);
-    StringBuffer filter;
 
-    m_scope = scope;
-    
-    try {
-        int freqRefresh_Hz = (int) m_cfg->lookupInt(scope.c_str(), "freqRefresh");
-        int useWAV = (int) m_cfg->lookupInt(scope.c_str(), "useWAV");
-        
-        //printf("useWAV?\n");
-        struct moveWF * tapm = new moveWF();
-        //struct appMove * tapm = new appMove();
-        Configuration::mergeNames(scope.c_str(), "tap", filter);
-        tapm->duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
-        tapm->amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
-        tapm->wav = m_cfg->lookupString(filter.c_str(), "wav");
-        
-        struct tapHoldMove * tapHoldm = new tapHoldMove();
-        //struct appMove * tapm = new appMove();
-        Configuration::mergeNames(scope.c_str(), "tapHold", filter);
-        tapHoldm->actOverlap.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "actuator_overlapping"))*100);
-        tapHoldm->action.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
-        tapHoldm->action.amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
-        tapHoldm->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
-        
-        struct appMove * am = new appMove();
-		initAppMoveVariables(am);
-        Configuration::mergeNames(scope.c_str(), "apparent", filter);
-        am->nbAct.value = (int) m_cfg->lookupInt(filter.c_str(), "nb_act_superposed");
-        am->actOverlap.value = (int)(((float) m_cfg->lookupFloat(filter.c_str(), "actuator_overlapping"))*100);
-        
-        Configuration::mergeNames(scope.c_str(), "apparent.asc", filter);
-        am->asc.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
-        am->asc.wav = m_cfg->lookupString(filter.c_str(), "wav");
-        
-        Configuration::mergeNames(scope.c_str(), "apparent.action", filter);
-        am->action.duration.value = (int) m_cfg->lookupInt(filter.c_str(), "duration");
-        am->action.amplitude.value = (int) m_cfg->lookupInt(filter.c_str(), "amplitude");
-        am->action.wav = m_cfg->lookupString(filter.c_str(), "wav");
-        
-        printf("wf->configure::begin\n");
-        wf->configure(*tapHoldm, *tapm, *am, freqRefresh_Hz, useWAV);
-        printf("wf->configure::end\n");
-    }
-    catch(const ConfigurationException & ex) {
-            throw HaptiCommConfigurationException(ex.c_str());
-    }
-    
-    m_scope = __m_scope;
-}
+
 
 //--------
 // Configuration functions.
+
+
+void HaptiCommConfiguration::configure(const char * cfgSource, DEVICE * dev, WAVEFORM * wf, ALPHABET * alph)
+throw (HaptiCommConfigurationException)
+{
+    
+    parse(cfgSource, "HaptiComm");
+    configureDevice(dev);
+    configureWaveform(wf);
+    configureAlphabet(alph, dev, wf);
+    
+}
+
 //--------
 void HaptiCommConfiguration::configureDevice(DEVICE * dev)
 throw (HaptiCommConfigurationException)
@@ -211,77 +168,101 @@ throw (HaptiCommConfigurationException)
 
 
 
+void HaptiCommConfiguration::configureWaveform(WAVEFORM * wf)
+throw (HaptiCommConfigurationException)
+{
+    StringBuffer __m_scope = m_scope;
+    
+    StringBuffer scope; 
+    Configuration::mergeNames(m_scope.c_str(), "waveform", scope);
+    StringBuffer filter;
+    const char * id;
+    int len;
+    int i;
+    
+    m_scope = scope;
+    
+    try {
+        int freqRefresh_Hz = (int) m_cfg->lookupInt(scope.c_str(), "freqRefresh");
+        bool useWAV = m_cfg->lookupBoolean(scope.c_str(), "useWAV");
+        wf->configure(freqRefresh_Hz, useWAV);
+        
+        Configuration::mergeNames(scope.c_str(), "uid-motion", filter);
+        m_cfg->listFullyScopedNames(m_scope.c_str(), "", Configuration::CFG_SCOPE,
+                                    false, filter.c_str(), m_scopeNames);
+        len = m_scopeNames.length();
+        printf("There are %d Motion\n", len);
+        for (i = 0; i < len; i++) {
+            struct motion m = lookupMotion(m_scopeNames[i]);
+            
+            wf->insertMotion(m);
+        }
+
+    }
+    catch(const ConfigurationException & ex) {
+            throw HaptiCommConfigurationException(ex.c_str());
+    }
+    
+    m_scope = __m_scope;
+}
+
+
+void HaptiCommConfiguration::configureAlphabet(
+                        ALPHABET * alph, 
+                        DEVICE * dev, 
+                        WAVEFORM * wf)
+throw (HaptiCommConfigurationException)
+{
+    alph->configure(dev, wf);
+    
+    
+    StringBuffer __m_scope = m_scope;
+    
+    StringBuffer scope; 
+    Configuration::mergeNames(m_scope.c_str(), "alphabet", scope);
+    StringBuffer filter;
+    const char * id;
+    int len;
+    int i;
+    
+    m_scope = scope;
+    
+    try {
+        Configuration::mergeNames(scope.c_str(), "uid-symbol", filter);
+        m_cfg->listFullyScopedNames(m_scope.c_str(), "", Configuration::CFG_SCOPE,
+                                    false, filter.c_str(), m_scopeNames);
+        len = m_scopeNames.length();
+        printf("There are %d symbols\n", len);
+        for (i = 0; i < len; i++) {
+            struct symbol s = lookupSymbol(m_scopeNames[i]);
+            
+            alph->insertSymbol(s);
+        }
+
+    }
+    catch(const ConfigurationException & ex) {
+            throw HaptiCommConfigurationException(ex.c_str());
+    }
+    
+    m_scope = __m_scope;
+}
+
+
 
 //--------  
 // PRIVATE functions.
 //--------
 
-void HaptiCommConfiguration::initAppMoveVariables(struct appMove * am) {
-	
-    am->asc.name = "Apparent Asc";
-    am->asc.wav = "apparentAsc.wav";
-    
-    am->asc.typeSignal.key = 'q';
-    am->asc.typeSignal.name = "ascension type";
-    am->asc.typeSignal.value = 1;
-    am->asc.typeSignal.valueDefault = 1;
-    am->asc.typeSignal.min = 1;
-    am->asc.typeSignal.max = 3;
-    
-    am->asc.amplitude.key = 'w';
-    am->asc.amplitude.name = "ascension amplitude";
-    am->asc.amplitude.value = 2300;
-    am->asc.amplitude.valueDefault = 2700;
-    am->asc.amplitude.min = 0;
-    am->asc.amplitude.max = 4095;
-    
-    am->asc.duration.key = 'e';
-    am->asc.duration.name = "ascension duration";
-    am->asc.duration.value = 50;
-    am->asc.duration.valueDefault = 100;
-    am->asc.duration.min = 0;
-    am->asc.duration.max = 2000;//ms
-    
-    
-    am->action.name = "Apparent Action";
-    am->action.wav = "../libtacom/Movement.wav";
-    
-    am->action.typeSignal.key = 'a';
-    am->action.typeSignal.name = "action type";
-    am->action.typeSignal.value = 1;
-    am->action.typeSignal.valueDefault = 1;
-    am->action.typeSignal.min = 1;
-    am->action.typeSignal.max = 3;
-    
-    am->action.amplitude.key = 's';
-    am->action.amplitude.name = "action amplitude";
-    am->action.amplitude.value = 300;
-    am->action.amplitude.valueDefault = 700;
-    am->action.amplitude.min = 0;
-    am->action.amplitude.max = 4095;
-    
-    am->action.duration.key = 'd';
-    am->action.duration.name = "action duration";
-    am->action.duration.value = 100;
-    am->action.duration.valueDefault = 400;
-    am->action.duration.min = 0;
-    am->action.duration.max = 2000;//ms
-    
-    
-    am->nbAct.key = 'z';
-    am->nbAct.name = "Number of actuators";
-    am->nbAct.value = 1;
-    am->nbAct.valueDefault = 1;
-    am->nbAct.min = 1;
-    am->nbAct.max = 6;//ms
-    
-    am->actOverlap.key = 'x';
-    am->actOverlap.name = "Overlap between actuators";
-    am->actOverlap.value = 30;
-    am->actOverlap.valueDefault = 0;
-    am->actOverlap.min = 0;
-    am->actOverlap.max = 100;//ms
+void HaptiCommConfiguration::initVariableMove(struct variableMove * vm) 
+{
+    vm->key = ' ';
+    vm->name = "";
+    vm->value = 2048;
+    vm->valueDefault = 2048;
+    vm->min = 0;
+    vm->max = 4095;
 }
+
 
 //--------  
 // Lookup-style functions.
@@ -313,16 +294,86 @@ const throw (HaptiCommConfigurationException){
 }
 
 
-
 const char * HaptiCommConfiguration::lookupActuatorID(const char * scopeActuator) 
 const throw (HaptiCommConfigurationException)
 {
     try {
-                return m_cfg->lookupString(scopeActuator, "id");
+        return m_cfg->lookupString(scopeActuator, "id");
+    } catch(const ConfigurationException & ex) {
+        throw HaptiCommConfigurationException(ex.c_str());
+    }
+}
+
+
+struct motion HaptiCommConfiguration::lookupMotion(const char * scopeMotion) 
+throw (HaptiCommConfigurationException)
+{    
+    struct motion * m = new motion();
+    
+    initVariableMove(&(m->typeSignal));
+    initVariableMove(&(m->amplitude));
+    initVariableMove(&(m->duration));
+    
+    try {
+        m->name      = m_cfg->lookupString(scopeMotion, "name");
+        m->wav       = m_cfg->lookupString(scopeMotion, "wav");
+        
+        m->duration.value  = m_cfg->lookupInt(scopeMotion, "duration");
+        m->amplitude.value = m_cfg->lookupInt(scopeMotion, "amplitude");
     } catch(const ConfigurationException & ex) {
             throw HaptiCommConfigurationException(ex.c_str());
     }
+    
+    return (*m);
 }
+
+struct symbol HaptiCommConfiguration::lookupSymbol(const char * scopeSymbol) 
+throw (HaptiCommConfigurationException)
+{   
+    struct symbol * s = new symbol();
+    
+    StringVector listID;
+    StringBuffer lineID;
+    StringBuffer nextLineID;
+    StringBuffer currID;
+    int lineInt;
+    
+    int i;
+    
+    try {
+        s->name       = m_cfg->lookupString(scopeSymbol, "name");
+        s->motion     = m_cfg->lookupString(scopeSymbol, "motion");
+        s->actOverlap = m_cfg->lookupFloat(scopeSymbol, "actuatorOverlap");
+    
+        s->actArr.clear();
+        m_cfg->lookupList(scopeSymbol, "actuatorArrangement", listID);
+        
+        lineID  = listID[0];
+        lineInt = std::stoi(lineID.c_str());
+        nextLineID = StringBuffer();
+        nextLineID.append(lineInt+1);
+        for(i=1; i<listID.length(); i++)
+        {
+            currID = listID[i];
+            if (Configuration::patternMatch(currID.c_str(), nextLineID.c_str()))
+            {
+                lineInt     = std::stoi(nextLineID.c_str());
+                nextLineID  = StringBuffer();
+                nextLineID.append(lineInt+1);
+            }
+            else
+            {
+                s->actArr.push_back(actuatorStartLine(currID.c_str(), lineInt));
+            }
+        }
+                
+    } catch(const ConfigurationException & ex) {
+            throw HaptiCommConfigurationException(ex.c_str());
+    }
+    
+    return (*s);
+}
+
 
 
 

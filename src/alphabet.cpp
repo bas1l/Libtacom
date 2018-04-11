@@ -27,7 +27,7 @@ ALPHABET::~ALPHABET() {}
 void 
 ALPHABET::configure() 
 {
-    configure_letters();
+    //configure_letters();
     configure_neutral();
 }
 
@@ -37,7 +37,7 @@ ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf)
     dev = _dev;
     wf = _wf;
     
-    configure_letters();
+    //configure_letters();
     configure_neutral();
 }
 
@@ -60,18 +60,25 @@ ALPHABET::getneutral()
 
 
 waveformLetter
-ALPHABET::getl(char l) 
+ALPHABET::getl(std::string l) 
 {
     // searching for the letter l
-    it_letter = letters.find(l);
-    if (it_letter != letters.end())
+    it_dictionnary = dictionnary.find(l);
+    if (it_dictionnary != dictionnary.end())
     {
-        return it_letter->second;
+        return it_dictionnary->second;
     }
     else
     {// if not found, return an empty vector 
-        return letters.find('~')->second;
+        return dictionnary.find("~")->second;
     }
+}
+
+waveformLetter
+ALPHABET::getl(char l) 
+{
+    std::string lstring(1, l);
+    return getl(lstring);
 }
 
 
@@ -94,9 +101,11 @@ ALPHABET::make_tapHoldLetter(std::vector<std::vector<std::string>> a_names)
 {
     std::map<std::string, struct actuator>  actuators = dev->getActuatorMap();
     
-    double actOverlap   = wf->getTapHoldOverlap()/(double)100; //0.25
+    double actOverlap   = 0.20; //0.25
     bool find           = false;
-    int  tapholdsize    = wf->getTapHoldMoveSize();
+    motion                tapHoldMotion = wf->getMotion("tapHold");
+    std::vector<uint16_t> tapHoldvec    = tapHoldMotion.motionVec;
+    int  tapholdsize    = tapHoldvec.size();
     // shift in time/ms/value between 2 actuators in series into the app move
     int  lag_inter_line = tapholdsize*actOverlap;
     int  nb_range       = a_names.size();
@@ -125,7 +134,6 @@ ALPHABET::make_tapHoldLetter(std::vector<std::vector<std::string>> a_names)
                 // (1/3) before the movement:
                 tmp.insert(tmp.end(), start_at, vneutral);
                 // (2/3) the movement:
-                std::vector<uint16_t> tapHoldvec = wf->getTapHoldMove();
                 tmp.insert(tmp.end(), tapHoldvec.begin(), tapHoldvec.end());
                 // (3/3) after the movement + inter-letters procrastination:
                 tmp.insert(tmp.end(), total_time-tmp.size(), vneutral);
@@ -152,10 +160,14 @@ ALPHABET::make_tapHoldLetter(std::vector<std::vector<std::string>> a_names)
 
 
 waveformLetter
-ALPHABET::make_tapLetter(std::vector<std::string> a_names) {
+ALPHABET::make_tapLetter(std::vector<std::string> a_names) 
+{
     
     waveformLetter result;//(a_names.size());
     actuatorsMap  actuators = dev->getActuatorMap();
+    
+    motion                tapMotion = wf->getMotion("tap");
+    std::vector<uint16_t> tapmove   = tapMotion.motionVec;
     
     // For each actuator :
     //cout << "\tFor each actuator: " << endl;
@@ -168,9 +180,6 @@ ALPHABET::make_tapLetter(std::vector<std::string> a_names) {
         {
 //            cout << "\tcurr_name= " << curr_name << endl; 
             actuator * act = &(it->second);
-
-            // put the corresponding tap move into the result vector
-            std::vector<uint16_t> tapmove = wf->getTapMove();
             
             std::vector<uint16_t> tm;
             tm.reserve(tapmove.size()+300);
@@ -192,15 +201,16 @@ ALPHABET::make_tapLetter(std::vector<std::string> a_names) {
 waveformLetter
 ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names) 
 {
-    std::map<std::string, struct actuator> actuators = dev->getActuatorMap();
+    actuatorsMap            actuators   = dev->getActuatorMap();
+    motion                  appMotion   = wf->getMotion("apparent");
+    std::vector<uint16_t>   amvec       = appMotion.motionVec;
     
-    double appMotionActOverlap = wf->getAppOverlap()/(double)100; //0.25
+    double appMotionActOverlap = 0.30; //0.25
     bool find           = false;
-    int  amsize         = wf->getAppMoveSize();
     // shift in time/ms/value between 2 actuators in series into the app move
-    int  lag_inter_line = amsize*appMotionActOverlap;
+    int  lag_inter_line = amvec.size()*appMotionActOverlap;
     int  nb_range       = a_names.size();
-    int  total_time     = amsize *(1+ appMotionActOverlap*(nb_range-1)) +1;//+1 for neutral statement
+    int  total_time     = amvec.size() *(1+ appMotionActOverlap*(nb_range-1)) +1;//+1 for neutral statement
     
     std::vector<uint16_t> tmp;
     waveformLetter result;
@@ -219,13 +229,11 @@ ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names)
                 actuator *  act      = &(it->second);
                 int         start_at = lag_inter_line*line;
                 uint16_t    vneutral = (uint16_t) ~((unsigned int) act->vneutral);
-
-                std::vector<uint16_t> tmp;
+                
                 tmp.reserve(total_time);
                 // (1/3) before the movement:
                 tmp.insert(tmp.end(), start_at, vneutral);
                 // (2/3) the movement:
-                std::vector<uint16_t> amvec = wf->getAppMove();
                 tmp.insert(tmp.end(), amvec.begin(), amvec.end());
                 // (3/3) after the movement + inter-letters procrastination:
                 tmp.insert(tmp.end(), total_time-tmp.size(), vneutral);
@@ -251,9 +259,76 @@ ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names)
 }
 
 
-waveformLetter 
+bool 
+ALPHABET::insertSymbol(struct symbol s)
+{
+    waveformLetter wfLetter;
+    std::pair<std::map<std::string ,waveformLetter>::iterator,bool> ret;
+    struct motion m     = wf->getMotion(s.motion);
+    int lagInterLine    = m.motionVec.size()*s.actOverlap; // time to wait between two lines
+    int totDuration     = m.motionVec.size()+ lagInterLine*(getMaxStartLineID(&(s.actArr))-1) +1;//+1 for end neutral statement
+    cout << "name symbol:" << s.name << ". motion:" << s.motion << ". overlap:" << s.actOverlap << std::endl;
+    
+    actuator *              act = new actuator();
+    std::vector<uint16_t>   totMotion;
+    std::string             actID;
+    int                     actStartLineID;
+    int                     timeToWait;
+    uint16_t                actVNeutral;
+    
+    for(actuatorArrangement::iterator it = s.actArr.begin(); it != s.actArr.end(); ++it)
+    {
+        actID           = it->first;
+        actStartLineID  = it->second;
+        //cout << "actID:" << actID << "\tactStartLineID:" << actStartLineID << std::endl;
+        
+        (*act)      = dev->getActuator(actID);
+        actVNeutral = (uint16_t) ~((unsigned int) act->vneutral);
+        timeToWait  = lagInterLine*actStartLineID;
+        
+        totMotion.reserve(totDuration);
+        // (1/3) before the motion:
+        totMotion.insert(totMotion.end(), timeToWait, actVNeutral);
+        // (2/3) the motion:
+        totMotion.insert(totMotion.end(), m.motionVec.begin(), m.motionVec.end());
+        // (3/3) after the motion:
+        totMotion.insert(totMotion.end(), totDuration-totMotion.size(), actVNeutral);
+        
+        
+        wfLetter.insert(std::pair<uint8_t,std::vector<uint16_t>>(act->chan, totMotion));
+        
+        totMotion.clear();
+    }
+    
+    //std::pair<std::string, waveformLetter> p;
+    //p = std::make_pair;
+    
+    ret = dictionnary.insert(std::pair<std::string, waveformLetter>(s.name, wfLetter));
+    
+    return ret.second;
+}
+
+
+int 
+ALPHABET::getMaxStartLineID(actuatorArrangement * ar)
+{
+    int startLine = 0;
+    
+    for(actuatorArrangement::reverse_iterator rit = ar->rbegin(); rit != ar->rend(); ++rit)
+    {
+        if (startLine < rit->second)
+        {
+            startLine = rit->second;
+        }
+    }
+    
+    return startLine;
+}
+
+waveformLetter
 ALPHABET::make_letter(char l) {
     waveformLetter result;
+    
     
     switch (l){
         case 'a' :
@@ -552,18 +627,18 @@ ALPHABET::configure_letters() {
         perror("dev->actuators is empty");
         return false;
     }
-    if (!letters.empty())
+    if (!dictionnary.empty())
     {
-        letters.clear();
+        dictionnary.clear();
     }
     
     //std::cout << "configure_letters()" << std::endl;
-    char l;
+    std::string l;
     for(std::string::size_type i = 0; i < listSymbols.length(); ++i)
     {
         l = listSymbols[i];
         //std::cout << "l = " << l << "::begin " <<  std::endl;
-        letters[l] = make_letter(l);
+        dictionnary[l] = make_letter(l.at(0));
         //std::cout << "l = " << l << "::end " << std::endl;
     }
     

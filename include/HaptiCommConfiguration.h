@@ -28,6 +28,7 @@
 #include <config4cpp/Configuration.h>
 #include "device.h"
 #include "waveform.h"
+#include "alphabet.h"
 
 using namespace CONFIG4CPP_NAMESPACE;
 
@@ -71,15 +72,21 @@ public:
     //--------
     // Configuration functions.
     //--------
+    void configure(const char * cfgSource, DEVICE * dev, WAVEFORM * wf, ALPHABET * alph)
+        throw (HaptiCommConfigurationException);
+    
     void configureDevice(DEVICE * dev)
         throw (HaptiCommConfigurationException);
     
-    void configureWaveform(WAVEFORM * dev)
+    void configureWaveform(WAVEFORM * wf)
+        throw (HaptiCommConfigurationException);
+    
+    void configureAlphabet(ALPHABET * alph, DEVICE * dev, WAVEFORM * wf)
         throw (HaptiCommConfigurationException);
    
 private: 
-	void initAppMoveVariables(struct appMove * am);
-	
+    void initVariableMove(struct variableMove * vm);
+    
     //--------
     // Lookup-style functions.
     //--------
@@ -89,6 +96,12 @@ private:
     const char * lookupActuatorID(const char * scopeActuator) 
         const throw (HaptiCommConfigurationException);
     
+    struct motion lookupMotion(const char * scopeMotion) 
+        throw (HaptiCommConfigurationException);
+    
+    struct symbol lookupSymbol(const char * scopeSymbol) 
+        throw (HaptiCommConfigurationException);
+
     void lookupList(const char * name, const char **& array, int & arraySize) 
         const throw (HaptiCommConfigurationException);
 

@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <map>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -40,40 +41,22 @@ struct variableMove
     int min;
     int max;
 };
-/* @struct moveWF
+/* @struct motion
  * @brief Group of variables defining a motion
  */
-struct moveWF
+struct motion
 {
-    std::string name;
-    std::string wav;
+    std::vector<uint16_t>   motionVec;
+    WavFile *               motionWAV;
     
-    variableMove typeSignal;
-    variableMove amplitude;
-    variableMove duration;
-};
-/* @struct appMove
- * @brief specific structure defining the apparent motion
- */
-struct appMove
-{
-    moveWF asc;
-    moveWF action;
+    std::string     name;
+    std::string     wav;
     
-    variableMove nbAct;
-    variableMove actOverlap;
-};
-/* @struct tapHoldMove
- * @brief specific structure defining the tapHold motion
- */
-struct tapHoldMove
-{
-    moveWF action;
+    variableMove    typeSignal;
+    variableMove    amplitude;
+    variableMove    duration;
     
-    variableMove nbAct;
-    variableMove actOverlap;
 };
-
 
 
 
@@ -93,17 +76,13 @@ public:
     /**********************************************/
     /***            @brief Configurations       ***/
     /**********************************************/
-    void configure( struct tapHoldMove _tapHoldmc,
-                    struct moveWF _tapmc, 
-                    struct appMove _amc, 
-                    int nmessage_sec, int useWAV);
-    void configure();
+    void configure(int nmessage_sec, bool useWAV);
     
     
     /**********************************************/
     /***            @brief Tools                ***/
     /**********************************************/
-    std::vector<uint16_t> getTapMove(actuator a);
+    bool insertMotion(struct motion motionVec);
     
     
     /**********************************************/
@@ -117,16 +96,10 @@ public:
     /***            @brief Getters              ***/
     /**********************************************/
     int                     getFreqRefresh_mHz();
-    int                     getTapHoldMoveSize();
-    int                     getAppMoveSize();    
-    int                     getTapHoldOverlap();
-    int                     getAppOverlap();    
-    tapHoldMove             getTapHoldMoveC();
-    moveWF                  getTapMoveC();
-    
-    std::vector<uint16_t>   getTapHoldMove();
-    std::vector<uint16_t>   getTapMove();
-    std::vector<uint16_t>   getAppMove();
+    int                     getMotionSize(std::string motionName);
+    struct motion           getMotion(std::string motionName);
+    std::vector<uint16_t>   getTapMove(actuator a);
+
     
     
     
@@ -135,30 +108,20 @@ private:
     /***            @brief Private variables    ***/
     /**********************************************/
     // refresh rate bits/milliseconds (SPI, RPI3 to AD5383)
-    int freqRefresh_mHz;
-    // Caracteristics of the motions
-    struct tapHoldMove  tapHoldmc;
-    struct moveWF       tapmc;
-    struct appMove      amc;
-    // Normalised values of the motions
-    std::vector<uint16_t> tapHoldMoveVec;
-    std::vector<uint16_t> tapMoveVec;
-    std::vector<uint16_t> appMoveVec;
-    // if WAV files exist: wav containers of the motions
-    WavFile * tapHoldMoveWAV;
-    WavFile * tapMoveWAV;
-    WavFile * appMoveWAV;
+    int     freqRefresh_mHz;
+    bool    useWAV;
+    // Map of the motions
+    std::map<std::string, motion>              motionsMap;
+    std::map<std::string, motion>::iterator    it_motionsMap;
     
     
     /**********************************************/
     /***            @brief Private functions    ***/
     /**********************************************/
-    bool extractWAV();
-    void create_tapHoldMoveWAV();
-    void create_tapMoveWAV();
-    void create_appMoveWAV();
+    bool extractWAV(struct motion * m);
+    void create_moveWAV(struct motion * m);
     
-    void create_appMoveDefault();
+    //void create_appMoveDefault();
     float * create_envelope_sin(int length, int ampl);
     float * create_envelope_asc(int length);
     /**
@@ -179,5 +142,6 @@ private:
     float * create_random_dots(int nsample, int a, int b);
 };
 #endif // WAVEFORM_H_
+
 
 

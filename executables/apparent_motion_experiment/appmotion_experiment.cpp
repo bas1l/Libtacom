@@ -42,12 +42,13 @@ using namespace std::chrono;
 
 
 void draw_variable(struct variableMove * vam);
-void draw(struct appMove * am);
-waveformLetter getAppmove(struct appMove * am, ALPHABET* alph);
-struct variableMove * getVariableam(struct appMove *am, char * c);
+void draw(struct appMove * am, struct variableMove * nbAct);
+waveformLetter getAppmove(struct variableMove * nbAct, ALPHABET* alph);
+struct variableMove * getVariableam(struct appMove *am, struct variableMove * nbAct, char * c);
 bool modifyVariable(struct variableMove * vam, int v);
 void resetVariable(struct variableMove * vam);
 void initAppMoveVariables(struct appMove * am);
+void initnbActVariables(struct variableMove * nbAct);
 static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
 
 
@@ -61,7 +62,9 @@ int main(int argc, char *argv[])
     WAVEFORM *  wf  = new WAVEFORM();
     ALPHABET * alph = new ALPHABET();
     struct appMove * am = new appMove();
-    struct variableMove * vam = new variableMove();
+    struct variableMove * nbAct = new variableMove();
+    struct variableMove * vam   = new variableMove();
+    
     std::vector<std::vector<uint16_t> > values(AD5383::num_channels);
     waveformLetter wfLetter;
     
@@ -102,6 +105,7 @@ int main(int argc, char *argv[])
     cfg->configureWaveform(wf);
     alph->configure(dev, wf);
     initAppMoveVariables(am);
+    initnbActVariables(nbAct);
     (*vam) = {"null", ' ', -1, -1, -1, -1};
     double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
     int durationRefresh_ns  = durationRefresh_ms * ms2ns; // * ns
@@ -122,14 +126,14 @@ int main(int argc, char *argv[])
         if (ERR != ch) {
             if (std::string::npos != changeVariables.find(ch)) {
                 cCurrentVariable = ch;
-                vam = getVariableam(am, &cCurrentVariable);
+                vam = getVariableam(am, nbAct, &cCurrentVariable);
             }
             else if (KEY_RIGHT == ch) {   
                 // special case for the action.amplitude 
                 if (vam->key == 's') {
                     if ((vam->value+am->asc.amplitude.value+1 >= vam->min) && (vam->value+am->asc.amplitude.value+1 <= vam->max)) {
-						modifyVariable(vam, +1);
-					}
+                        modifyVariable(vam, +1);
+                    }
                 }
                 else {    
                     modifyVariable(vam, +1);
@@ -147,13 +151,13 @@ int main(int argc, char *argv[])
                 }
             }
             else if (KEY_LEFT == ch) {
-				if (vam->key == 's') {
+                if (vam->key == 's') {
                     if ((vam->value+am->asc.amplitude.value-1 >= vam->min) && (vam->value+am->asc.amplitude.value-1	 <= vam->max)) {
-						modifyVariable(vam, -1);
+                        modifyVariable(vam, -1);
                     }
                 }
                 else {    
-					modifyVariable(vam, -1);
+                    modifyVariable(vam, -1);
                 }
             }
             else if (KEY_DOWN == ch) {
@@ -182,19 +186,19 @@ int main(int argc, char *argv[])
                 //wf->configure(tapholdmc, tapmc, *am, refreshRate_Hz, 1);
                 //alph->configure(dev, wf);
                 
-                wfLetter = getAppmove(am, alph);
+                wfLetter = getAppmove(nbAct, alph);
                 int ovr = ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
-				if (ovr)
-				{
-					overruns += ovr;
-				}
-				
-				wfLetter.clear();
+                if (ovr)
+                {
+                        overruns += ovr;
+                }
+
+                wfLetter.clear();
                 nbAppmove++;
             }
         }
         
-        draw(am);
+        draw(am, nbAct);
         draw_variable(vam);
         //printw("\n");
         //printw("ID apparent move :%i\n", nbAppmove);
@@ -220,11 +224,11 @@ void draw_variable(struct variableMove * vam) {
 }
 
 void 
-draw(struct appMove * am) {    
+draw(struct appMove * am, struct variableMove * nbAct) {    
     clear();
     print_instructions();
     printw("Global variables:\n");
-    printw("(%c) Number of actuators = <%i>\n", am->nbAct.key, am->nbAct.value);
+    printw("(%c) Number of actuators = <%i>\n", nbAct->key, nbAct->value);
     printw("(%c) Overlap between actuators = <%i%>\n", am->actOverlap.key, am->actOverlap.value);
     
     printw("\n");
@@ -241,11 +245,11 @@ draw(struct appMove * am) {
 }
 
 waveformLetter 
-getAppmove(struct appMove * am, ALPHABET* alph)
+getAppmove(struct variableMove * nbAct, ALPHABET* alph)
 {
     //reconfigure the app motion
     /*
-    std::vector<std::vector<std::string>> names(am->nbAct.max, std::vector<std::string>(1));
+    std::vector<std::vector<std::string>> names(nbAct->max, std::vector<std::string>(1));
     names[0][0] = "palm32";
     names[1][0] = "palm22";
     names[2][0] = "palm12";
@@ -254,49 +258,52 @@ getAppmove(struct appMove * am, ALPHABET* alph)
     names[5][0] = "mf3";
     
     
-    std::vector<std::vector<std::string>> actIDs(am->nbAct.value, std::vector<std::string>(1));
-    for(int i=0; i<am->nbAct.value; i++)
+    std::vector<std::vector<std::string>> actIDs(nbAct->value, std::vector<std::string>(1));
+    for(int i=0; i<nbAct->value; i++)
     {
-        actIDs[i][0] = names[(am->nbAct.max-am->nbAct.value)+i][0];
+        actIDs[i][0] = names[(nbAct->max-nbAct->value)+i][0];
     }
     */
     //std::vector<std::vector<uint16_t>> result = ;
     std::vector<std::vector<std::string>> names(6,std::vector<std::string>(4));
-	// first line.
-	names[0][0] = "~";
-	names[0][1] = "palm31";
-	names[0][2] = "palm32";
-	names[0][3] = "palm33";
-	// second line..
-	names[1][0] = "palmleft";
-	names[1][1] = "palm21";
-	names[1][2] = "palm22";
-	names[1][3] = "palm23";
-	// third line...
-	names[2][0] = "~";
-	names[2][1] = "palm11";
-	names[2][2] = "palm12";
-	names[2][3] = "palm13";
-	
-	names[3][0] = "p1";
-	names[3][1] = "rf1";
-	names[3][2] = "mf1";
-	names[3][3] = "ff1";
-	
-	names[4][0] = "p2";
-	names[4][1] = "rf2";
-	names[4][2] = "mf2";
-	names[4][3] = "ff2";
-	
-	names[5][0] = "~";
-	names[5][1] = "rf3";
-	names[5][2] = "mf3";
-	names[5][3] = "ff3";
+    // first line.
+    names[0][0] = "~";
+    names[0][1] = "palm31";
+    names[0][2] = "palm32";
+    names[0][3] = "palm33";
+    // second line..
+    names[1][0] = "palmleft";
+    names[1][1] = "palm21";
+    names[1][2] = "palm22";
+    names[1][3] = "palm23";
+    // third line...
+    names[2][0] = "~";
+    names[2][1] = "palm11";
+    names[2][2] = "palm12";
+    names[2][3] = "palm13";
+
+    names[3][0] = "p1";
+    names[3][1] = "rf1";
+    names[3][2] = "mf1";
+    names[3][3] = "ff1";
+
+    names[4][0] = "p2";
+    names[4][1] = "rf2";
+    names[4][2] = "mf2";
+    names[4][3] = "ff2";
+
+    names[5][0] = "~";
+    names[5][1] = "rf3";
+    names[5][2] = "mf3";
+    names[5][3] = "ff3";
+
     return alph->make_appLetter(names);
 }   
 
 
-struct variableMove * getVariableam(struct appMove *am, char * c)
+struct variableMove * getVariableam(struct appMove *am, 
+                                    struct variableMove * nbAct,
+                                    char * c)
 {
     if (*c == am->asc.typeSignal.key){
         return &(am->asc.typeSignal);
@@ -316,8 +323,8 @@ struct variableMove * getVariableam(struct appMove *am, char * c)
     else if (*c == am->action.duration.key){
         return &(am->action.duration);
     }
-    else if (*c == am->nbAct.key){
-        return &(am->nbAct);
+    else if (*c == nbAct->key){
+        return nbAct;
     }
     else if (*c == am->actOverlap.key){
         return &(am->actOverlap);
@@ -398,19 +405,22 @@ void initAppMoveVariables(struct appMove * am) {
     am->action.duration.max = 2000;//ms
     
     
-    am->nbAct.key = 'z';
-    am->nbAct.name = "Number of actuators";
-    am->nbAct.value = 1;
-    am->nbAct.valueDefault = 1;
-    am->nbAct.min = 1;
-    am->nbAct.max = 6;//ms
-    
     am->actOverlap.key = 'x';
     am->actOverlap.name = "Overlap between actuators";
     am->actOverlap.value = 0;
     am->actOverlap.valueDefault = 0;
     am->actOverlap.min = 0;
     am->actOverlap.max = 100;//ms
+}
+
+void initnbActVariables(struct variableMove * nbAct)
+{
+    nbAct->key = 'z';
+    nbAct->name = "Number of actuators";
+    nbAct->value = 1;
+    nbAct->valueDefault = 1;
+    nbAct->min = 1;
+    nbAct->max = 6;//ms
 }
 
 
