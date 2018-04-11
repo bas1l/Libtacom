@@ -70,6 +70,8 @@ int main(int argc, char *argv[])
     }
     
     //cfg->configure(cfgSource, dev, wf, alph);
+    
+    parse(cfgSource, "HaptiComm");
     cfg->configureDevice(dev);
     cfg->configureWaveform(wf);
     alph->configure(dev, wf);
