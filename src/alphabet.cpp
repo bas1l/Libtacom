@@ -205,8 +205,8 @@ ALPHABET::make_appLetter(std::vector<std::vector<std::string>> a_names)
     motion                  appMotion   = wf->getMotion("apparent");
     std::vector<uint16_t>   amvec       = appMotion.motionVec;
     
-    double appMotionActOverlap = 0.30; //0.25
-    bool find           = false;
+    double  appMotionActOverlap = 0.30; //0.25
+    bool    find                = false;
     // shift in time/ms/value between 2 actuators in series into the app move
     int  lag_inter_line = amvec.size()*appMotionActOverlap;
     int  nb_range       = a_names.size();
