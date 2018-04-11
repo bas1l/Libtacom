@@ -39,26 +39,18 @@ using namespace std::chrono;
 #endif
 
 
-void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto);
-uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset);
-std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, 
-                                        double phase, int nsample);
-std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value);
-void triple_spike(ALPHABET& alph, int chan_current, 
-                  std::vector<std::vector<uint16_t>>& result);
-int get_up(std::vector<uint16_t>& result, int nsample);
-void getvalues(std::vector<uint16_t> & result, char c, int nsample);
-void changeVariables(char c, int * f, int * a, int * u);
-int execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int channel);
-void print_fau(int * f, int * a, int * u);
-void print_instructions();
-void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, 
-                  std::atomic<bool> & work);
-int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
-             std::atomic<bool> & work, int nmessage_sec, 
+std::vector<uint16_t>   createsine_vector(int freq, int ampl, int offset, double phase, int nsample);
+int                     get_up(std::vector<uint16_t>& result, int nsample);
+void                    changeVariables(char c, int * f, int * a, int * u);
+int                     execute(AD5383& ad, std::vector<uint16_t>& values, long period_ns, int channel);
+
+void    read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work);
+int     send_DAC(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work, 
              ALPHABET* & alph, DEVICE* & dev);
-static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, 
-                             const char *& scope, int & nmessage_sec);
+
+static void parseCmdLineArgs(int argc, char ** argv, const char *& cfgSource, const char *& scope, int & nmessage_sec);
+void        print_fau(int * f, int * a, int * u);
+void        print_instructions();
 static void usage();
 
 
@@ -112,7 +104,7 @@ int main(int argc, char *argv[])
     std::thread thread_sendToDAC(
                             send_DAC, std::ref(letters),
                             std::ref(mutexLetters), std::ref(work), 
-                            nmessage_sec, std::ref(alph), std::ref(dev));
+                            std::ref(alph), std::ref(dev));
     
     thread_sendToDAC.join();
     thread_readLetters.join();
@@ -123,39 +115,6 @@ int main(int argc, char *argv[])
     
     return exitStatus;
 }
-    
-
-static int number_of_the_file = 1;
-void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
-{
-    std::string path = "caracterise2018/results/";
-    std::string name =  path +
-                        "n" + std::to_string(number_of_the_file) +
-                        "_up" + std::to_string(upto) + 
-                        "f" + std::to_string(freq) +
-                        "amp" + std::to_string(ampl) +
-                        "_theoric.csv";
-    ofstream fichier(name, ios::out | ios::trunc);  //déclaration du flux et ouverture du fichier
-
-    //cout << name << endl;
-    if(fichier.is_open())  // si l'ouverture a réussi
-    {
-        // instructions
-        for (int w=0; w<values.size(); ++w)
-        {
-            fichier << values[w];  // on l'affiche
-            fichier << ", ";  // on l'affiche
-        }
-        fichier.close();  // on referme le fichier
-    }
-    else  // sinon
-    {
-        std::cerr<<"Failed to open file : "<<SYSERROR()<<std::endl;
-        //cerr << "write_file/Erreur a l'ouverture !" << endl;
-    }
-    
-    number_of_the_file++;
-}
 
 /***********************************
  *
@@ -165,20 +124,7 @@ void write_file(std::vector<uint16_t> values, int freq, int ampl, int upto)
  *          matrices
  * 
  **********************************/
-uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset)
-{
-	uint16_t * s;
-	s = (uint16_t*) malloc(nsample * sizeof(uint16_t));
-	
-        // Suivant le nombre d'échantillons voulus :
-	float incr = 2*M_PI/((float)nsample);
-	for (int i=0; i<nsample; i++){
-                //s[i] = sin(i*incr*freq +phase);
-		s[i] = (uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset);
-                //printw("%i,", s[i]);
-	}
-	return s;
-}
+
 
 std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, double phase, int nsample)
 {
@@ -192,20 +138,6 @@ std::vector<uint16_t> createsine_vector(int freq, int ampl, int offset, double p
     return sinus;
 }
 
-std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
-{
-    std::vector<std::vector<uint16_t>> result(AD5383::num_channels);
-    std::vector<uint16_t> onechan(nbsample, value);
-    
-    for(int c=0; c<AD5383::num_channels; c++)
-    {
-        result[c].assign(onechan.begin(), onechan.end());
-    }
-    
-    return result;
-}
-
-
 
 
 /***********************************
@@ -213,35 +145,6 @@ std::vector<std::vector<uint16_t>> creatematrix(int nbsample, int value)
  *          patterns' makers
  * 
  **********************************/
-void triple_spike(ALPHABET& alph, int chan_current, std::vector<std::vector<uint16_t>>& result)
-{
-    
-    std::vector<std::vector<uint16_t>> spike = creatematrix(20, 0);
-    std::vector<std::vector<uint16_t>> waitspike = creatematrix(20, 2048);
-    std::vector<std::vector<uint16_t>> wait = creatematrix(2000, 2048);
-    
-    for (int i=0; i<3; i++)
-    {
-        for(int c=0; c<AD5383::num_channels; c++)
-        {
-            result[c].insert(result[c].end(),  wait[c].begin(), wait[c].end());
-            if (c == chan_current)
-            {
-                result[c].insert(result[c].end(), spike[c].begin(), spike[c].end());
-            }
-            else
-            {
-                result[c].insert(result[c].end(), waitspike[c].begin(), waitspike[c].end());
-            }
-            
-            
-        }
-    }
-    for(int c=0; c<AD5383::num_channels; c++)
-    {
-        result[c].insert(result[c].end(),  wait[c].begin(), wait[c].end());
-    }
-}
 
 
 static int amp_get_up = 500;
@@ -276,129 +179,6 @@ int get_up(std::vector<uint16_t>& result, int nsample)
  *          Functions 
  * 
  **********************************/
-void getvalues(std::vector<uint16_t> & result, char c, int nsample)
-{
-    static int f = 1;
-    static int a = 1;
-    static int u = 2048;
-    
-    int fadd = 0;
-    int aadd = 0;
-    
-    switch (c)
-    {
-        // value to add to the current frequency
-        case 'q':
-        {
-            fadd = -1;
-            break;
-        }
-        case 'w':
-        {
-            fadd = +1;
-            break;
-        }
-        case 'a':
-        {
-            fadd = -10;
-            break;
-        }
-        case 's':
-        {
-            fadd = +10;
-            break;
-        }
-        case 'z':
-        {
-            fadd = -100;
-            break;
-        }
-        case 'x':
-        {
-            fadd = +100;
-            break;
-        }
-        // value to add to the current amplitude
-        case 'e':
-        {
-            aadd = -1;
-            break;
-        }
-        case 'r':
-        {
-            aadd = +1;
-            break;
-        }
-        case 'd':
-        {
-            aadd = -10;
-            break;
-        }
-        case 'f':
-        {
-            aadd = +10;
-            break;
-        }
-        case 'c':
-        {
-            aadd = -100;
-            break;
-        }
-        case 'v':
-        {
-            aadd = +100;
-            break;
-        }
-        // other type of movement
-        case 'u':
-        {// up statement
-            u = get_up(result, nsample);
-            break;
-        }
-        case 'n' :
-        {// neutral statement
-            u = 2048;
-            result.clear();
-            result.push_back(u);
-            result.push_back(u);
-            break;
-        }
-        default :
-        {
-            break;
-        }
-    }
-    
-    if ((f+fadd) <= 0)
-    {
-        printw("f<=0");
-    }
-    if ((a+aadd) <= 0)
-    {
-        printw("a<=0");
-    }
-    
-    if (((f+fadd) > 0) && ((a+aadd) > 0) && (c != 'n') )
-    {
-        f = f+fadd;
-        a = a+aadd;
-        int phase = 0;
-        std::vector<uint16_t> sinus = createsine_vector(f, a, u, phase, nsample);
-        
-        result.clear();
-        result.insert(result.end(), sinus.begin(), sinus.end());
-    }
-    
-    printw("\n");
-    printw("f=%i, ", f);
-    printw("a=%i, ", a);
-    printw("u=%i", u);
-    refresh();
-     
-    
-    
-}
-
 
 
 
@@ -581,39 +361,6 @@ int execute_up(AD5383 & ad, int channel, int nsample)
     return u;
 }
 
-void print_fau(int * f, int * a, int * u)
-{
-    
-    printw("\n");
-    printw("f=%i, ", *f);
-    printw("a=%i, ", *a);
-    printw("u=%i", *u);
-    refresh();
-}
-
-void print_instructions()
-{
-    printw("---------------------------------------\n");
-    printw("\tSine function generator\n");
-    printw("---------------------------------------\n");
-    
-    printw("[Modify amplitude]\n");
-    printw("\t+/-1   : 'q'=decrease, 'w'=increase\n");
-    printw("\t+/-10  : 'a'=decrease, 's'=increase\n");
-    printw("\t+/-100 : 'z'=decrease, 'x'=increase\n");
-    
-    printw("[Modify frequency]\n");
-    printw("\t+/-1   : 'e'=decrease, 'r'=increase\n");
-    printw("\t+/-10  : 'd'=decrease, 'f'=increase\n");
-    printw("\t+/-100 : 'c'=decrease, 'v'=increase\n");
-    
-    printw("[Modify statement(offset)]\n");
-    printw("\tUp      : 'u'\n");
-    printw("\tNeutral : 'n'\n");
-    
-    printw("--- When you are done, press '*' to Exit ---\n");
-}
-
 void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::atomic<bool> & work)
 {
     int ch = ERR;
@@ -647,7 +394,7 @@ void read_letters(std::queue<char> & letters, std::mutex & mutexLetters, std::at
 
 
 int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
-             std::atomic<bool> & work, int nmessage_sec, 
+             std::atomic<bool> & work, 
              ALPHABET* & alph, DEVICE* & dev)
 {   
     AD5383 ad;
@@ -656,13 +403,13 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
     struct actuator current_actuator = dev->getActuator("rf2");
     int channel = current_actuator.chan;
     
-    //int nmessage_sec = 2000; // message/s
-    double dur_message_ms = (1/(double)nmessage_sec) *1000; // dur_message_per_sec * sec2ms
-    long dur_message_ns = dur_message_ms * ms2ns; // * ns
-    ad.execute_trajectory(alph->getneutral(), dur_message_ns);
+    double  durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
+    int     durationRefresh_ns  = durationRefresh_ms * ms2ns; // * ns
+    
+    ad.execute_trajectory(alph->getneutral(), durationRefresh_ns);
     
     std::queue<char> letters_in;
-    float incr = 2*M_PI/((float)nmessage_sec);   
+    float incr = 2*M_PI/((float)alph->getFreqRefresh_mHz()*1000);   
     int i = 0;
     int f = 1;
     int a = 1;
@@ -673,7 +420,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
     int overruns = 0;
     struct timespec ts = {
         .tv_sec = 0,
-                .tv_nsec = dur_message_ns
+                .tv_nsec = durationRefresh_ns
     };
     struct itimerspec its = {
         .it_interval = ts,
@@ -733,13 +480,15 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
         {
             if (letters_in.front() == 'u')
             {
-                u = execute_up(ad, channel, nmessage_sec);
+                u = execute_up(ad, channel, durationRefresh_ns);
             }
             else
             {
                 changeVariables(letters_in.front(), &f, &a, &u);
             }
             
+            clear();
+            print_instructions();
             print_fau(&f, &a, &u);
             letters_in.pop();
         }
@@ -748,7 +497,7 @@ int send_DAC(std::queue<char> & letters, std::mutex & mutexLetters,
             ad.execute_single_channel((uint16_t) floor(a * sin(i*incr*f) + u), channel);
         }
 
-        i = (i+1)%nmessage_sec;
+        i = (i+1)%durationRefresh_ns;
     }
     
     
@@ -794,6 +543,41 @@ parseCmdLineArgs(
 }
 
 
+
+void 
+print_fau(int * f, int * a, int * u)
+{
+    
+    printw("\n");
+    printw("f=%i, ", *f);
+    printw("a=%i, ", *a);
+    printw("u=%i", *u);
+    refresh();
+}
+
+void 
+print_instructions()
+{
+    printw("---------------------------------------\n");
+    printw("\tSine function generator\n");
+    printw("---------------------------------------\n");
+    
+    printw("[Modify amplitude]\n");
+    printw("\t+/-1   : 'q'=decrease, 'w'=increase\n");
+    printw("\t+/-10  : 'a'=decrease, 's'=increase\n");
+    printw("\t+/-100 : 'z'=decrease, 'x'=increase\n");
+    
+    printw("[Modify frequency]\n");
+    printw("\t+/-1   : 'e'=decrease, 'r'=increase\n");
+    printw("\t+/-10  : 'd'=decrease, 'f'=increase\n");
+    printw("\t+/-100 : 'c'=decrease, 'v'=increase\n");
+    
+    printw("[Modify statement(offset)]\n");
+    printw("\tUp      : 'u'\n");
+    printw("\tNeutral : 'n'\n");
+    
+    printw("--- When you are done, press '*' to Exit ---\n");
+}
 
 static void
 usage()
