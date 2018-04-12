@@ -116,8 +116,8 @@ private:
     
     std::string listSymbols;
     std::vector<std::vector<uint16_t>> neutral_statement;
-    std::multimap<std::string, waveformLetter> dictionnary;
-    std::multimap<std::string, waveformLetter >::iterator it_dictionnary;
+    std::map<std::string, waveformLetter> dictionnary;
+    std::map<std::string, waveformLetter >::iterator it_dictionnary;
 };
 #endif //H_ALPHABET_H
 
