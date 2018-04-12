@@ -297,7 +297,7 @@ int WavFile::openWavFile(char* fileName)
         }
 
         // read chunk header
-        cerr << "Size of chunk" << sizeof( CHUNK_HDR) << endl;
+        cout << "Size of chunk" << sizeof( CHUNK_HDR) << endl;
         stat = fread((void*)pChunkHeader, sizeof(CHUNK_HDR), (size_t)1, pFile);
         if( 1 != stat)
         {
@@ -329,7 +329,7 @@ int WavFile::openWavFile(char* fileName)
 
     /* find length of remaining data. */
     wBufferLength = pChunkHeader->dLen;
-    cerr << "wBufferLength : " << pChunkHeader->dLen;
+    cout << "wBufferLength : " << pChunkHeader->dLen << endl;
 
 
 #ifdef  DEBUG1
@@ -337,7 +337,7 @@ int WavFile::openWavFile(char* fileName)
 #endif     /* -----  not DEBUG  ----- */
     /* find number of samples. */
     maxInSamples = pChunkHeader->dLen;
-    cerr  << "maxInSamples " << maxInSamples << endl;
+    cout  << "maxInSamples " << maxInSamples << endl;
     maxInSamples /= pWavHeader->numBitsPerSample/8;
 
     /* allocate new buffers */

@@ -1,5 +1,4 @@
-
-    /*
+/*
  * waveform.cpp
  *
  *  Created on: 5 april. 2016
@@ -28,9 +27,16 @@ WAVEFORM::insertMotion(struct motion m)
     std::pair<std::map<std::string, motion>::iterator,bool> ret;
     std::pair<std::string, motion> result;
     
+    
     if (useWAV)
     {
         extractWAV(&m);
+        create_moveWAV(&m);
+        
+        cout    << "motion name:" << m.name 
+            << ". wav:" << m.wav 
+            << ". motionVec.size:" << m.motionVec.size() 
+            << std::endl;
     }
     
     result  = std::make_pair (m.name, m);

@@ -45,6 +45,9 @@ static void usage();
 
 int main(int argc, char *argv[])
 {   
+    /* CREATE VARIABLES
+     * 
+     */
     HaptiCommConfiguration * cfg = new HaptiCommConfiguration();
     DEVICE * dev = new DEVICE();
     WAVEFORM * wf  = new WAVEFORM();
@@ -54,8 +57,10 @@ int main(int argc, char *argv[])
     int exitStatus = 0;
 
     
-    setlocale(LC_ALL, "");
-    parseCmdLineArgs(argc, argv, cfgSource, scope);
+    /* SETUP ENVIRONEMENT
+     * printw and timer
+     *
+    */
     
     struct timespec t;
     struct sched_param param;
@@ -69,15 +74,24 @@ int main(int argc, char *argv[])
             exit(-2);
     }
     
-    //cfg->configure(cfgSource, dev, wf, alph);
     
+    /* INITIALISE VARIABLES
+     * 
+     */
+    setlocale(LC_ALL, "");
+    parseCmdLineArgs(argc, argv, cfgSource, scope);
+    cfg->configure(cfgSource, dev, wf, alph);
+    /*
     cfg->parse(cfgSource, "HaptiComm");
     cfg->configureDevice(dev);
     cfg->configureWaveform(wf);
     alph->configure(dev, wf);
-    
+    */
     cout << "END" << endl;
     
+    /* INITIALISE THREAD
+     * 
+     *
     std::condition_variable cv;
     std::mutex m;
     std::atomic<bool> workdone(false);
@@ -93,11 +107,18 @@ int main(int argc, char *argv[])
                                 std::ref(sentences), std::ref(cv),
                                 std::ref(m), std::ref(workdone), 
                                 alph->getlistSymbols());
+    */
     
+    /* WORK
+     * 
+     *
     extract_text.join();
     send_to_dac.join();
+    */
     
-    
+    /* CLEAN
+     * 
+     */
     delete cfg;
     delete dev;
     delete wf;
@@ -117,7 +138,7 @@ void generateSentences(std::queue<char> & sentences, std::condition_variable & c
     noecho();
     
     std::string str_ponc = " '.,;:!?-";
-    printw("alphabet:%s", str_alph.c_str());
+    //printw("alphabet:%s", str_alph.c_str());
     
     int ch;
     printw("You can start to write a letter, a word, a sentence \n --- When you are done, press '*' to Exit ---\n");

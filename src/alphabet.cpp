@@ -29,6 +29,10 @@ ALPHABET::configure()
 {
     //configure_letters();
     configure_neutral();
+    
+    dictionnary.clear();
+    std::string nan = "~";
+    dictionnary[nan] = make_letter(nan.at(0));
 }
 
 void 
@@ -37,8 +41,7 @@ ALPHABET::configure(DEVICE * _dev, WAVEFORM * _wf)
     dev = _dev;
     wf = _wf;
     
-    //configure_letters();
-    configure_neutral();
+    configure();
 }
 
 
@@ -267,8 +270,14 @@ ALPHABET::insertSymbol(struct symbol s)
     struct motion m     = wf->getMotion(s.motion);
     int lagInterLine    = m.motionVec.size()*s.actOverlap; // time to wait between two lines
     int totDuration     = m.motionVec.size()+ lagInterLine*(getMaxStartLineID(&(s.actArr))-1) +1;//+1 for end neutral statement
-    cout << "name symbol:" << s.name << ". motion:" << s.motion << ". overlap:" << s.actOverlap << std::endl;
-    
+    /*cout    << "symbol name:" << s.name 
+            << ". motion:" << s.motion 
+            << " (size=" << m.motionVec.size()
+            << ". totDuration:" << totDuration 
+            << ". lagInterLine:" << lagInterLine 
+            << "). overlap:" << s.actOverlap 
+            << std::endl;
+    */
     actuator *              act = new actuator();
     std::vector<uint16_t>   totMotion;
     std::string             actID;
@@ -276,27 +285,32 @@ ALPHABET::insertSymbol(struct symbol s)
     int                     timeToWait;
     uint16_t                actVNeutral;
     
+    totMotion.reserve(totDuration);
+    
     for(actuatorArrangement::iterator it = s.actArr.begin(); it != s.actArr.end(); ++it)
     {
         actID           = it->first;
         actStartLineID  = it->second;
         //cout << "actID:" << actID << "\tactStartLineID:" << actStartLineID << std::endl;
-        
+        //cout    << "1" << endl;
         (*act)      = dev->getActuator(actID);
         actVNeutral = (uint16_t) ~((unsigned int) act->vneutral);
-        timeToWait  = lagInterLine*actStartLineID;
-        
-        totMotion.reserve(totDuration);
+        timeToWait  = lagInterLine*(actStartLineID-1);
+        //cout    << "reserve" << endl;
         // (1/3) before the motion:
-        totMotion.insert(totMotion.end(), timeToWait, actVNeutral);
+        //cout    << "before:" << timeToWait << endl;
+        totMotion.insert(totMotion.begin(), timeToWait, actVNeutral);
         // (2/3) the motion:
+        //cout    << "motion" << endl;
         totMotion.insert(totMotion.end(), m.motionVec.begin(), m.motionVec.end());
         // (3/3) after the motion:
+        //cout    << "after:" << totDuration << ". " << totMotion.size() << endl;
         totMotion.insert(totMotion.end(), totDuration-totMotion.size(), actVNeutral);
         
-        
+        //cout    << "insert" << endl;
         wfLetter.insert(std::pair<uint8_t,std::vector<uint16_t>>(act->chan, totMotion));
-        
+       
+        //cout    << "clear" << endl;
         totMotion.clear();
     }
     

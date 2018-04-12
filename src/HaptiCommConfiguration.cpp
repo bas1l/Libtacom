@@ -176,7 +176,7 @@ throw (HaptiCommConfigurationException)
     StringBuffer scope; 
     Configuration::mergeNames(m_scope.c_str(), "waveform", scope);
     StringBuffer filter;
-    const char * id;
+    
     int len;
     int i;
     
@@ -221,7 +221,7 @@ throw (HaptiCommConfigurationException)
     StringBuffer scope; 
     Configuration::mergeNames(m_scope.c_str(), "alphabet", scope);
     StringBuffer filter;
-    const char * id;
+    
     int len;
     int i;
     
