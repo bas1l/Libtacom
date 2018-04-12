@@ -77,7 +77,7 @@ public:
      * @param period_ns Period between updates (ns)
      * @return The number of overruns (missed timer ticks)
      */
-    int execute_selective_trajectory(std::map<uint8_t,std::vector<uint16_t>> wfLetter, long period_ns);
+    int execute_selective_trajectory(std::multimap<uint8_t,std::vector<uint16_t>> wfLetter, long period_ns);
 
     
     /**

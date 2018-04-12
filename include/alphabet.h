@@ -41,7 +41,7 @@ typedef std::vector<actuatorStartLine>  actuatorArrangement;
  * First -> Identification Number for ad5383 channels
  * Second -> Corresponding waveform values 
  */
-typedef map<uint8_t, vector<uint16_t>> waveformLetter;
+typedef multimap<uint8_t, vector<uint16_t>> waveformLetter;
 
 
 /**********************************************/
@@ -116,8 +116,8 @@ private:
     
     std::string listSymbols;
     std::vector<std::vector<uint16_t>> neutral_statement;
-    std::map<std::string, waveformLetter> dictionnary;
-    std::map<std::string, waveformLetter >::iterator it_dictionnary;
+    std::multimap<std::string, waveformLetter> dictionnary;
+    std::multimap<std::string, waveformLetter >::iterator it_dictionnary;
 };
 #endif //H_ALPHABET_H
 

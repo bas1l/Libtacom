@@ -212,12 +212,12 @@ int AD5383::execute_trajectory(const std::vector<std::vector<uint16_t> >& values
 
 
 
-int AD5383::execute_selective_trajectory(std::map<uint8_t,std::vector<uint16_t>> wfLetter, long period_ns)
+int AD5383::execute_selective_trajectory(std::multimap<uint8_t,std::vector<uint16_t>> wfLetter, long period_ns)
 {   
     if(wfLetter.size() > num_channels)
         throw std::runtime_error("Trajectory vector is bigger than number of channels");
     
-    std::map<uint8_t, std::vector<uint16_t>>::iterator it = wfLetter.begin();
+    std::multimap<uint8_t, std::vector<uint16_t>>::iterator it = wfLetter.begin();
     bool keep_running;
     int ret;
     unsigned long long missed = 0;

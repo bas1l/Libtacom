@@ -266,7 +266,7 @@ bool
 ALPHABET::insertSymbol(struct symbol s)
 {
     waveformLetter wfLetter;
-    std::pair<std::map<std::string ,waveformLetter>::iterator,bool> ret;
+    std::pair<std::multimap<std::string ,waveformLetter>::iterator,bool> ret;
     struct motion m     = wf->getMotion(s.motion);
     int lagInterLine    = m.motionVec.size()*s.actOverlap; // time to wait between two lines
     int totDuration     = m.motionVec.size()+ lagInterLine*(getMaxStartLineID(&(s.actArr))-1) +1;//+1 for end neutral statement
