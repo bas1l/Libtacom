@@ -98,7 +98,7 @@ public :
     /*
      * @brief return the frequency with which the actuators are refreshed (Hz)
      */
-    int getFreqRefresh_mHz();
+    double getFreqRefresh_mHz();
     
     bool insertSymbol(struct symbol s);
     waveformLetter make_tapHoldLetter(std::vector<std::vector<std::string>> a_names);

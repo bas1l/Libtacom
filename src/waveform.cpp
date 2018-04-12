@@ -285,7 +285,7 @@ WAVEFORM::create_random_dots(int nsample, int a, int b)
 
 
 
-int 
+double 
 WAVEFORM::getFreqRefresh_mHz()
 {
     return freqRefresh_mHz;

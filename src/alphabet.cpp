@@ -85,7 +85,7 @@ ALPHABET::getl(char l)
 }
 
 
-int 
+double 
 ALPHABET::getFreqRefresh_mHz() 
 {
     return wf->getFreqRefresh_mHz();

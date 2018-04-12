@@ -76,7 +76,7 @@ public:
     /**********************************************/
     /***            @brief Configurations       ***/
     /**********************************************/
-    void configure(int nmessage_sec, bool useWAV);
+    void configure(int nmessage_Hz, bool _useWAV);
     
     
     /**********************************************/
@@ -95,7 +95,7 @@ public:
     /**********************************************/
     /***            @brief Getters              ***/
     /**********************************************/
-    int                     getFreqRefresh_mHz();
+    double                  getFreqRefresh_mHz();
     int                     getMotionSize(std::string motionName);
     struct motion           getMotion(std::string motionName);
     std::vector<uint16_t>   getTapMove(actuator a);
@@ -108,7 +108,7 @@ private:
     /***            @brief Private variables    ***/
     /**********************************************/
     // refresh rate bits/milliseconds (SPI, RPI3 to AD5383)
-    int     freqRefresh_mHz;
+    double  freqRefresh_mHz;
     bool    useWAV;
     // Map of the motions
     std::map<std::string, motion>              motionsMap;
