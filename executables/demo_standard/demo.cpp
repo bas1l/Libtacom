@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     
     /* INITIALISE THREAD
      * 
-     *
+     */
     std::condition_variable cv;
     std::mutex m;
     std::atomic<bool> workdone(false);
@@ -107,14 +107,14 @@ int main(int argc, char *argv[])
                                 std::ref(sentences), std::ref(cv),
                                 std::ref(m), std::ref(workdone), 
                                 alph->getlistSymbols());
-    */
+    
     
     /* WORK
      * 
-     *
+     */
     extract_text.join();
     send_to_dac.join();
-    */
+    
     
     /* CLEAN
      * 
