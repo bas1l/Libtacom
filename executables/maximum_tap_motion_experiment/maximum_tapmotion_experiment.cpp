@@ -38,8 +38,8 @@ using namespace std::chrono;
 #endif
 
 
-waveformLetter  getTapmove(int waitFor, double refreshRate_mHz, uint8_t channel);
-static void     parseCmdLineArgs(int argc, char ** argv, int * nmessage_sec);
+waveformLetter  getTapmove(int nbRep, int waitFor, double refreshRate_mHz, uint8_t channel);
+static void     parseCmdLineArgs(int argc, char ** argv, int * nbRep, int * nmessage_sec);
 
 
 int main(int argc, char *argv[])
@@ -56,6 +56,7 @@ int main(int argc, char *argv[])
     double  refreshRate_mHz;
     int     durationRefresh_ns; // * ns
     int     waitFor;
+    int     nbRep;
     uint8_t channel;
     
     
@@ -74,7 +75,7 @@ int main(int argc, char *argv[])
     
     
     /*** Configuration VARIABLES ***/
-    parseCmdLineArgs(argc, argv, &waitFor);
+    parseCmdLineArgs(argc, argv, &nbRep, &waitFor);
     cfg->configure(cfgSource, dev, wf, alph);
     ad->spi_open();
     ad->configure();
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
     refreshRate_mHz     = alph->getFreqRefresh_mHz();   
     durationRefresh_ns  = 1/refreshRate_mHz * ms2ns; // * ns
     channel             = dev->getActuator("mf2").chan;
-    wfLetter            = getTapmove(waitFor, refreshRate_mHz, channel);
+    wfLetter            = getTapmove(nbRep, waitFor, refreshRate_mHz, channel);
     
     /*** work ***/
     ad->execute_trajectory(alph->getneutral(), durationRefresh_ns);
@@ -99,17 +100,16 @@ int main(int argc, char *argv[])
 }
 
 
-waveformLetter getTapmove(int waitFor, double refreshRate_mHz, uint8_t channel)
+waveformLetter getTapmove(int nbRep, int waitFor, double refreshRate_mHz, uint8_t channel)
 {
     waveformLetter wL;
     vector<uint16_t> vec;
     int timeMove_ms = refreshRate_mHz* 15;
     int timeWait_ms = refreshRate_mHz* waitFor;
-    int nbOccur = 25;
     int cpt;
     
     vec.clear();
-    for(cpt=0; cpt<nbOccur; cpt++)
+    for(cpt=0; cpt<nbRep; cpt++)
     {
         vec.insert(vec.begin(), timeWait_ms, 2048);
         vec.insert(vec.begin(), timeMove_ms, 0);
@@ -122,7 +122,7 @@ waveformLetter getTapmove(int waitFor, double refreshRate_mHz, uint8_t channel)
 }
 
 static void 
-parseCmdLineArgs(int argc, char ** argv, int * waitFor)
+parseCmdLineArgs(int argc, char ** argv, int * nbRep, int * waitFor)
 {
     int i;
     for (i = 1; i < argc; i++) {
@@ -130,6 +130,12 @@ parseCmdLineArgs(int argc, char ** argv, int * waitFor)
             if (i == argc-1) { fprintf(stderr, "Unrecognised option '%s'\n\n", argv[i]);}
             *waitFor = atoi(argv[i+1]);
             fprintf(stderr, "waitFor initialised to %i\n\n", *waitFor);
+            i++;
+        } 
+        else if  (strcmp(argv[i], "-nrep") == 0) {
+            if (i == argc-1) { fprintf(stderr, "Unrecognised option '%s'\n\n", argv[i]);}
+            *nbRep = atoi(argv[i+1]);
+            fprintf(stderr, "nrep initialised to %i\n\n", *nbRep);
             i++;
         } 
         else {
