@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
     double  refreshRate_mHz;
     int     durationRefresh_ns; // * ns
     int     waitFor;
-    int     cpt;
     uint8_t channel;
     
     
@@ -85,14 +84,10 @@ int main(int argc, char *argv[])
     durationRefresh_ns  = 1/refreshRate_mHz * ms2ns; // * ns
     channel             = dev->getActuator("rf2").chan;
     wfLetter            = getTapmove(waitFor, refreshRate_mHz, channel);
-    cpt                 = 0;
     
     /*** work ***/
     ad->execute_trajectory(alph->getneutral(), durationRefresh_ns);
-    while(cpt++<5)
-    {
-        ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
-    }
+    ad->execute_selective_trajectory(wfLetter, durationRefresh_ns);
     
     /*** Free the environment and memory ***/
     delete cfg;
@@ -110,7 +105,7 @@ waveformLetter getTapmove(int waitFor, double refreshRate_mHz, uint8_t channel)
     vector<uint16_t> vec;
     int timeMove_ms = refreshRate_mHz* 15;
     int timeWait_ms = refreshRate_mHz* waitFor;
-    int nbOccur = 10;
+    int nbOccur = 25;
     int cpt;
     
     for(cpt=0; cpt<nbOccur; cpt++)
