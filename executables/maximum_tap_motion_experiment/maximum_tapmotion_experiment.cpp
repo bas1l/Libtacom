@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
     
     refreshRate_mHz     = alph->getFreqRefresh_mHz();   
     durationRefresh_ns  = 1/refreshRate_mHz * ms2ns; // * ns
-    channel             = dev->getActuator("rf2").chan;
+    channel             = dev->getActuator("mf2").chan;
     wfLetter            = getTapmove(waitFor, refreshRate_mHz, channel);
     
     /*** work ***/
@@ -108,13 +108,15 @@ waveformLetter getTapmove(int waitFor, double refreshRate_mHz, uint8_t channel)
     int nbOccur = 25;
     int cpt;
     
+    vec.clear();
     for(cpt=0; cpt<nbOccur; cpt++)
     {
+        vec.insert(vec.begin(), timeWait_ms, 2048);
         vec.insert(vec.begin(), timeMove_ms, 0);
-        vec.insert(vec.end(), timeWait_ms, 2048);
     }
     wL.insert(std::pair<uint8_t, vector<uint16_t>>(channel, vec));
     
+    fprintf(stderr, "size of the vec '%i\n\n", vec.size());
     return wL;
     
 }
