@@ -82,23 +82,16 @@ int main(int argc, char *argv[])
     parseCmdLineArgs(argc, argv, cfgSource, scope);
     cfg->configure(cfgSource, dev, wf, alph);
     
-    std::vector<std::string> idMotions = {"tap", "apparent", "tapSync", "tapHoldSync"};
+    //std::vector<std::string> idMotions = {"tap", "apparent", "tapSync", "tapHoldSync"};
     //wf->printWAVData(idMotions[0]);
     //wf->printData(idMotions[0]);
     //alph->printData("h");
     
-    
-    /*
-    cfg->parse(cfgSource, "HaptiComm");
-    cfg->configureDevice(dev);
-    cfg->configureWaveform(wf);
-    alph->configure(dev, wf);
-    */
     cout << "END" << endl;
     
     /* INITIALISE THREAD
      * 
-     *
+     */
     std::condition_variable cv;
     std::mutex m;
     std::atomic<bool> workdone(false);
@@ -118,7 +111,7 @@ int main(int argc, char *argv[])
     
     /* WORK
      * 
-     *
+     */
     extract_text.join();
     send_to_dac.join();
     

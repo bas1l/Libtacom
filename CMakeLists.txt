@@ -17,7 +17,7 @@ add_library(config4cpp STATIC IMPORTED)
 set_target_properties(config4cpp PROPERTIES IMPORTED_LOCATION ${CMAKE_SOURCE_DIR}/3_external_lib/libconfig4cpp.a)
 # Dynamic Libraries
 add_library(wavFileReader "2_src/wav_file.cpp")
-add_library(audioFile "3_external_lib/AudioFile-master/audioFile.cpp")
+add_library(audioFile "3_external_lib/AudioFile-master/AudioFile.cpp")
 #add_subdirectory("external_lib/sound_master")
 
 

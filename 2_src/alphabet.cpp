@@ -101,6 +101,7 @@ ALPHABET::insertSymbol(struct symbol s)
     struct actuator *   act = new actuator();
     waveformLetter          wfLetter;
     std::vector<uint16_t>   mv;
+    int dir;
     int amplmax;
     int amplmin;
     int neutral;
@@ -108,14 +109,15 @@ ALPHABET::insertSymbol(struct symbol s)
     for(int cpt=0; cpt<s.actList.size(); ++cpt)
     {
         *act = dev->getActuator(s.actList[cpt]); //current actuator
+        dir = act->windingDirection;
         neutral = act->vneutral; //neutral value
         amplmax = act->vmax - neutral; //amplitude max value
         amplmin = neutral - act->vmin;  //amplitude min value
         mv.resize(m.data[cpt].size());
         std::transform(m.data[cpt].begin(), m.data[cpt].end(), mv.begin(), //transform the signal from
-            [neutral, amplmax, amplmin](double i){ //+1/-1 to +/-amplitude
+            [neutral, amplmax, amplmin, dir](double i){ //+1/-1 to +/-amplitude
                 int ampl = (i<0)?amplmin:amplmax;
-                return (uint16_t)(i*ampl+neutral);});
+                return (uint16_t)((i*dir)*ampl+neutral);});
         
         wfLetter.insert(waveformLetterPair(act->chan, mv)); //add vector to the map
         mv.clear(); //clear the temporary vector

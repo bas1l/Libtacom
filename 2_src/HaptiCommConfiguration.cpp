@@ -275,7 +275,7 @@ const throw (HaptiCommConfigurationException){
     
     try {
         StringBuffer windingStr = m_cfg->lookupString(scopeActuator, "windingDirection");
-        ac.windingDirection = (int8_t) (strcmp(windingStr.c_str(),"anticlockwise")?+1:-1); // /!\ if(0) => same string !
+        ac.windingDirection = (int8_t) (strcmp(windingStr.c_str(),"anticlockwise")?actuator::ANTICLOCKWISE:actuator::CLOCKWISE); // /!\ if(0) => same string !
         ac.chan = (uint8_t) m_cfg->lookupInt(scopeActuator, "dacChannel");
         ac.name = m_cfg->lookupString(scopeActuator, "name");
         

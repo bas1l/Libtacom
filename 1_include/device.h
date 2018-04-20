@@ -17,10 +17,11 @@
 #include <vector>
 
 
-
-
 struct actuator
 {
+	static constexpr int ANTICLOCKWISE = 1;
+	static constexpr int CLOCKWISE = -1;
+
     std::string name;
     
     int8_t windingDirection;
