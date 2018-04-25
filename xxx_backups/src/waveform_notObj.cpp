@@ -1,131 +1,245 @@
-    /*
+/*
  * waveform.cpp
  *
  *  Created on: 5 april. 2016
  *  Author: basilou
  */
-#include <vector>
 
 #include "waveform.h"
 
 
+WAVEFORM::WAVEFORM() {}
+
+WAVEFORM::~WAVEFORM() {}
 
 
-void waveform_begin(){
-	waveform_create_apparent();
-}
-void waveform_end(){
-	//if (apparent_asc_fun != NULL) free(apparent_asc_fun);
-	//if (apparent_move_fun != NULL) free(apparent_move_fun);
+void 
+WAVEFORM::configure(int nmessage_Hz)
+{
+    freqRefresh_mHz = nmessage_Hz * (1/(double)sec2ms);
 }
 
-float * create_envelope_sin(int length, int ampl){
-	float * s;
-	s = (float*) malloc(length * sizeof(float));
-	
-	float incr = M_PI/(float)length;
-	 
-	for (int i=0; i<length; i++){
-		s[i] = ampl *( sin(i * incr)*0.5 + 0.5);
-	}
-	
-	return s;
+
+bool 
+WAVEFORM::insertMotion(struct motion m)
+{
+    std::pair<std::map<std::string, motion>::iterator,bool> ret;
+    std::pair<std::string, motion> result;
+    
+    extractWAV(&m);
+    create_dataWAV(&m);
+    
+    result  = std::make_pair (m.id, m);
+    ret     = motionsMap.insert(result);
+    
+    return ret.second;
 }
-uint16_t * create_sin(int freq, int ampl, int phase, int nsample, int offset){
-	uint16_t * s;
-	s = (uint16_t*) malloc(nsample * sizeof(uint16_t));
-	
-        // Suivant le nombre d'échantillons voulus :
-	float incr = 2*M_PI/((float)nsample);
-	for (int i=0; i<nsample; i++){
-		s[i] = (uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset);
-	}
-	return s;
-}
-float * create_envelope_asc(){
-	float * s;
-	s = (float*) malloc(APPARENT_ASC_DURATION * sizeof(float));
-	
-	float incr = M_PI/(float)(2*APPARENT_ASC_DURATION);
-	 
-	for (int i=0; i<APPARENT_ASC_DURATION; i++){
-		s[i] = sin(i * incr);
-	}
-	
-	return s;
-}
-float * create_random_dots(int length, int a, int b){
-	float * r;
-	r = (float*) malloc(length*sizeof(float));
-	
-	for (int t=0; t<length; t++){
-		r[t] = rand_a_b(a, b);
-	}
-	
-	return r;
-}
-std::vector<uint16_t> waveform_create_apparent(){
-        std::vector<uint16_t> apparent_movement;
-	int t;
-	uint16_t inv = 4095;
-	// ascension part 1/2
+
+struct motion
+WAVEFORM::getMotion(std::string id)
+{
+    it_motionsMap = motionsMap.find(id);
+    if (it_motionsMap == motionsMap.end())
+    {
+        std::cout<<"\nCan't get the motion with id=" << id << std::endl;
+        exit(-1);
         
-	float * asc = create_envelope_asc();
-	
-	for (t=0; t<APPARENT_ASC_DURATION; t++)
+    }
+    
+    return it_motionsMap->second;
+}
+
+
+/*  PRIVATE:
+ * 
+ * 
+ * 
+ * 
+ */
+void 
+WAVEFORM::create_dataWAV(struct motion * m)
+{
+    int numChannels     = m->fileWAV->getNumChannels();
+    int numSamples      = m->fileWAV->getNumSamplesPerChannel();
+    // Compensate the difference between WAV and DAC frequencies
+    int      fs_mHz     = (int)(m->fileWAV->getSampleRate()*(1/(double)sec2ms));
+    double   incr       = fs_mHz / (double) freqRefresh_mHz;
+    int      nbValue    = (int) (numSamples/incr);
+    //std::vector<double> tmpVec;
+    
+    m->data.clear();
+    m->data.reserve(numChannels);
+    for (int c = 0; c < numChannels; c++)
+    {
+        std::vector<double> tmpVec;
+        tmpVec.reserve(nbValue);
+        for (int i = 0; i < nbValue; i++)
         {
-		apparent_movement.push_back(inv - (uint16_t) (2000+1000*asc[t]));
-                //printw("asc=%.f", asc[t]);
-	}
-	
-	
-	// pink noise part 2/2
-	float * shape = create_envelope_sin(APPARENT_MOVE_DURATION, APPARENT_MOVE_AMPLITUDE);
-	float * r = create_random_dots(APPARENT_MOVE_DURATION, -1, 1);
-	
-	for (t=0; t<APPARENT_MOVE_DURATION; t++){
-		apparent_movement.push_back(inv - (uint16_t)(3200+ shape[t] * r[t]));
-                //printw("move=%f", shape[t] * r[t]);
-	}
-	
-	
-	free(asc);
-	free(shape);
-	free(r);
+            tmpVec.push_back((m->fileWAV->samples[c][(int)(i*incr)]));
+        }
+        tmpVec.push_back(0);
         
-        return apparent_movement;
+        tmpVec.shrink_to_fit();                  // #2
+        m->data.emplace_back(std::move(tmpVec)); // #3
+    }
 }
 
-// setter and getter
-int waveform_get_apparent_asc_dur(){
-	return APPARENT_ASC_DURATION;
-}
-int waveform_get_apparent_move_dur(){
-	return APPARENT_MOVE_DURATION;
-}
-int waveform_get_apparent_dur(){
-	return APPARENT_DURATION;
-}
-int waveform_get_tap_dur(){
-	return TAP_MOVE_DURATION;
+
+
+float * 
+WAVEFORM::create_envelope_sin(int length, int ampl)
+{
+    float * s;
+    s = (float*) malloc(length * sizeof(float));
+
+    float incr = M_PI/(float)length;
+
+    for (int i=0; i<length; i++){
+            s[i] = ampl *( sin(i * incr)*0.5 + 0.5);
+    }
+
+    return s;
 }
 
-float waveform_get_apparent_asc(int idx){
-	return apparent_asc_fun[idx];
+float * 
+WAVEFORM::create_envelope_asc(int length)
+{
+    float * s;
+    s = (float*) malloc(length * sizeof(float));
+    
+    float incr = M_PI/(float)(2*length);
+
+    for (int i=0; i<length; i++){
+            s[i] = sin(i * incr);
+    }
+
+    return s;
 }
 
-float waveform_get_apparent_move(int idx){
-	return apparent_move_fun[idx];
+
+
+
+
+uint16_t * 
+WAVEFORM::create_sin(int freq, int ampl, int phase, int nsample, int offset)
+{
+    uint16_t * s;
+    s = (uint16_t*) malloc(nsample * sizeof(uint16_t));
+
+    // Suivant le nombre d'échantillons voulus :
+    float incr = 2*M_PI/((float)nsample);
+    for (int i=0; i<nsample; i++){
+            s[i] = (uint16_t) floor(ampl * sin(i*incr*freq +phase) + offset);
+    }
+    return s;
 }
 
-void print_moves(){
-	for (int i = 0; i<APPARENT_ASC_DURATION; i++){
-		std::cout << "apparent_asc_fun[" << i << "] = " << apparent_asc_fun[i] << std::endl;
-	}
-	
-	
-	for (int i = 0; i<APPARENT_MOVE_DURATION; i++){
-		std::cout << "apparent_move_fun[" << i << "] = " << apparent_move_fun[i] << std::endl;
-	}
-	
+
+float * 
+WAVEFORM::create_random_dots(int nsample, int a, int b)
+{
+    float * r;
+    r = (float*) malloc(nsample*sizeof(float));
+
+    for (int t=0; t<nsample; t++){
+            r[t] = rand_a_b(a, b);
+    }
+
+    return r;
+}
+
+double 
+WAVEFORM::getFreqRefresh_mHz()
+{
+    return freqRefresh_mHz;
+}
+
+bool 
+WAVEFORM::extractWAV(struct motion * m)
+{
+    m->fileWAV = new AudioFile<double>();
+    
+    if (!(m->fileWAV->load(m->wavPath)))
+    {
+        std::cout<<"\nCan't load wav file:"<< m->wavPath << std::endl;
+        exit(-1);
+    }
+    
+    return true;
+}
+
+void
+WAVEFORM::informations()
+{
+    std::cout << "\n[WAVEFORM::Informations]" << std::endl;
+    for(auto mMap=motionsMap.begin(); mMap!=motionsMap.end(); mMap++)
+    {
+        informationsMotion(&(mMap->second));
+    }
+}
+
+void
+WAVEFORM::informationsMotion(struct motion * m)
+{
+    std::cout   << "Motion:" 
+                << "\n    id: " << m->id  
+                << "\n    name: " << m->name
+                << "\n    wavPath: " << m->wavPath
+                << "\n    WAV::numChannel: " << m->data.size()
+                << std::endl;
+}
+
+void
+WAVEFORM::printData(struct motion m)
+{
+    int numChan = m.data.size(), numSample;
+    int c, i;
+    
+    std::cout.precision(15);
+    informationsMotion(&m);
+    for(c=0; c<numChan; c++)
+    {
+        numSample = m.data[c].size();
+        std::cout << "channel(" << c+1 << "/" << numChan << "),numSample= " << numSample << std::endl; 
+        for(i=0; i<numSample; i++)
+        {
+            std::cout << std::fixed << m.data[c][i] << "; "; 
+        }
+        std::cout << std::endl;
+    }
+}
+
+void
+WAVEFORM::printData(std::string id)
+{
+    struct motion m = getMotion(id);
+    printData(m);
+}
+
+
+void
+WAVEFORM::printWAVData(struct motion m)
+{
+    int numChan = m.fileWAV->samples.size(), numSample;
+    int c, i;
+    
+    std::cout.precision(15);
+    informationsMotion(&m);
+    for(c=0; c<numChan; c++)
+    {
+        numSample = m.fileWAV->samples[c].size();
+        std::cout << "channel(" << c+1 << "/" << numChan << "),numSample= " << numSample << std::endl; 
+        for(i=0; i<numSample; i++)
+        {
+            std::cout << std::fixed << m.fileWAV->samples[c][i] << "; "; 
+        }
+        std::cout << std::endl;
+    }
+}
+
+void
+WAVEFORM::printWAVData(std::string id)
+{
+    struct motion m = getMotion(id);
+    printWAVData(m);
 }

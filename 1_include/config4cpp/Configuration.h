@@ -50,7 +50,7 @@ namespace CONFIG4CPP_NAMESPACE {
 
 struct EnumNameAndValue {
 	const char *	name;
-	int             value;
+	int				value;
 };
 
 
@@ -601,12 +601,12 @@ protected:
 
 private:
 	static bool patternMatchInternal(
-					const wchar_t * wStr,
-					int             wStrIndex,
-					int             wStrLen,
-					const wchar_t * wPattern,
-					int             wPatternIndex,
-					int             wPatternLen);
+					const wchar_t *		wStr,
+					int					wStrIndex,
+					int					wStrLen,
+					const wchar_t *		wPattern,
+					int					wPatternIndex,
+					int					wPatternLen);
 	//--------
 	// Not implemented
 	//--------
