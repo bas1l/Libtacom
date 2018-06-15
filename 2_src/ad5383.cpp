@@ -273,6 +273,12 @@ int AD5383::execute_selective_trajectory(std::multimap<uint8_t,std::vector<uint1
         ++value_idx;
 
     } while(keep_running);
+    struct timespec ts_wait, ts_rem;
+    ts_wait.tv_sec = 0;
+    ts_wait.tv_nsec = 200 * 1000000;
+    
+    nanosleep(&ts_wait, &ts_rem);
+    
     close(_timer_fd);
 
     return overruns;

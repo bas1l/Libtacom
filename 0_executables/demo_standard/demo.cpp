@@ -219,11 +219,11 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         {
             values = alph->getl(letters.front());
             int ovr = ad.execute_selective_trajectory(values, durationRefresh_ns);
-			if (ovr)
-			{
-				overruns += ovr;
-				//cout << "Overruns: " << overruns << endl;
-			}
+            if (ovr)
+            {
+                    overruns += ovr;
+                    //cout << "Overruns: " << overruns << endl;
+            }
             values.clear();
         }
         letters.pop();
