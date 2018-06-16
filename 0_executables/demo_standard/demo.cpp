@@ -12,6 +12,8 @@
 #include <sys/ioctl.h>
 #include <ncurses.h>
 #include <math.h>
+#include <unistd.h>
+
 
 #include "HaptiCommConfiguration.h"
 #include "waveform.h"
@@ -184,6 +186,8 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
     ad.spi_open();
     ad.configure();
     
+    int timerInterLetterMs = 20;
+    
     double durationRefresh_ms = 1/(double) alph->getFreqRefresh_mHz();
     int durationRefresh_ns  = durationRefresh_ms * ms2ns; // * ns
     
@@ -215,7 +219,15 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
         cv.notify_one(); // Notify generator (placed here to avoid waiting for the lock)
         
         // if last char is a space, then a word is finished
-        if (letters.front() != ' ')// is part of the alphabet){
+        if (letters.front() == '+')// is part of the alphabet){
+        {
+            timerInterLetterMs += 20;
+        }
+        else if (letters.front() == '-' && timerInterLetterMs>20)
+        {
+            timerInterLetterMs -= 20;
+        }
+        else
         {
             values = alph->getl(letters.front());
             int ovr = ad.execute_selective_trajectory(values, durationRefresh_ns);
@@ -225,6 +237,7 @@ void workSymbols(std::queue<char> & sentences, std::condition_variable & cv,
                     //cout << "Overruns: " << overruns << endl;
             }
             values.clear();
+            usleep(timerInterLetterMs);
         }
         letters.pop();
      }
