@@ -134,7 +134,7 @@ ALPHABET::insertSymbol(struct symbol s)
     ret = dictionnary.insert(std::pair<std::string, struct symbol>(s.id, s)); //add symbol to the map
     
     
-    listSymbols.insert(listSymbols.end(), s.id);
+    //listSymbols.insert(listSymbols.end(), s.id);
     return ret.second;
 }
 
