@@ -14,12 +14,12 @@ using namespace std;
 
 
 ALPHABET::ALPHABET() : 
-        listSymbols("abcdefghijklmnopqrstuvwxyz~+-12 ") {}
+        listSymbols("abcdefghijklmnopqrstuvwxyz~+-1234567890 ") {}
 
 ALPHABET::ALPHABET(DEVICE * _dev, WAVEFORM * _wf) :
         dev(_dev), 
         wf( _wf),
-        listSymbols("abcdefghijklmnopqrstuvwxyz~+-12 ") {}
+        listSymbols("abcdefghijklmnopqrstuvwxyz~+-1234567890 ") {}
 
 ALPHABET::~ALPHABET() {}
 
