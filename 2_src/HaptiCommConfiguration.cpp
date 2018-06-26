@@ -122,7 +122,6 @@ throw (HaptiCommConfigurationException)
     configureDevice(dev);
     configureWaveform(wf);
     configureAlphabet(alph, dev, wf);
-    
 }
 
 //--------
@@ -159,7 +158,7 @@ throw (HaptiCommConfigurationException)
         printf("[DEVICE::configuration]   %d actuators added\n", len);
     }
     catch(const ConfigurationException & ex) {
-            throw HaptiCommConfigurationException(ex.c_str());
+            throw HaptiCommConfigurationException("configure_device:actuators");//ex.c_str());
     }
     
     m_scope = __m_scope;
@@ -198,7 +197,7 @@ throw (HaptiCommConfigurationException)
         printf("[WAVEFORM::configuration] %d motions added\n", len);
     }
     catch(const ConfigurationException & ex) {
-            throw HaptiCommConfigurationException(ex.c_str());
+            throw HaptiCommConfigurationException("configure_waveform");//ex.c_str());
     }
     
     m_scope = __m_scope;
@@ -286,7 +285,7 @@ const throw (HaptiCommConfigurationException){
         ac.vmin     = (uint16_t) m_cfg->lookupInt(scopeActions.c_str(), "min");        
     } 
     catch(const ConfigurationException & ex) {
-            throw HaptiCommConfigurationException(ex.c_str());
+            throw HaptiCommConfigurationException("configure_lookupActuator");//ex.c_str());
     }
     
     return ac;
@@ -300,7 +299,7 @@ const throw (HaptiCommConfigurationException)
     try {
         return m_cfg->lookupString(scopeActuator, "id");
     } catch(const ConfigurationException & ex) {
-        throw HaptiCommConfigurationException(ex.c_str());
+        throw HaptiCommConfigurationException("configure_lookupactuatorID");//ex.c_str());
     }
 }
 
@@ -316,7 +315,7 @@ throw (HaptiCommConfigurationException)
         m->name = m_cfg->lookupString(scopeMotion, "name");
         m->wavPath = m_cfg->lookupString(scopeMotion, "wav");
     } catch(const ConfigurationException & ex) {
-            throw HaptiCommConfigurationException(ex.c_str());
+            throw HaptiCommConfigurationException("configure_lookupMotion");//ex.c_str());
     }
     
     return (*m);
@@ -344,7 +343,7 @@ throw (HaptiCommConfigurationException)
         }
     } 
     catch(const ConfigurationException & ex) {
-        throw HaptiCommConfigurationException(ex.c_str());
+        throw HaptiCommConfigurationException("configure_lookupSymbol");//ex.c_str());
     }
     
     return (*s);
