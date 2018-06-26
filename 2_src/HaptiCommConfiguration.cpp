@@ -238,7 +238,7 @@ throw (HaptiCommConfigurationException)
         printf("[ALPHABET::configuration] %d symbols added\n", len);
     }
     catch(const ConfigurationException & ex) {
-            throw HaptiCommConfigurationException(ex.c_str());
+            throw HaptiCommConfigurationException(ex.c_str()+"configure_Alphabet::symbols");
     }
     
     m_scope = __m_scope;
