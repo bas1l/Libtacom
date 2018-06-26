@@ -118,7 +118,7 @@ void HaptiCommConfiguration::configure(const char * cfgSource, DEVICE * dev, WAV
 throw (HaptiCommConfigurationException)
 {
     
-    parse(cfgSource, "HaptiComm");
+    //parse(cfgSource, "HaptiComm");
     configureDevice(dev);
     configureWaveform(wf);
     configureAlphabet(alph, dev, wf);
