@@ -12,6 +12,7 @@ add_subdirectory("apparent_motion_experiment")
 add_subdirectory("tap_motion_experiment")
 add_subdirectory("taphold_motion_experiment")
 add_subdirectory("maximum_tap_motion_experiment")
+add_subdirectory("tests/test_config4cpp")
 
 #add_subdirectory("tests/read_values")
 #add_subdirectory("tests/HaptiCommConfig")
